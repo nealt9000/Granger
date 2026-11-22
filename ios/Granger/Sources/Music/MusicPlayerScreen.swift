@@ -248,7 +248,7 @@ struct QueueSheet: View {
             .navigationTitle("Queue")
             .navigationBarTitleDisplayMode(.inline)
         }
-        .presentationDetents([.medium, .large])
+        .halfSheet([.medium, .large])
         .accessibilityIdentifier("queue-sheet")
     }
 

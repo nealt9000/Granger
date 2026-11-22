@@ -96,7 +96,7 @@ struct LibriVoxScreen: View {
                 LibriVoxBookSheet(sheet: item.sheet, fallbackTitle: holder.ui?.rows.first { $0.id == item.sheet.id }?.title, model: model) {
                     removing = (item.sheet.id, item.sheet.book.map { LibriVoxTextKt.decodeEntities(text: $0.title) } ?? holder.ui?.rows.first { $0.id == item.sheet.id }?.title)
                 }
-                .presentationDetents([.medium, .large])
+                .halfSheet([.medium, .large])
             }
         }
         .alert(removing?.title.map { L("Remove \($0)?") } ?? L("Remove this book?"), isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {

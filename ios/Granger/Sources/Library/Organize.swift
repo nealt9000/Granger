@@ -91,7 +91,7 @@ struct MoveSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
         }
-        .presentationDetents([.medium, .large])
+        .halfSheet([.medium, .large])
     }
 
     private var choices: [MoveChoice] {

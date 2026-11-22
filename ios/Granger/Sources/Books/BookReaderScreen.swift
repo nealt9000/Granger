@@ -76,7 +76,7 @@ struct BookReaderScreen: View {
         .sheet(isPresented: panelBinding(.settings)) {
             if let prefs = model.prefs {
                 TextSettingsSheet(prefs: prefs, isPdf: model.isPdf, hasLinks: model.hasLinks) { model.model?.updatePrefs(prefs: $0) }
-                    .presentationDetents([.medium, .large])
+                    .halfSheet([.medium, .large])
             }
         }
         .sheet(item: Binding(get: { model.peek.map(PeekItem.init) }, set: { if $0 == nil { model.peek = nil } })) { item in
@@ -87,11 +87,11 @@ struct BookReaderScreen: View {
                 model.peek = nil
                 openRoute(.book(id: id))
             }
-            .presentationDetents([.medium])
+            .halfSheet([.medium])
         }
         .sheet(item: editingBinding) { mark in
             HighlightSheet(mark: mark.mark, focusNote: model.shared?.focusNote ?? false, model: model)
-                .presentationDetents([.medium])
+                .halfSheet([.medium])
         }
     }
 

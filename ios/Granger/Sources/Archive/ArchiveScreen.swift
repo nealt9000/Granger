@@ -102,7 +102,7 @@ struct ArchiveScreen: View {
                 ArchiveItemSheet(sheet: item.sheet, model: model, audio: holder.ui?.sheetAudio, kind: kind) {
                     if kind == .texts { open(item.sheet.identifier) } else { openInLibrary(item.sheet.identifier) }
                 } onRemove: { removing = item.sheet.identifier }
-                    .presentationDetents([.medium, .large])
+                    .halfSheet([.medium, .large])
             }
         }
         .alert(largeTitle, isPresented: Binding(get: { holder.ui?.confirm != nil }, set: { if !$0 { holder.model?.dismissLarge() } })) {

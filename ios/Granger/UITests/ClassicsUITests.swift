@@ -83,10 +83,10 @@ final class ClassicsUITests: XCTestCase {
         let whole = app.descendants(matching: .any)["preset-granger-classics"]
         let drama = app.descendants(matching: .any)["preset-granger-classics-drama"]
         XCTAssertTrue(app.reveal(whole, timeout: 60), "the collection's set")
+        let wholeX = whole.frame.minX
         XCTAssertTrue(app.reveal(drama), "a volume")
         XCTAssertTrue(drama.staticTexts["Drama"].exists, "the volume named without its collection's name")
-        XCTAssertTrue(app.reveal(whole))
         shot(app, "classics-volumes")
-        XCTAssertGreaterThan(drama.frame.minX, whole.frame.minX + 10, "indented under its collection")
+        XCTAssertGreaterThan(drama.frame.minX, wholeX + 10, "indented under its collection")
     }
 }

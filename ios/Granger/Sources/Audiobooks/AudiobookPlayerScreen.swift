@@ -225,17 +225,17 @@ struct AudiobookPlayerScreen: View {
                 BookChaptersSheet(chapters: shown.chapters, current: Int(shown.book.chapter.ordinal)) { model.seekToChapter(ordinal: $0); sheet = nil }
             case .speed:
                 SpeedSheet(speed: Double(shown.book.speed)) { model.setSpeed(speed: Float($0)) }
-                    .presentationDetents([.medium])
+                    .halfSheet([.medium])
             case .sleep:
                 MediaSleepSheet(remainingMs: shown.ui.sleepRemainingMs?.int64Value,
                                 onStart: { model.startSleepTimer(setting: $0); sheet = nil },
                                 onCancel: { model.cancelSleepTimer(); sheet = nil })
-                    .presentationDetents([.medium, .large])
+                    .halfSheet([.medium, .large])
             case .bookmarks:
                 BookmarksSheet(bookmarks: holder.bookmarks, onAdd: { model.addBookmark { $0.words } },
                                onPlay: { model.playBookmark(bookmark: $0); sheet = nil },
                                onDelete: { model.removeBookmark(bookmark: $0) })
-                    .presentationDetents([.medium, .large])
+                    .halfSheet([.medium, .large])
             }
         }
     }

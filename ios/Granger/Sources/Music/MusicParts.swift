@@ -378,6 +378,6 @@ struct AddToPlaylistSheet: View {
                 Button("Cancel", role: .cancel) {}
             }
         }
-        .presentationDetents([.medium, .large])
+        .halfSheet([.medium, .large])
     }
 }

@@ -65,7 +65,7 @@ struct ListenScreen: View {
             if let chapters { ChaptersSheet(chapters: chapters) { i in showChapters = false; voice?.voice.player.jumpToChapter(index: Int32(i)) } }
         }
         .sheet(isPresented: $showSleep) {
-            if let voice { SleepTimerSheet(ui: voice.ui, player: voice.voice.player) { showSleep = false }.presentationDetents([.medium, .large]) }
+            if let voice { SleepTimerSheet(ui: voice.ui, player: voice.voice.player) { showSleep = false }.halfSheet([.medium, .large]) }
         }
     }
 

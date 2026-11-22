@@ -101,15 +101,28 @@ final class ReadAloudUITests: XCTestCase {
         XCTAssertTrue(app.reveal(sleepRow, timeout: 10))
         let state = app.staticTexts["listen-sleep-state"]
         XCTAssertEqual(state.label, "Off")
-        sleepRow.tap()
+        // A tap while the last sheet is still going away can be lost: tried again until the sheet is up.
+        func openSleep() {
+            // The last sheet gone first, so its rows aren't taken for the new one's.
+            _ = app.buttons["sleep-5"].waitForNonExistence(timeout: 5)
+            for _ in 0..<3 {
+                XCTAssertTrue(app.reveal(sleepRow))
+                sleepRow.tap()
+                if app.buttons["sleep-5"].waitForExistence(timeout: 3) || app.buttons["sleep-cancel"].exists { return }
+            }
+        }
+        openSleep()
         XCTAssertTrue(app.reveal(app.buttons["sleep-5"], timeout: 10)); app.buttons["sleep-5"].tap()
         waitFor(state, label: "Stops in 4:")
         shot(app, "readaloud-sleep")
-        XCTAssertTrue(app.reveal(sleepRow)); sleepRow.tap()
+        openSleep()
         XCTAssertTrue(app.reveal(app.buttons["sleep-cancel"], timeout: 10)); app.buttons["sleep-cancel"].tap()
         waitFor(state, label: "Off")
-        XCTAssertTrue(app.reveal(sleepRow)); sleepRow.tap()
-        XCTAssertTrue(app.reveal(app.buttons["sleep-chapter"], timeout: 10)); app.buttons["sleep-chapter"].tap()
+        // Paused, so the page holds still: at the accessibility sizes each new sentence moves the rows under it.
+        app.buttons["mini-play-pause"].tap()
+        openSleep()
+        let chapterButton = app.buttons["sleep-chapter"]
+        XCTAssertTrue(app.reveal(chapterButton, timeout: 10)); chapterButton.tap()
         waitFor(state, label: "End of chapter")
         XCTAssertTrue(app.reveal(app.buttons["listen-stop"]))
         app.buttons["listen-stop"].tap()

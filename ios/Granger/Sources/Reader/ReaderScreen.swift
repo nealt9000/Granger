@@ -83,7 +83,7 @@ struct ReaderScreen: View {
                     showFooter = false
                     openRoute(.bookAt(id: id, passage: BookPassage(href: m.href, quote: m.quote, before: m.before)))
                 }
-                .presentationDetents([.medium, .large])
+                .halfSheet([.medium, .large])
             }
         }
         .task(id: pack) {
@@ -112,10 +112,10 @@ struct ReaderScreen: View {
                 showContents = false
                 controller.scroll(to: anchor)
             }
-            .presentationDetents([.medium, .large])
+            .halfSheet([.medium, .large])
         }
         .sheet(isPresented: $showText) {
-            TextSizeSheet().presentationDetents([.height(200)])
+            TextSizeSheet().halfSheet([.height(200)])
         }
     }
 }
