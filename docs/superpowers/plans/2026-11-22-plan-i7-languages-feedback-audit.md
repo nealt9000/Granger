@@ -83,8 +83,9 @@ When I7 merges, the parity list has no open row except the ones that need a devi
     - Left for Task 2's walkthrough: Send feedback with and without a crash (the sheet's lines, the attachment, Home's crash line and Not now), the Report sheet on an Ask reply, Settings › Language with both library languages (tick, untick down to one, Make main, the Main language line).
 
 ### Task 2: I7a check and merge
-- [ ] JVM suite, `bundleRelease`, the Pixel 6 walkthrough above.
-- [ ] Release GrangerCore, merge and push. Tell the peer sessions.
+- [x] JVM suite, `bundleRelease`, the Pixel 6 walkthrough above.
+- [x] Release GrangerCore, merge and push. Tell the peer sessions.
+  - Lead's check 2026-11-22: JVM 3930 tests, 1 failure in the full run (`SubjectViewModelTest.aSubjectCountsItsErasAndListsAnEraOrOldestFirst`, its 5 s wait timing out under the suite's load; untouched by I7) that passed on two reruns of the class; `bundleRelease` OK (subagent). Pixel 6 on debug 1760 over 1738 (DB 18): Send feedback's lines (build, Pixel 6 Android 17, tier, 40 GB free, 9 packs and 776 books, 2 crash reports attached), the attach switch removes and restores the line, View reads a crash written by build 1455 through the moved format; Language: App language unchanged, library languages tick (Main language and Make main appear), survive a restart (`knowledge.xml` en,es), Make main swaps (es,en), restored to en. Write email not opened (it would leave a draft in Neal's mail; `FeedbackTest` covers the email). The Report sheet is Ask's (off in release; `AskReportTest`). Release ios-core-2026-11-22-2 pinned; the app builds against it.
 
 ## I7b: the iPhone
 
