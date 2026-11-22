@@ -68,6 +68,7 @@
 		711103A9DB383DCAD57C4811 /* Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F52092A31F49258FD75CDE1 /* Navigation.swift */; };
 		748BD1AA8D9BC67C6B3904A2 /* BookReaderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 667361EE3B1A4EBB93B3D72E /* BookReaderModel.swift */; };
 		7577FFE4C7A82FA18ED619C7 /* GTagLib.mm in Sources */ = {isa = PBXBuildFile; fileRef = A898AA900FB3ACFC627C87AA /* GTagLib.mm */; };
+		766212E434A588FFA5296F75 /* DebugReset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E8E6A313A843D40AA49ADC /* DebugReset.swift */; };
 		778BDF615EC87283577FB534 /* SpeechSpikeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1439F499A6C92B68FA738B44 /* SpeechSpikeTests.swift */; };
 		7EA68110BD41341E41AC4485 /* spectral_medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BB0D5B0B1CFDF9D94B1CDA8 /* spectral_medium.ttf */; };
 		83E90F2F900D9DF69287B976 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D5F373DED5327DC509AEA8 /* Theme.swift */; };
@@ -95,6 +96,7 @@
 		BA18DD0AFB9ECE7B44C9F64D /* RemoteCollectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F7EA26827A05868CC275A31 /* RemoteCollectionScreen.swift */; };
 		BAB62659A4F6E15AC20344AF /* ArticleFooterViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E15CF9125F2CB79C5BA79D3 /* ArticleFooterViews.swift */; };
 		BB760FEC8AA398EFD6C5D59B /* PiperEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E9A9BA8801DAA542069B93 /* PiperEngine.swift */; };
+		BD10DFD88E381B8582102FB0 /* CleanData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FE1B5BF154C00C901FCE92 /* CleanData.swift */; };
 		BE470A0D6EB34BD5D96BF8D6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6654812DC545BDF69A9B7931 /* Assets.xcassets */; };
 		BEF413C3A1C0FF922369F254 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A6A503B5D655BB52449F2EA8 /* libz.tbd */; };
 		BEFEC6C675C34F8076E81BBF /* DebugPlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D903785B6244825C4AE414 /* DebugPlay.swift */; };
@@ -213,6 +215,7 @@
 		3F836DFBA7941E1A0041B382 /* LibraryUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryUITests.swift; sourceTree = "<group>"; };
 		3F8A78AFDEDC1CB30DAC3AA3 /* rooms.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = rooms.json; sourceTree = "<group>"; };
 		3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderHostTests.swift; sourceTree = "<group>"; };
+		40FE1B5BF154C00C901FCE92 /* CleanData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanData.swift; sourceTree = "<group>"; };
 		469652AD912C027477FE90A0 /* PlayerEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEngineTests.swift; sourceTree = "<group>"; };
 		46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		47606CCEFB5363760F5EA2B4 /* VoiceSettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSettingsScreen.swift; sourceTree = "<group>"; };
@@ -235,6 +238,7 @@
 		6654812DC545BDF69A9B7931 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		667361EE3B1A4EBB93B3D72E /* BookReaderModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookReaderModel.swift; sourceTree = "<group>"; };
 		66B1E4DC5AE8F75EB511C8B2 /* BookReaderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookReaderScreen.swift; sourceTree = "<group>"; };
+		66E8E6A313A843D40AA49ADC /* DebugReset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugReset.swift; sourceTree = "<group>"; };
 		684FBF5DA7849CC0C574C0F8 /* GTagLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GTagLib.h; sourceTree = "<group>"; };
 		6B58EB0526BF3953E06E97BB /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
 		6EB9E388036E947C9C13B2FB /* UiTextWords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UiTextWords.swift; sourceTree = "<group>"; };
@@ -410,6 +414,7 @@
 				2B47F986BFCA85901970F72F /* AppSettings.swift */,
 				1EDFCCCB9DFC1E76B1696659 /* Core.swift */,
 				38D903785B6244825C4AE414 /* DebugPlay.swift */,
+				66E8E6A313A843D40AA49ADC /* DebugReset.swift */,
 				7CC01381BEC958CC5134EC02 /* GrangerApp.swift */,
 				2CF1F83534B602BD903DEF86 /* Library.swift */,
 				7F52092A31F49258FD75CDE1 /* Navigation.swift */,
@@ -496,6 +501,7 @@
 				F9227D21081FB98BFD93211A /* AudiobookUITests.swift */,
 				020C983E7DB13074CD37FBF1 /* BookReaderTests.swift */,
 				A27583559CE695EAA07B0C90 /* ClassicsUITests.swift */,
+				40FE1B5BF154C00C901FCE92 /* CleanData.swift */,
 				3F836DFBA7941E1A0041B382 /* LibraryUITests.swift */,
 				569C1AFF6DFF658AA105544D /* MusicUITests.swift */,
 				7F0D2C6AA7832F3D9D55E154 /* PlayerUITests.swift */,
@@ -840,6 +846,7 @@
 				04CFA2C87CFCD2BE87CC05AA /* AudiobookUITests.swift in Sources */,
 				31A659E2396F32D1505AB504 /* BookReaderTests.swift in Sources */,
 				1AFA13D56BD199C80C543B2B /* ClassicsUITests.swift in Sources */,
+				BD10DFD88E381B8582102FB0 /* CleanData.swift in Sources */,
 				50A4399B70427222E9FA11D0 /* LibraryUITests.swift in Sources */,
 				C7C07D7256184A6C415A2BB5 /* MusicUITests.swift in Sources */,
 				8929C0B2AE9FAA5B3BDE946D /* PlayerUITests.swift in Sources */,
@@ -893,6 +900,7 @@
 				47AE67A55A3B03EA5A5C8B8C /* ComicNatives.swift in Sources */,
 				3A14C67A4ADC44BAECECC538 /* Core.swift in Sources */,
 				BEFEC6C675C34F8076E81BBF /* DebugPlay.swift in Sources */,
+				766212E434A588FFA5296F75 /* DebugReset.swift in Sources */,
 				06D12B83802F3059A8FCB6BA /* DebugSystem.swift in Sources */,
 				29E1C8E3A75EB297D1C74CEB /* DownloadsScreen.swift in Sources */,
 				85BC2D700DB5328930D91075 /* EveryCollection.swift in Sources */,

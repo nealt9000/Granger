@@ -5,7 +5,7 @@ import XCTest
 /// the test pack (GRANGER_TEST_ZIM); the "archive.org" PDF is made on the phone by `-debugArchiveSample` and filed as a
 /// finished archive.org download would be. archive.org's own screen is opened with Local only on.
 final class ClassicsUITests: XCTestCase {
-    override func setUp() { continueAfterFailure = false }
+    override func setUp() { continueAfterFailure = false; CleanData.renew() }
 
     private func env(_ key: String) throws -> String {
         guard let v = ProcessInfo.processInfo.environment[key], !v.isEmpty else { throw XCTSkip("no \(key)") }
@@ -24,7 +24,7 @@ final class ClassicsUITests: XCTestCase {
         let epub = try env("GRANGER_TEST_EPUB")
         let zim = try env("GRANGER_TEST_ZIM")
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en",
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en",
                                "-reading.theme", "APP", "-debugPack", zim, "-debugLinks", "YES", "-debugTapFirstLink", "YES", "-debugBook", epub]
         app.launch()
         let open = app.buttons["link-open-article"]
@@ -40,7 +40,7 @@ final class ClassicsUITests: XCTestCase {
     /// book is an EPUB's), and it's on the shelf (Recently open has it). archive.org's screen shows the 1930 rule.
     func testArchiveTextPdfBecomesAnEpubOnTheShelf() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en",
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en",
                                "-reading.theme", "APP", "-debugArchiveSample", "YES"]
         app.launch()
         let notice = app.staticTexts["debug-import-notice"]

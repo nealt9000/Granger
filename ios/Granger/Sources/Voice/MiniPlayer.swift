@@ -78,6 +78,9 @@ struct MiniPlayer: View {
                 .accessibilityIdentifier("mini-secondary")
         }
         .padding(.horizontal, 16)
+        // The bottom accessory keeps its height whatever the text size, so the row's text stops growing at xLarge (as
+        // the system's own accessories do) rather than spilling over the page above it; VoiceOver reads it whole.
+        .dynamicTypeSize(...DynamicTypeSize.xLarge)
         .contentShape(Rectangle())
         .onTapGesture { open(item) }
         .accessibilityElement(children: .contain)
@@ -137,5 +140,17 @@ struct MiniPlayer: View {
         case .music: onOpen(.musicPlayer)
         case .book: onOpen(.audiobookPlayer)
         }
+    }
+}
+
+/// On a full player (music's, the audiobook's): the mini player is hidden while it's on screen, as Android hides it there.
+struct HidesMiniPlayer: ViewModifier {
+    @Environment(\.voice) private var voice
+    @State private var counted = false
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear { if !counted { counted = true; voice?.fullPlayersShown += 1 } }
+            .onDisappear { if counted { counted = false; voice?.fullPlayersShown = max(0, (voice?.fullPlayersShown ?? 1) - 1) } }
     }
 }

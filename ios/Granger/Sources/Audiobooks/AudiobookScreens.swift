@@ -236,7 +236,7 @@ struct AudiobookScreen: View {
         let book = page.book
         return List {
             Section {
-                HStack(alignment: .center, spacing: 16) {
+                AdaptiveStack(spacing: 16) {
                     AudiobookCover(path: book.coverPath, title: book.title).frame(width: 120).opacity(page.missing ? 0.4 : 1)
                     VStack(alignment: .leading, spacing: 4) {
                         Text(book.title).font(Spectral.medium(20)).foregroundStyle(palette.onSurface)
@@ -251,7 +251,7 @@ struct AudiobookScreen: View {
                     Text(progressLine(page)).font(.caption).foregroundStyle(palette.onSurfaceVariant)
                         .accessibilityIdentifier("audiobook-progress")
                 }
-                HStack(spacing: 12) {
+                AdaptiveStack(spacing: 12) {
                     Button(page.playLabel.words) { holder.model?.play(audiobookId: book.id) }
                         .buttonStyle(.borderedProminent).disabled(!page.playable)
                         .accessibilityIdentifier("audiobook-play")

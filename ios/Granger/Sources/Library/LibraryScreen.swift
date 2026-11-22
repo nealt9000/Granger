@@ -206,6 +206,9 @@ struct ReadingNowView: View {
                 }
             }
             .frame(width: width)
+            // Under a cover of fixed width the title can't grow past xxxLarge: at the accessibility sizes it took most of
+            // the screen, a word a line (I5's walk). VoiceOver reads the title and progress whole.
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
@@ -237,6 +240,7 @@ struct CollectionStack: View {
                 Text(ShelfWords.books(count)).font(.footnote).foregroundStyle(palette.onSurfaceVariant)
             }
             .frame(width: 132, alignment: .leading)
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)

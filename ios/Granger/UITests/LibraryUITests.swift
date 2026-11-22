@@ -4,7 +4,7 @@ import XCTest
 /// `-debugImport` (imported as a pick from Files would be, through the shared FileImports: UI tests can't drive the
 /// Files picker). Uses GRANGER_TEST_EPUB, GRANGER_TEST_PDF and the Alice EPUB beside them; skipped without them.
 final class LibraryUITests: XCTestCase {
-    override func setUp() { continueAfterFailure = false }
+    override func setUp() { continueAfterFailure = false; CleanData.renew() }
 
     private func env(_ key: String) throws -> String {
         guard let v = ProcessInfo.processInfo.environment[key], !v.isEmpty else { throw XCTSkip("no \(key)") }
@@ -20,7 +20,7 @@ final class LibraryUITests: XCTestCase {
 
     private func launch(_ extra: [String]) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en"] + extra
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en"] + extra
         app.launch()
         return app
     }

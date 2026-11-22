@@ -5,6 +5,8 @@ import SwiftUI
 struct GrangerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
+    /// `-resetData` (UI tests, debug builds): clean data before the settings below read the defaults (Plan I6 Task 9).
+    private let reset = DebugReset.runIfAsked()
     @State private var settings = AppSettings()
     @State private var recent = RecentStore()
     @State private var library = LibraryModel()

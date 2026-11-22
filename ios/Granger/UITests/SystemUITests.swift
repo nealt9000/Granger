@@ -3,11 +3,11 @@ import XCTest
 /// Plan I6 Task 8: the widget's snapshot and Control Center's Local only control, through `-debugSystem` (a hidden label
 /// with the snapshot as the widget reads it from the app group, and hidden buttons that run the widget's intents).
 final class SystemUITests: XCTestCase {
-    override func setUp() { continueAfterFailure = false }
+    override func setUp() { continueAfterFailure = false; CleanData.renew() }
 
     private func launch(_ extra: [String]) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-wikiLanguage", "en", "-debugSystem", "YES"] + extra
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-wikiLanguage", "en", "-debugSystem", "YES"] + extra
         app.launch()
         return app
     }

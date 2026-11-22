@@ -3,7 +3,7 @@ import XCTest
 /// Plan I5 Task 5: the e-book and PDF readers on Readium Swift. A book comes in through `-debugBook` (imported into the
 /// shelf at launch and opened). Uses GRANGER_TEST_EPUB (Pride and Prejudice) and GRANGER_TEST_PDF; skipped without them.
 final class BookReaderTests: XCTestCase {
-    override func setUp() { continueAfterFailure = false }
+    override func setUp() { continueAfterFailure = false; CleanData.renew() }
 
     private func env(_ key: String) throws -> String {
         guard let v = ProcessInfo.processInfo.environment[key], !v.isEmpty else { throw XCTSkip("no \(key)") }
@@ -12,7 +12,7 @@ final class BookReaderTests: XCTestCase {
 
     private func launch(_ book: String) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en",
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en",
                                "-reading.font_scale", "1.0", "-reading.theme", "APP", "-debugBook", book]
         app.launch()
         return app
@@ -193,7 +193,7 @@ final class BookReaderTests: XCTestCase {
     func testPackBookOpensInTheReader() throws {
         let zim = try env("GRANGER_TEST_BOOKPACK")
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
         app.launch()
         app.tabBars.buttons["Explore"].tap()
         let sources = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Your sources'")).firstMatch

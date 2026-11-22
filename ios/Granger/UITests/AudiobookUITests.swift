@@ -6,7 +6,7 @@ import XCTest
 /// LibriVox from `-debugLibriVoxStub` (one stub book answered from a folder of tones, the queue copying them from
 /// there: no network). Never real recordings.
 final class AudiobookUITests: XCTestCase {
-    override func setUp() { continueAfterFailure = false }
+    override func setUp() { continueAfterFailure = false; CleanData.renew() }
 
     private func env(_ key: String) throws -> String {
         guard let v = ProcessInfo.processInfo.environment[key], !v.isEmpty else { throw XCTSkip("no \(key)") }
@@ -15,7 +15,7 @@ final class AudiobookUITests: XCTestCase {
 
     private func launch(_ extra: [String]) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-voice.speed", "1.0"] + extra
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-voice.speed", "1.0"] + extra
         app.launch()
         return app
     }

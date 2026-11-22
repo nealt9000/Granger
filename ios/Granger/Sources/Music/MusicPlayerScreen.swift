@@ -91,6 +91,7 @@ struct MusicPlayerScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { holder.start(voice) }
         .accessibilityIdentifier("music-player")
+        .modifier(HidesMiniPlayer())
     }
 
     private var nothing: some View {
@@ -150,7 +151,9 @@ struct MusicPlayerScreen: View {
                         .accessibilityLabel(["Repeat off", "Repeat all", "Repeat one"][Int(shown.music.repeat) % 3])
                     }
                     .font(.title3)
-                    HStack(spacing: 16) {
+                    // Five buttons in a row were wider than the phone at the largest sizes.
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                    AdaptiveStack(spacing: 16) {
                         Button { showQueue = true } label: { Label("Queue", systemImage: "list.bullet") }
                             .accessibilityIdentifier("player-queue")
                         if holder.model?.canAddToPlaylist == true {
@@ -159,8 +162,9 @@ struct MusicPlayerScreen: View {
                     }
                     Button("Music shelf") { openRoute(.music(collectionId: nil)) }.font(.subheadline)
                 }
+                // The phone's width, so long lines wrap rather than push the page past its edges (I6 Task 9's walk).
+                .frame(width: max(0, geo.size.width - 48))
                 .padding(.horizontal, 24).padding(.vertical, 8)
-                .frame(maxWidth: .infinity)
             }
         }
         .sheet(isPresented: $showQueue) {

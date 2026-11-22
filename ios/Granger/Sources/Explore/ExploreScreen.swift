@@ -86,7 +86,7 @@ struct ExploreScreen: View {
                     if !ui.eras.isEmpty { time(ui) }
                     ways(ui)
                     if let seen = ui.roomsSeen?.int32Value, ui.rooms > 0 { RoomsSeenLine(seen: seen, total: ui.rooms).padding(.top, 12) }
-                } else if library.index == .ready {
+                } else if library.index != .coming {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 300)
                 }
             }
@@ -95,8 +95,10 @@ struct ExploreScreen: View {
         .background(palette.background)
         .navigationTitle("Explore")
         .toolbar { ToolbarItem(placement: .topBarTrailing) { RecentlyOpenMenu() } }
+        // Built whatever the index's state, as Android's landing: with no index (Local only on a fresh install) it still
+        // says so and keeps Ways on, with Your sources and the packs; it builds again when the index comes.
         .task(id: library.index) {
-            guard let core, library.index == .ready else { return }
+            guard let core else { return }
             holder.start({ core.library.explore() }, flow: { $0.ui })
             holder.model?.refresh()
         }

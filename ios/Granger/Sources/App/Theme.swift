@@ -59,3 +59,19 @@ struct Themed: ViewModifier {
 extension View {
     func themed() -> some View { modifier(Themed()) }
 }
+
+/// A row that stands its parts in a column at the accessibility text sizes (Plan I6 Task 9's largest-text walk): side by
+/// side, a button beside a long line got a few letters wide and broke its words ("Al-low ac-cess").
+struct AdaptiveStack<Content: View>: View {
+    var spacing: CGFloat? = nil
+    var alignment: VerticalAlignment = .center
+    @ViewBuilder let content: () -> Content
+    @Environment(\.dynamicTypeSize) private var size
+
+    var body: some View {
+        let layout = size.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: spacing))
+            : AnyLayout(HStackLayout(alignment: alignment, spacing: spacing))
+        layout { content() }
+    }
+}

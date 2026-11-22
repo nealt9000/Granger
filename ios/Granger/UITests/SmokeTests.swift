@@ -3,11 +3,11 @@ import XCTest
 /// The walkthrough the app must always pass (Plan I2 Task 7 grows it with each plan). Needs the internet (Wikipedia).
 /// Each test pins the settings it relies on through launch arguments (they shadow what a previous test saved).
 final class SmokeTests: XCTestCase {
-    override func setUp() { continueAfterFailure = false }
+    override func setUp() { continueAfterFailure = false; CleanData.renew() }
 
     func testLaunchesWithTabs() {
         let app = XCUIApplication()
-        app.launchArguments = ["-localOnly", "NO"]
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-localOnly", "NO"]
         app.launch()
         XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.tabBars.buttons["Search"].exists)
@@ -16,7 +16,7 @@ final class SmokeTests: XCTestCase {
     /// Topic page → full article → Contents → a section → a link in the page → its topic page → back twice.
     func testTopicReaderContentsAndLinks() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
         app.launch()
         let read = app.buttons["read-full"]
         XCTAssertTrue(read.waitForExistence(timeout: 20), "topic page")
@@ -47,7 +47,7 @@ final class SmokeTests: XCTestCase {
     /// Search online: type, see Titles and Articles, open a result's topic page, find the search under Recent.
     func testSearchOpensATopic() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
         app.launch()
         app.tabBars.buttons["Search"].tap()
         let field = app.searchFields.firstMatch
@@ -66,7 +66,7 @@ final class SmokeTests: XCTestCase {
     /// First run: nothing is fetched until the privacy line's OK; Settings' Local only stops Search going online.
     func testPrivacyLineAndLocalOnly() {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en", "-homeOrder", "continue,readiness,timeline,feeds", "-homeHidden", "()"]
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en", "-homeOrder", "continue,readiness,timeline,feeds", "-homeHidden", "()"]
         app.launch()
         let ok = app.buttons["privacy-ok"]
         XCTAssertTrue(ok.waitForExistence(timeout: 10), "the privacy line on first run")
@@ -93,7 +93,7 @@ final class SmokeTests: XCTestCase {
     /// summary and page, from the phone; Remove takes it off again.
     func testKeepAndLocalOnly() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
         app.launch()
         if app.buttons["keep-remove"].waitForExistence(timeout: 20) { app.buttons["keep-remove"].tap() }
         let keep = app.buttons["keep"]
@@ -107,7 +107,7 @@ final class SmokeTests: XCTestCase {
             || app.descendants(matching: .any)["mark-on-phone"].exists, "marked on this phone")
 
         app.terminate()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
         app.launch()
         let read = app.buttons["read-full"]
         XCTAssertTrue(read.waitForExistence(timeout: 20), "the topic page opens with Local only on")
@@ -137,7 +137,7 @@ final class SmokeTests: XCTestCase {
     /// The whole topic page (Plan I3 Task 7): trail, years, their time, more in the room, closest topics.
     func testTopicPageWhole() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Archimedes"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Archimedes"]
         app.launch()
         XCTAssertTrue(app.staticTexts["287 BC – 212 BC · aged 75"].waitForExistence(timeout: 30), "years from the time index")
         shot(app, "topic-1")
@@ -159,7 +159,7 @@ final class SmokeTests: XCTestCase {
     /// Home (Plan I3 Task 8): the timeline card, a tap on the river selects a mark, Full timeline, Arrange Home hides it.
     func testHomeTimelineAndArrange() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-homeOrder", "continue,readiness,timeline,feeds", "-homeHidden", "()"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-homeOrder", "continue,readiness,timeline,feeds", "-homeHidden", "()"]
         app.launch()
         let full = app.buttons["full-timeline"]
         XCTAssertTrue(full.waitForExistence(timeout: 60), "the timeline card")
@@ -181,7 +181,7 @@ final class SmokeTests: XCTestCase {
     /// Explore (Plan I3 Task 9): the landing, a subject, a room, a topic; Wander; a round of a game.
     func testExploreWalk() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
         app.launch()
         app.tabBars.buttons["Explore"].tap()
         let spread = app.buttons["open-spread"]
@@ -232,7 +232,7 @@ final class SmokeTests: XCTestCase {
     /// Landscape: the topic page and the reader lay out and stay usable sideways.
     func testLandscape() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon"]
         app.launch()
         XCUIDevice.shared.orientation = .landscapeLeft
         defer { XCUIDevice.shared.orientation = .portrait }
@@ -254,7 +254,7 @@ final class SmokeTests: XCTestCase {
     func testPackSearchTopicAndReader() throws {
         guard let zim = ProcessInfo.processInfo.environment["GRANGER_TEST_ZIM"], !zim.isEmpty else { throw XCTSkip("no GRANGER_TEST_ZIM") }
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
         app.launch()
         app.tabBars.buttons["Search"].tap()
         let field = app.searchFields.firstMatch
@@ -286,7 +286,7 @@ final class SmokeTests: XCTestCase {
     /// opens from its row, and is removed again. Real network: the signed catalog and Kiwix's mirror.
     func testGetMoreDownloadPauseResume() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-wifiOnly", "NO"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-wifiOnly", "NO"]
         app.launch()
         let getMore = app.buttons["Get more"].firstMatch
         XCTAssertTrue(getMore.waitForExistence(timeout: 10))
@@ -346,7 +346,7 @@ final class SmokeTests: XCTestCase {
     /// Plan I4 Task 6: Kiwix's list draws the Wikipedia set as one row, with how much of it and with or without pictures.
     func testGetMoreKiwixWikipediaRow() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en"]
         app.launch()
         let getMore = app.buttons["Get more"].firstMatch
         XCTAssertTrue(getMore.waitForExistence(timeout: 10))
@@ -366,7 +366,7 @@ final class SmokeTests: XCTestCase {
     func testYourSources() throws {
         guard let zim = ProcessInfo.processInfo.environment["GRANGER_TEST_ZIM"], !zim.isEmpty else { throw XCTSkip("no GRANGER_TEST_ZIM") }
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
         app.launch()
         app.tabBars.buttons["Explore"].tap()
         let sources = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Your sources'")).firstMatch
@@ -381,7 +381,7 @@ final class SmokeTests: XCTestCase {
     /// Plan I4 Task 8: after a read, Home's Ready offline counts it; See everything opens Outfitting with the domains.
     func testReadyOfflineAndOutfitting() {
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon",
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-debugOpen", "en:Moon",
                                "-homeOrder", "readiness,continue,timeline,feeds", "-homeHidden", "()"]
         app.launch()
         XCTAssertTrue(app.buttons["read-full"].waitForExistence(timeout: 20), "topic page")
@@ -403,7 +403,7 @@ final class SmokeTests: XCTestCase {
     func testHomeFeeds() throws {
         guard let zim = ProcessInfo.processInfo.environment["GRANGER_TEST_ZIM"], !zim.isEmpty else { throw XCTSkip("no GRANGER_TEST_ZIM") }
         let app = XCUIApplication()
-        app.launchArguments = ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim,
+        app.launchArguments = CleanData.args + ["-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim,
                                "-homeOrder", "feeds,continue,readiness,timeline", "-homeHidden", "()"]
         app.launch()
         // The defaults (Wikipedia, Classics, Wikiquote) wait for their packs; a feed over the pack on the phone draws.
@@ -426,7 +426,7 @@ final class SmokeTests: XCTestCase {
     /// the quick wins queue and Home follows.
     func testOnboardingPickAStart() {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "NO", "-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en"]
+        app.launchArguments = CleanData.args + ["-onboarding.done", "NO", "-privacySeen", "NO", "-localOnly", "NO", "-wikiLanguage", "en"]
         app.launch()
         let outfit = app.buttons["onboarding-outfit"]
         XCTAssertTrue(outfit.waitForExistence(timeout: 15), "Welcome")
@@ -449,7 +449,7 @@ final class SmokeTests: XCTestCase {
     func testBookPackCollection() throws {
         guard let zim = ProcessInfo.processInfo.environment["GRANGER_TEST_BOOKPACK"], !zim.isEmpty else { throw XCTSkip("no GRANGER_TEST_BOOKPACK") }
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en", "-debugPack", zim]
         app.launch()
         app.tabBars.buttons["Explore"].tap()
         let sources = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Your sources'")).firstMatch
@@ -467,7 +467,7 @@ final class SmokeTests: XCTestCase {
     /// resume data, after the next start, and installs. Real network (the 43 MB pack); the pack is removed after.
     func testDownloadSurvivesTheAppBeingKilled() {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-wifiOnly", "NO"]
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-wifiOnly", "NO"]
         app.launch()
         app.buttons["Get more"].firstMatch.tap()
         app.buttons["getmore-books"].tap()

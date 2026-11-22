@@ -147,6 +147,8 @@ struct BookReaderScreen: View {
                     .accessibilityValue(model.isBookmarkedHere ? "On" : "Off")
             }
             .font(.title3)
+            // Five icons at the largest sizes were wider than the phone, pushing the bar past both edges (I6 Task 9's walk).
+            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             .padding(.horizontal, 8)
         }
         .padding(.horizontal, 16).padding(.top, 10).padding(.bottom, 6)

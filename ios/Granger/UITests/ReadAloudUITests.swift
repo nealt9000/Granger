@@ -5,7 +5,7 @@ import XCTest
 /// (TEST_RUNNER_GRANGER_TEST_VOICE: the catalog's Owl zip unpacked), the book through `-debugBook`
 /// (GRANGER_TEST_EPUB) and the article's pack through `-debugPack` (GRANGER_TEST_ZIM); skipped without them.
 final class ReadAloudUITests: XCTestCase {
-    override func setUp() { continueAfterFailure = false }
+    override func setUp() { continueAfterFailure = false; CleanData.renew() }
 
     private func env(_ key: String) throws -> String {
         guard let v = ProcessInfo.processInfo.environment[key], !v.isEmpty else { throw XCTSkip("no \(key)") }
@@ -14,7 +14,7 @@ final class ReadAloudUITests: XCTestCase {
 
     private func launch(_ extra: [String]) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en",
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en",
                                "-reading.font_scale", "1.0", "-reading.theme", "APP", "-voice.speed", "1.0"] + extra
         app.launch()
         return app

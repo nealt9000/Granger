@@ -38,6 +38,7 @@ struct AudiobookPlayerScreen: View {
     @State private var sheet: Sheet?
     @State private var seeking: Double?
     @State private var watching: Task<Void, Never>?
+    @Environment(\.dynamicTypeSize) private var dynamicType
 
     private enum Sheet: String, Identifiable { case chapters, speed, sleep, bookmarks; var id: String { rawValue } }
 
@@ -58,6 +59,7 @@ struct AudiobookPlayerScreen: View {
         }
         .onDisappear { watching?.cancel(); watching = nil }
         .sheet(item: $sheet) { which in sheetView(which) }
+        .modifier(HidesMiniPlayer())
         .accessibilityIdentifier("audiobook-player")
     }
 
@@ -134,18 +136,22 @@ struct AudiobookPlayerScreen: View {
                             .accessibilityIdentifier("book-player-next-chapter")
                     }
                     .font(.title2)
+                    // Five buttons in a row were wider than the phone at the largest sizes (I6 Task 9's walk).
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                     if shown.live { actions(shown) }
                     Button("Audiobooks shelf") { openRoute(.audiobooks(collectionId: nil)) }.font(.subheadline)
                 }
+                // The phone's width, so long lines wrap rather than push the page past its edges.
+                .frame(width: max(0, geo.size.width - 48))
                 .padding(.horizontal, 24).padding(.vertical, 8)
-                .frame(maxWidth: .infinity)
             }
         }
     }
 
     @ViewBuilder private func actions(_ shown: ShownBook) -> some View {
         let book = shown.book
-        HStack {
+        // At the accessibility sizes the five labels don't fit in a row (they read "C…", "Sl…"), so they stand in a column.
+        AdaptiveStack(spacing: dynamicType.isAccessibilitySize ? 12 : nil) {
             action("list.bullet", "Chapters", "Chapters") { sheet = .chapters }
             Spacer()
             action("gauge.with.dots.needle.33percent", speedLabel(book.speed), "Playback speed \(speedLabel(book.speed))") { sheet = .speed }
@@ -163,9 +169,15 @@ struct AudiobookPlayerScreen: View {
 
     private func action(_ icon: String, _ label: String, _ description: String, active: Bool = false, id: String? = nil, _ run: @escaping () -> Void) -> some View {
         Button(action: run) {
-            VStack(spacing: 4) {
-                Image(systemName: icon).font(.title3)
-                Text(label).font(.caption2).lineLimit(1)
+            Group {
+                if dynamicType.isAccessibilitySize {
+                    Label(label, systemImage: icon).frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    VStack(spacing: 4) {
+                        Image(systemName: icon).font(.title3)
+                        Text(label).font(.caption2).lineLimit(1)
+                    }
+                }
             }
             .foregroundStyle(active ? palette.primary : palette.onSurface)
         }

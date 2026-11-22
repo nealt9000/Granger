@@ -30,6 +30,8 @@ final class VoiceCenter {
     private(set) var saved: SavedModes = SavedModes.companion.UNKNOWN
     /// A line for the user (no voice, one that wouldn't start, a song that wouldn't play), shown by whichever screen is up.
     var notice: String?
+    /// How many full players (music's, the audiobook's) are on screen; while any is, the mini player is hidden.
+    var fullPlayersShown = 0
     private var tasks: [Task<Void, Never>] = []
 
     init(core: Core) {
@@ -86,6 +88,8 @@ final class VoiceCenter {
     /// The mini player shows: the voice reads, music or a book is loaded, or (as Android's restore() brings back) the
     /// last media mode has a saved song or book.
     var miniShown: Bool {
+        // The full music or audiobook player is on screen: the mini player gives way, as Android hides it there.
+        if fullPlayersShown > 0 { return false }
         if reading { return true }
         if case .idle = onEnum(of: media.now) {
             switch saved.lastMode {

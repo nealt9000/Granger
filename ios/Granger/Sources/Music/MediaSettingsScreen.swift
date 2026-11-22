@@ -54,7 +54,7 @@ struct MediaSettingsScreen: View {
 
     @ViewBuilder private func access(_ center: MusicCenter) -> some View {
         Section {
-            HStack(alignment: .top) {
+            AdaptiveStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Find music and audiobooks in the Music library")
                     Text(accessLine(center.libraryStatus)).font(.footnote).foregroundStyle(palette.onSurfaceVariant)
@@ -91,7 +91,7 @@ struct MediaSettingsScreen: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Add a folder")
                 Text("For music in Files, on this iPhone or elsewhere. Granger only reads them.").font(.footnote).foregroundStyle(palette.onSurfaceVariant)
-                HStack(spacing: 8) {
+                AdaptiveStack(spacing: 8) {
                     Button("Music folder") { picking = .music }.buttonStyle(.bordered)
                     Button("Audiobooks folder") { picking = .audiobooks }.buttonStyle(.bordered)
                 }

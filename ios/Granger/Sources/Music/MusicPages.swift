@@ -48,7 +48,7 @@ struct AlbumScreen: View {
         let tracks = page.tracks
         let multiDisc = Set(tracks.map { $0.disc?.intValue ?? 1 }).count > 1
         LazyVStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 16) {
+            AdaptiveStack(spacing: 16) {
                 AlbumCover(path: album.coverPath, title: MusicWords.shown(album.title)).frame(width: 140)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(MusicWords.shown(album.title)).font(Spectral.medium(22)).foregroundStyle(palette.onSurface)

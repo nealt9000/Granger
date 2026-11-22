@@ -6,7 +6,7 @@ import XCTest
 /// launch). The tagged pair is Android's own MP3 fixtures (testdata/audio, read through TagLib); the rest are sine tones
 /// this test writes (never real music).
 final class MusicUITests: XCTestCase {
-    override func setUp() { continueAfterFailure = false }
+    override func setUp() { continueAfterFailure = false; CleanData.renew() }
 
     /// The repository's testdata/audio, from this file's place in the checkout (the Simulator reads the Mac's disk).
     /// A copy of the repository's testdata/audio, from GRANGER_TEST_AUDIO (the Simulator can't read the X10 volume the
@@ -20,7 +20,7 @@ final class MusicUITests: XCTestCase {
 
     private func launch(_ extra: [String]) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en"] + extra
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "YES", "-wikiLanguage", "en"] + extra
         app.launch()
         return app
     }
