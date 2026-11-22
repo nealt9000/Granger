@@ -235,6 +235,8 @@ When I6 merges, every parity row marked I6 is ticked or carries an agreed reason
 ### Task 9: I6b check and merge
 - [ ] Run the whole Simulator suite and the JVM suite.
 - [ ] UI tests start from clean app data (a launch argument that clears the library DB and prefs), so a failed run can't leave highlights or notes that break the next (found in Task 5's check: `testEpubReader`).
+  - Also: `SmokeTests.testBookPackCollection` and `BookReaderTests.testPackBookOpensInTheReader` fail on a fresh install in Local only (no "Your sources" in Explore until an online test has fetched the indexes). Checked by the lead 2026-11-22: same failure on 22d421e2 (before Task 6), so it's test order, not music. Each should set up its own pack and not lean on an earlier test.
+- [ ] Ogg Vorbis: iOS can't decode it (Task 6 finding), so `.ogg` Vorbis is left out of the scan. Note it in the parity row; libvorbis waits on Neal.
 - [ ] Walk it in Night and at the largest text size, including the two layout findings carried from I5 (the mini player over Listen's content, and the Library's huge titles). Fix them here, since Listen grows in this plan.
 - [ ] Tick the I6 rows in `ios-parity.md`, with reasons where they differ, and drop the `PROCESS_TEXT` row per call 9.
 - [ ] Publish a GrangerCore release and pin it. Merge and push. Tell the peer sessions what moved.
