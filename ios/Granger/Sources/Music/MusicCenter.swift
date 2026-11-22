@@ -189,6 +189,17 @@ final class MusicCenter {
             debugFolder = PickedFolder(path: path, name: (path as NSString).lastPathComponent, audiobooks: false)
             openFolders()
         }
+        // `-debugAudiobookFolder <folder on the Mac>`: read as a picked Audiobooks folder for this launch (Plan I6 Task 7):
+        // its files are grouped as one book, a chapter each.
+        if let path = d.string(forKey: "debugAudiobookFolder"), FileManager.default.fileExists(atPath: path) {
+            debugFolder = PickedFolder(path: path, name: (path as NSString).lastPathComponent, audiobooks: true)
+            openFolders()
+        }
+        // `-debugLibriVoxStub <folder on the Mac>`: LibriVox and archive.org answer with one book made of that folder's
+        // audio files, and the queue copies them from there: a LibriVox download with no network (Plan I6 Task 7).
+        if let path = d.string(forKey: "debugLibriVoxStub"), FileManager.default.fileExists(atPath: path) {
+            music.debugLibriVoxStub(dir: path)
+        }
         if let raw = d.string(forKey: "debugImportMusic"), !raw.isEmpty {
             let urls = raw.split(separator: "|").map { URL(fileURLWithPath: String($0)) }.filter { FileManager.default.fileExists(atPath: $0.path) }
             Task { let n = await importFiles(urls); NSLog("debugImportMusic: %d", n) }

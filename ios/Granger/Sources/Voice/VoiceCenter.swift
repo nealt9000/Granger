@@ -20,6 +20,9 @@ final class VoiceCenter {
     private(set) var lastRead: LastRead?
     /// The player as a whole (music, audiobooks, the voice with music under it).
     private(set) var media: PlayerUi = PlayerUi.companion.IDLE
+    /// Each mode's saved state (Plan I6 Task 7): the hub doesn't restore at launch (Android's restore()), so the mini
+    /// player and Listen show the last song or book from here, paused, until a control makes it the player's mode.
+    private(set) var saved: SavedModes = SavedModes.companion.UNKNOWN
     /// A line for the user (no voice, one that wouldn't start, a song that wouldn't play), shown by whichever screen is up.
     var notice: String?
     private var tasks: [Task<Void, Never>] = []
@@ -45,6 +48,7 @@ final class VoiceCenter {
         tasks.append(Task { @MainActor [weak self] in for await l in player.lastRead { self?.lastRead = l } })
         tasks.append(Task { @MainActor [weak self] in for await n in player.notices { self?.notice = n.words } })
         tasks.append(Task { @MainActor [weak self] in for await m in hub.ui { self?.media = m; self?.updateNowPlaying() } })
+        tasks.append(Task { @MainActor [weak self] in for await s in hub.saved { self?.saved = s } })
         tasks.append(Task { @MainActor [weak self] in for await n in hub.notices { self?.notice = PlayerViewModelKt.playerNotice(line: n).words } })
         remoteCommands()
         watchSession()
@@ -64,6 +68,20 @@ final class VoiceCenter {
     }
 
     var reading: Bool { ui.now != nil }
+
+    /// The mini player shows: the voice reads, music or a book is loaded, or (as Android's restore() brings back) the
+    /// last media mode has a saved song or book.
+    var miniShown: Bool {
+        if reading { return true }
+        if case .idle = onEnum(of: media.now) {
+            switch saved.lastMode {
+            case .music: return saved.music != nil
+            case .audiobook: return saved.book != nil
+            default: return false
+            }
+        }
+        return true
+    }
 
     // MARK: The audio session
 

@@ -3,9 +3,10 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// Get more (Android's, Plan U3b Decision 2): where packs and books come from. On the iPhone in I4: Kiwix's knowledge
-/// packs, Books by kind, archive.org and (Plan I5 Task 8) Models & voices: the Granger voices; LibriVox and audio come
-/// with I6.
+/// packs, Books by kind, archive.org and (Plan I5 Task 8) Models & voices: the Granger voices; (Plan I6 Task 7)
+/// Audiobooks & music: LibriVox and archive.org's audiobooks and music. Listen's + shows that section alone.
 struct GetMoreScreen: View {
+    var audioOnly = false
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
     @State private var importing = false
@@ -13,6 +14,51 @@ struct GetMoreScreen: View {
 
     var body: some View {
         List {
+            if !audioOnly { everything }
+            Section(header: heading("Audiobooks & music")) {
+                route(.librivox, "LibriVox", "Public-domain audiobooks, read by volunteers", id: "getmore-librivox")
+                route(.archiveAudio(kind: ArchiveKind.spokenWord.name), "Archive.org audiobooks", "Spoken word from the Internet Archive", id: "getmore-archive-audiobooks")
+                route(.archiveAudio(kind: ArchiveKind.music.name), "Archive.org music", "Recordings from the Internet Archive", id: "getmore-archive-music")
+            }
+            if !audioOnly {
+                Section(header: heading("Models & voices")) {
+                    NavigationLink(value: Route.voiceSettings) {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Models and voices").font(Spectral.regular(20)).foregroundStyle(palette.onSurface)
+                            Text("What Read aloud runs on").font(.callout).foregroundStyle(palette.onSurfaceVariant)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .accessibilityIdentifier("getmore-voices")
+                }
+            }
+            Section {
+                NavigationLink(value: Route.downloads) { Label("Downloads", systemImage: "arrow.down.circle") }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(palette.background)
+        .navigationTitle(audioOnly ? "Get audiobooks & music" : "Get more")
+        .navigationBarTitleDisplayMode(.inline)
+        .fileImporter(isPresented: $importing, allowedContentTypes: [UTType(filenameExtension: "zim") ?? .data]) { result in
+            guard case let .success(url) = result, let core else { return }
+            importNote = "Copying \(url.lastPathComponent)…"
+            Task { importNote = await PackImport.copy(url, core: core) }
+        }
+    }
+
+    private func route(_ to: Route, _ title: String, _ sub: String, id: String) -> some View {
+        NavigationLink(value: to) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(Spectral.regular(20)).foregroundStyle(palette.onSurface)
+                Text(sub).font(.callout).foregroundStyle(palette.onSurfaceVariant)
+            }
+            .padding(.vertical, 4)
+        }
+        .accessibilityIdentifier(id)
+    }
+
+    @ViewBuilder private var everything: some View {
             Section(header: heading("Knowledge packs")) {
                 link(.kiwix, "Kiwix", "Wikipedia, Stack Exchange, medicine, how-to and more, offline")
                 Button { importing = true } label: {
@@ -36,29 +82,6 @@ struct GetMoreScreen: View {
                 }
                 .accessibilityIdentifier("getmore-archive")
             }
-            Section(header: heading("Models & voices")) {
-                NavigationLink(value: Route.voiceSettings) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Models and voices").font(Spectral.regular(20)).foregroundStyle(palette.onSurface)
-                        Text("What Read aloud runs on").font(.callout).foregroundStyle(palette.onSurfaceVariant)
-                    }
-                    .padding(.vertical, 4)
-                }
-                .accessibilityIdentifier("getmore-voices")
-            }
-            Section {
-                NavigationLink(value: Route.downloads) { Label("Downloads", systemImage: "arrow.down.circle") }
-            }
-        }
-        .scrollContentBackground(.hidden)
-        .background(palette.background)
-        .navigationTitle("Get more")
-        .navigationBarTitleDisplayMode(.inline)
-        .fileImporter(isPresented: $importing, allowedContentTypes: [UTType(filenameExtension: "zim") ?? .data]) { result in
-            guard case let .success(url) = result, let core else { return }
-            importNote = "Copying \(url.lastPathComponent)…"
-            Task { importNote = await PackImport.copy(url, core: core) }
-        }
     }
 
     private func heading(_ s: String) -> some View { Text(s).font(Spectral.medium(16)).foregroundStyle(palette.tertiary) }

@@ -140,7 +140,7 @@ struct RootView: View {
                 .tabItem { Label("Listen", systemImage: "headphones") }
                 .tag(Tab.listen)
         }
-        .modifier(MiniPlayerAccessory(voice: voice) { listenPath = []; tab = .listen })
+        .modifier(MiniPlayerAccessory(voice: voice) { route in listenPath = route.map { [$0] } ?? []; tab = .listen })
         .overlay(alignment: .bottom) {
             if let notice = voice?.notice {
                 Text(notice).font(.callout).padding(12).background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8)).padding(.bottom, 120)
@@ -270,6 +270,12 @@ struct RootView: View {
                     case let .playlist(id): PlaylistScreen(playlistId: id)
                     case .musicPlayer: MusicPlayerScreen()
                     case .mediaSettings: MediaSettingsScreen()
+                    case let .audiobooks(id): AudiobookShelfScreen(collectionId: id)
+                    case let .audiobook(id): AudiobookScreen(bookId: id)
+                    case .audiobookPlayer: AudiobookPlayerScreen()
+                    case .librivox: LibriVoxScreen()
+                    case .getMoreAudio: GetMoreScreen(audioOnly: true)
+                    case let .archiveAudio(kind): ArchiveScreen(kind: ArchiveKind.allCases.first { $0.name == kind } ?? .music)
                     }
                 }
         }
@@ -277,16 +283,17 @@ struct RootView: View {
     }
 }
 
-/// The mini player above the tab bar while the voice is loaded (iOS 26's bottom accessory; 26.0 has no isEnabled, so
-/// the accessory is left off there while nothing reads).
+/// The mini player above the tab bar while something is loaded or would resume (iOS 26's bottom accessory; 26.0 has no
+/// isEnabled, so the accessory is left off there while there's nothing to show).
 private struct MiniPlayerAccessory: ViewModifier {
     let voice: VoiceCenter?
-    let onOpen: () -> Void
+    /// Opens Listen, at a player when given (music's or the audiobook's).
+    let onOpen: (Route?) -> Void
 
     func body(content: Content) -> some View {
         if #available(iOS 26.1, *) {
-            content.tabViewBottomAccessory(isEnabled: voice?.reading ?? false) { mini }
-        } else if voice?.reading == true {
+            content.tabViewBottomAccessory(isEnabled: voice?.miniShown ?? false) { mini }
+        } else if voice?.miniShown == true {
             content.tabViewBottomAccessory { mini }
         } else {
             content

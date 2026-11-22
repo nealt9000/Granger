@@ -18,6 +18,15 @@ import app.granger.core.player.PlayerSettingsKeys
 import app.granger.core.player.ReplayGainMode
 import app.granger.core.taglib.RawTags
 import app.granger.core.text.NaturalOrder
+import app.granger.archive.ArchiveModel
+import app.granger.archive.MediaArchiveAudio
+import app.granger.audiobooks.AudiobooksViewModel
+import app.granger.audiobooks.DaoListening
+import app.granger.core.archive.ArchiveKind
+import app.granger.core.media.DownloadedMediaScan
+import app.granger.core.media.PathTagReader
+import app.granger.librivox.LibriVoxModel
+import app.granger.media.MediaItemDownloader
 import app.granger.music.MusicViewModel
 import app.granger.player.PlayerFocus
 import app.granger.player.PlayerViewModel
@@ -129,6 +138,76 @@ class IosMusic(
         tagGuard = FileTagGuard(guardDir),
     )
 
+    // ---- Downloaded audio (Plan I6 Task 7, call 5): LibriVox's books and archive.org's spoken word and music ----
+
+    /**
+     * Where LibriVox's and archive.org's audio lands: `Documents/.granger/media/{audiobooks,music}/<source>/<ref>/`, a
+     * group on the shared queue each, filed by the shared downloaded-media scan. Hidden, as Android hides them from
+     * other apps (`.nomedia`): the Files app's Music folder is the phone scan's, and on a disk that ignores case (the
+     * Simulator's) "music" would be that same folder.
+     */
+    val mediaRoot: String = MediaDisk.child(library.downloadRoot, ".granger/media")
+
+    /** A downloaded file's tags (AVAsset, TagLib for MP3) and chapters, read as the phone scan reads its files. */
+    private val downloadedTags = PathTagReader { path, file, guard ->
+        val fd = open(path, O_RDONLY)
+        if (fd < 0) throw kotlinx.io.IOException("Can't open $path")
+        try {
+            guard.begin(file.uri)
+            val tags = try {
+                FileTags(natives.fileTags(path)?.raw(), ChapterReader.read(FdBytes(fd, MediaDisk.length(path))))
+            } catch (e: Exception) {
+                guard.end()
+                throw e
+            }
+            guard.end()
+            tags
+        } finally {
+            close(fd)
+        }
+    }
+
+    /** Gets, cancels, removes and files downloaded books and albums (Android's MediaDownloader). */
+    val downloader: MediaItemDownloader = MediaItemDownloader(
+        downloads = library.downloads,
+        scanner = DownloadedMediaScan({ listOf(mediaRoot) }, library.media, downloadedTags, FileTagGuard(MediaDisk.child(guardDir, "downloads"))),
+        media = library.media,
+        volumes = library.volumeAt(mediaRoot),
+        prefs = library.downloadPrefs,
+        scope = scope,
+        onRemoving = { audiobookId, trackIds -> voice.hub.unload(audiobookId, trackIds) },
+    )
+
+    init {
+        runCatching { kotlinx.io.files.SystemFileSystem.createDirectories(kotlinx.io.files.Path(MediaDisk.child(guardDir, "downloads"))) }
+        library.onMediaInstalled = { downloader.onFileInstalled(it) }
+        scope.launch { downloader.rescanQuietly() }
+    }
+
+    /** The Audiobooks shelf for [collectionId] (null: every audiobook) and the book pages, as Android's AudiobooksViewModel. */
+    fun audiobooks(collectionId: String?): OwnedViewModel<AudiobooksViewModel> = OwnedViewModel {
+        AudiobooksViewModel(
+            collectionId, library.media, library.shelves, DaoListening(library.database.playbackDao()), voice.hub,
+            downloads = library.downloads.records,
+            remover = { group -> scope.launch { runCatching { downloader.remove(group) }.onFailure { library.logLine("Couldn't remove $group: ${it.message}") } } },
+            viewPrefs = library.shelfChoices,
+        )
+    }
+
+    /** LibriVox: Recently added, the genres, search, a book's sheet and Get through the shared queue. */
+    fun librivox(): OwnedViewModel<LibriVoxModel> = OwnedViewModel {
+        LibriVoxModel(library.librivoxClient, library.archiveClient, downloader, library.downloads, library.appScope, languages = { library.languagesNow() })
+    }
+
+    /** archive.org's spoken word or music, its items got through [downloader] as a book or an album. */
+    fun archiveAudio(kind: ArchiveKind): OwnedViewModel<ArchiveModel> = library.archiveOrg(kind, MediaArchiveAudio(downloader))
+
+    /**
+     * Debug builds and UI tests: LibriVox and archive.org answered from [dir]'s audio files (one stub book, a chapter a
+     * file), and the queue's transfer copying them from there ([DebugLibriVox]): a download runs with no network.
+     */
+    fun debugLibriVoxStub(dir: String) = DebugLibriVox.install(library, dir)
+
     /** The picked folders Swift resolved (and holds open). A scan follows when they change. */
     fun setFolders(list: List<PickedFolder>) {
         folders.value = list
@@ -146,6 +225,8 @@ class IosMusic(
         try {
             scanner.scan()
             if (busy) scanner.scan()
+            // Rescan now covers downloaded books and albums too, as Android's.
+            downloader.rescan()
         } finally {
             scanLock.withLock { scans-- }
         }

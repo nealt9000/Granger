@@ -287,8 +287,10 @@ final class SmokeTests: XCTestCase {
         get.tap()
 
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        if app.navigationBars.buttons.element(boundBy: 0).exists && !app.buttons["Downloads"].exists { app.navigationBars.buttons.element(boundBy: 0).tap() }
+        if app.navigationBars.buttons.element(boundBy: 0).exists && !app.buttons["getmore-books"].exists { app.navigationBars.buttons.element(boundBy: 0).tap() }
         let downloads = app.buttons["Downloads"]
+        // Below Get more's sections (Audiobooks & music since Plan I6 Task 7): scrolled to.
+        for _ in 0..<4 where !(downloads.exists && downloads.isHittable) { app.swipeUp() }
         XCTAssertTrue(downloads.waitForExistence(timeout: 10))
         downloads.tap()
         sleep(3)
@@ -306,9 +308,14 @@ final class SmokeTests: XCTestCase {
         shot(app, "downloads-done")
 
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["getmore-books"].tap()
+        _ = app.buttons["getmore-books"].waitForExistence(timeout: 5)
+        sleep(1)
+        for _ in 0..<4 where !(app.buttons["getmore-books"].exists && app.buttons["getmore-books"].isHittable) { app.swipeDown(); sleep(1) }
+        // The row by its words: after the list has scrolled back, the link's own element can miss the tap.
+        app.staticTexts["Books by kind"].firstMatch.tap()
         let field2 = app.searchFields.firstMatch
-        XCTAssertTrue(field2.waitForExistence(timeout: 10))
+        if !field2.waitForExistence(timeout: 10) { shot(app, "kill-no-search") }
+        XCTAssertTrue(field2.exists)
         field2.tap()
         field2.typeText("Draw your African")
         let more = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'More for'")).firstMatch
@@ -462,14 +469,21 @@ final class SmokeTests: XCTestCase {
 
         app.launch()
         app.buttons["Get more"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["getmore-books"].waitForExistence(timeout: 10))
+        for _ in 0..<4 where !(app.buttons["Downloads"].exists && app.buttons["Downloads"].isHittable) { app.swipeUp() }
         app.buttons["Downloads"].tap()
         XCTAssertTrue(app.staticTexts["Done today"].waitForExistence(timeout: 300), "installed after the restart")
         shot(app, "downloads-after-kill")
 
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["getmore-books"].tap()
+        _ = app.buttons["getmore-books"].waitForExistence(timeout: 5)
+        sleep(1)
+        for _ in 0..<4 where !(app.buttons["getmore-books"].exists && app.buttons["getmore-books"].isHittable) { app.swipeDown(); sleep(1) }
+        // The row by its words: after the list has scrolled back, the link's own element can miss the tap.
+        app.staticTexts["Books by kind"].firstMatch.tap()
         let field2 = app.searchFields.firstMatch
-        XCTAssertTrue(field2.waitForExistence(timeout: 10))
+        if !field2.waitForExistence(timeout: 10) { shot(app, "kill-no-search") }
+        XCTAssertTrue(field2.exists)
         field2.tap()
         field2.typeText("Draw your African")
         let more = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'More for'")).firstMatch

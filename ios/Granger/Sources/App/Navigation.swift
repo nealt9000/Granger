@@ -60,6 +60,15 @@ enum Route: Hashable {
     case playlist(id: Int64)
     case musicPlayer
     case mediaSettings
+    /// Audiobooks (Plan I6 Task 7): a collection's shelf (nil: every audiobook), a book's page by its id, the audiobook
+    /// player; LibriVox; archive.org's spoken word or music (ArchiveKind by name).
+    case audiobooks(collectionId: String?)
+    case audiobook(id: String)
+    case audiobookPlayer
+    case librivox
+    case archiveAudio(kind: String)
+    /// Listen's +: Get more's audiobooks and music only (Android's GetMoreFor.LISTEN).
+    case getMoreAudio
 }
 
 /// What the user has read lately (Android's Continue / history): the last 50 articles, newest first.

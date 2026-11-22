@@ -5,9 +5,15 @@ import SwiftUI
 @Observable
 final class PlayerHolder {
     private(set) var ui: PlayerUi = PlayerUi.companion.IDLE
+    /// What a one-item view shows (the mini player): the music under the voice or the voice, by PlayerFocus.
+    private(set) var mini: PlayerUi = PlayerUi.companion.IDLE
     private(set) var queue: [Track] = []
     private(set) var saved: SavedModes = SavedModes.companion.UNKNOWN
     private(set) var playlists: [Playlist] = []
+    /// The loaded book's chapters and bookmarks, and how far through it is (Plan I6 Task 7).
+    private(set) var chapters: [AudiobookChapter] = []
+    private(set) var bookmarks: [AudioBookmark] = []
+    private(set) var progress: BookProgress?
     private var owned: OwnedViewModel<PlayerViewModel>?
     private var watching: [Task<Void, Never>] = []
     var model: PlayerViewModel? { owned?.model }
@@ -19,9 +25,13 @@ final class PlayerHolder {
         let m = o.model
         watching = [
             Task { @MainActor [weak self] in for await u in m.ui { self?.ui = u } },
+            Task { @MainActor [weak self] in for await u in m.mini { self?.mini = u } },
             Task { @MainActor [weak self] in for await q in m.queue { self?.queue = q } },
             Task { @MainActor [weak self] in for await s in m.saved { self?.saved = s } },
             Task { @MainActor [weak self] in for await p in m.allPlaylists { self?.playlists = p } },
+            Task { @MainActor [weak self] in for await c in m.bookChapters { self?.chapters = c } },
+            Task { @MainActor [weak self] in for await b in m.bookBookmarks { self?.bookmarks = b } },
+            Task { @MainActor [weak self] in for await p in m.progress { self?.progress = p } },
         ]
     }
 

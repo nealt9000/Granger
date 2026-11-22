@@ -134,6 +134,14 @@ final class ReadAloudUITests: XCTestCase {
         app.tabBars.buttons["Listen"].tap()
         XCTAssertTrue(app.staticTexts["listen-sentence"].waitForExistence(timeout: 10))
         app.buttons["listen-stop"].tap()
-        XCTAssertTrue(app.buttons["mini-play-pause"].waitForNonExistence(timeout: 10), "the mini player goes with the voice")
+        // The voice goes from the mini player; since Plan I6 Task 7 the last song or book stays there, paused, when there
+        // is one (Android's restore()), so the mini player either goes or shows that, not the voice.
+        XCTAssertTrue(app.staticTexts["listen-sentence"].waitForNonExistence(timeout: 10), "the voice is stopped")
+        let mini = app.otherElements["mini-player"]
+        if mini.exists {
+            XCTAssertEqual(app.buttons["mini-play-pause"].label, "Play", "what's left there is paused")
+            XCTAssertFalse(app.staticTexts["mini-music"].exists)
+            XCTAssertFalse(app.buttons["mini-secondary"].label == "Back a sentence", "not the voice")
+        }
     }
 }

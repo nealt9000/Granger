@@ -9,9 +9,16 @@ final class ArchiveHolder {
     private var watching: Task<Void, Never>?
     var model: ArchiveModel? { owned?.model }
 
-    @MainActor func start(_ core: Core) {
+    @MainActor func start(_ core: Core, voice: VoiceCenter?, kind: ArchiveKind) {
         guard owned == nil else { return }
-        let o = core.library.archiveOrg()
+        let o: OwnedViewModel<ArchiveModel>
+        if kind == .texts {
+            o = core.library.archiveOrg()
+        } else {
+            // Spoken word and music (Plan I6 Task 7) download through the media downloads, as a book or an album.
+            guard let music = voice?.music.music else { return }
+            o = music.archiveAudio(kind: kind)
+        }
         owned = o
         watching = Task { @MainActor [weak self] in for await ui in o.model.ui { self?.ui = ui } }
     }
@@ -22,9 +29,13 @@ final class ArchiveHolder {
 /// archive.org's texts (Android's ArchiveScreen over the shared ArchiveModel, Plan I5 Task 7): Browse and On this
 /// phone, a search, the shelves, rows that load more at the end, and an item's sheet with Keep (through the shared
 /// queue), its PDF beside it, a set's parts in order, and Open once it's here. The App Store's rule (call 9): only
-/// books published before 1930, and no "Show everything".
+/// books published before 1930, and no "Show everything". Since Plan I6 Task 7 also spoken word and music ([kind]),
+/// with Android's release-build rules: recordings before the filter year, and spoken word (undated) only its note and
+/// the way to LibriVox.
 struct ArchiveScreen: View {
+    var kind: ArchiveKind = .texts
     @Environment(\.core) private var core
+    @Environment(\.voice) private var voice
     @Environment(\.palette) private var palette
     @Environment(\.openRoute) private var openRoute
     @State private var holder = ArchiveHolder()
@@ -39,10 +50,13 @@ struct ArchiveScreen: View {
                         ForEach(ArchiveTab.allCases, id: \.self) { t in Text(ScreenText.strings[t.titleKey] ?? t.name).tag(t) }
                     }
                     .pickerStyle(.segmented)
-                    if ui.tab == .browse {
+                    if ui.tab == .browse && ui.waiverNeeded {
+                        Text(ArchiveWords.spokenWordNote).font(.caption).foregroundStyle(palette.onSurfaceVariant)
+                        Button("LibriVox") { openRoute(.librivox) }.buttonStyle(.bordered).accessibilityIdentifier("archive-librivox")
+                    } else if ui.tab == .browse {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
-                                ForEach(ArchiveShelf.allCases.filter { $0.kind == .texts }, id: \.self) { shelf in
+                                ForEach(ArchiveShelf.allCases.filter { $0.kind == ui.kind }, id: \.self) { shelf in
                                     Button(ScreenText.strings[shelf.titleKey] ?? shelf.name) { query = ""; model.selectShelf(shelf: shelf) }
                                         .buttonStyle(.bordered)
                                         .tint(ui.shelf == shelf ? palette.primary : .secondary)
@@ -50,7 +64,8 @@ struct ArchiveScreen: View {
                                 }
                             }
                         }
-                        Text(ArchiveWords.filterNote).font(.caption).foregroundStyle(palette.onSurfaceVariant)
+                        Text(ui.kind == .texts ? ArchiveWords.filterNote : "Showing public-domain recordings only: published before \(ui.filterYear).")
+                            .font(.caption).foregroundStyle(palette.onSurfaceVariant)
                     }
                     if let notice = ui.notice {
                         HStack { Text(notice.words).foregroundStyle(palette.onSurface); Spacer(); Button("OK") { model.dismissNotice() } }
@@ -62,7 +77,7 @@ struct ArchiveScreen: View {
                         Button("Try again") { model.retry() }
                     }
                 }
-                Section {
+                if !(ui.waiverNeeded && ui.tab == .browse) { Section {
                     ForEach(ui.rows, id: \.identifier) { row in
                         Button { model.openItem(identifier: row.identifier) } label: { rowView(row) }
                             .buttonStyle(.plain)
@@ -70,7 +85,7 @@ struct ArchiveScreen: View {
                             .onAppear { if row.identifier == ui.rows.last?.identifier, ui.canLoadMore { model.loadMore() } }
                     }
                     if ui.loading { HStack { Spacer(); ProgressView(); Spacer() } }
-                }
+                } }
             } else {
                 HStack { Spacer(); ProgressView(); Spacer() }
             }
@@ -79,12 +94,14 @@ struct ArchiveScreen: View {
         .background(palette.background)
         .navigationTitle("Archive.org")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search archive.org")
+        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: prompt)
         .onChange(of: query) { _, q in holder.model?.setQuery(value: q) }
-        .task { if let core { holder.start(core) } }
+        .task { if let core { holder.start(core, voice: voice, kind: kind) } }
         .sheet(item: Binding(get: { holder.ui?.sheet.map(SheetItem.init) }, set: { if $0 == nil { holder.model?.closeItem() } })) { item in
             if let model = holder.model {
-                ArchiveItemSheet(sheet: item.sheet, model: model) { open(item.sheet.identifier) } onRemove: { removing = item.sheet.identifier }
+                ArchiveItemSheet(sheet: item.sheet, model: model, audio: holder.ui?.sheetAudio, kind: kind) {
+                    if kind == .texts { open(item.sheet.identifier) } else { openInLibrary(item.sheet.identifier) }
+                } onRemove: { removing = item.sheet.identifier }
                     .presentationDetents([.medium, .large])
             }
         }
@@ -96,7 +113,26 @@ struct ArchiveScreen: View {
         .alert("Remove?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
             Button("Remove", role: .destructive) { if let id = removing { holder.model?.remove(identifier: id) }; removing = nil }
             Button("Keep", role: .cancel) { removing = nil }
-        } message: { Text(ArchiveWords.removeBody) }
+        } message: { Text(kind == .texts ? ArchiveWords.removeBody : "This deletes its files. Your place and bookmarks are kept.") }
+    }
+
+    private var prompt: String {
+        switch kind {
+        case .spokenWord: "Search archive.org audiobooks"
+        case .music: "Search archive.org music"
+        default: "Search archive.org texts"
+        }
+    }
+
+    /// An audio item got from the other audio view, where it lives: a book (got from Audiobooks) seen in Music, or an
+    /// album (got from Music) seen in Audiobooks (Android's inLibraryRoute).
+    private func openInLibrary(_ identifier: String) {
+        holder.model?.closeItem()
+        if kind == .music {
+            openRoute(.audiobook(id: "audiobook:\(ArchiveAudioCompanion.shared.SOURCE):\(identifier)"))
+        } else {
+            openRoute(.album(key: Albums.shared.itemKey(source: ArchiveAudioCompanion.shared.SOURCE, ref: identifier)))
+        }
     }
 
     private var largeTitle: String {
@@ -128,7 +164,7 @@ struct ArchiveScreen: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(row.title).font(Spectral.regular(18)).foregroundStyle(palette.onSurface).multilineTextAlignment(.leading)
             if !row.details.isEmpty { Text(row.details).font(.callout).foregroundStyle(palette.onSurfaceVariant) }
-            if let label = ArchiveWords.offer(row.preview, sheet: nil) { Text(label).font(.caption).foregroundStyle(palette.tertiary) }
+            if let label = ArchiveWords.offer(row.preview, sheet: nil) ?? ArchiveWords.audio(row.audio) { Text(label).font(.caption).foregroundStyle(palette.tertiary) }
             if let line = ArchiveWords.status(row.status) { Text(line).font(.caption).foregroundStyle(palette.tertiary) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -145,6 +181,9 @@ struct SheetItem: Identifiable {
 struct ArchiveItemSheet: View {
     let sheet: ItemSheet
     let model: ArchiveModel
+    /// What an audio item offers (texts use the sheet's offer), and the view it's seen in.
+    var audio: AudioOffer? = nil
+    var kind: ArchiveKind = .texts
     let onOpen: () -> Void
     let onRemove: () -> Void
     @Environment(\.palette) private var palette
@@ -179,7 +218,13 @@ struct ArchiveItemSheet: View {
             if !byline.isEmpty { Text(byline).font(.callout) }
             if !item.subjects.isEmpty { Text(item.subjects.prefix(6).joined(separator: " · ")).font(.caption).foregroundStyle(palette.onSurfaceVariant) }
             if !item.description_.isEmpty { Text(item.description_).font(.footnote).lineLimit(6) }
-            if let label = ArchiveWords.offer(sheet.offer, sheet: sheet) { Text(label).font(.callout.weight(.medium)) }
+            if let label = ArchiveWords.offer(sheet.offer, sheet: sheet) ?? ArchiveWords.audio(audio) { Text(label).font(.callout.weight(.medium)) }
+        }
+        if kind != .texts, sheet.filesTotal > 0 {
+            switch onEnum(of: sheet.status) {
+            case .queued, .downloading: Text("Downloading: \(sheet.filesDone) of \(sheet.filesTotal)").font(.callout)
+            default: EmptyView()
+            }
         }
         if let line = ArchiveWords.status(sheet.status) { Text(line).font(.callout).foregroundStyle(palette.tertiary) }
         HStack(spacing: 8) {
@@ -207,12 +252,23 @@ struct ArchiveItemSheet: View {
             Button("Retry") { model.retryDownload(identifier: sheet.identifier) }.buttonStyle(.borderedProminent)
         case .installed, .updateAvailable:
             Button("Remove", action: onRemove)
-            Button("Open", action: onOpen).buttonStyle(.borderedProminent).accessibilityIdentifier("archive-open")
+            // Audio is opened from its shelf, as on Android; a text opens as its book.
+            if kind == .texts { Button("Open", action: onOpen).buttonStyle(.borderedProminent).accessibilityIdentifier("archive-open") }
         case .partial:
             Button("Remove", action: onRemove)
             Button("Keep the rest") { model.get(identifier: sheet.identifier, pdf: false) }.buttonStyle(.borderedProminent)
+        case .inLibrary:
+            Button("Open", action: onOpen).buttonStyle(.borderedProminent).accessibilityIdentifier("archive-open")
         default:
-            if let offer = sheet.offer {
+            if let audio {
+                switch onEnum(of: audio) {
+                case .tracks: Button("Keep") { model.get(identifier: sheet.identifier, pdf: false) }.buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier("archive-keep")
+                case .lendOnly:
+                    if let url = URL(string: "https://archive.org/details/\(sheet.identifier)") { Button("Borrow on archive.org") { openURL(url) } }
+                case .nothing: EmptyView()
+                }
+            } else if let offer = sheet.offer {
                 switch onEnum(of: offer) {
                 case .download:
                     let all = !sheet.parts.isEmpty
@@ -258,6 +314,17 @@ enum ArchiveWords {
     static let download = "Keep"
     static let dontAskAgain = "Don't ask again"
     static let removeBody = "This deletes the file. Your place, bookmarks and highlights are kept."
+    static let spokenWordNote = "Archive.org dates spoken-word recordings by their text, not the recording, so Granger can't tell which are in the public domain. LibriVox recordings all are."
+
+    /// What an audio item offers: its format on a row, "7 tracks · VBR MP3" once its files are known.
+    static func audio(_ offer: AudioOffer?) -> String? {
+        guard let offer else { return nil }
+        switch onEnum(of: offer) {
+        case let .tracks(t): return t.files.isEmpty ? t.format : (t.files.count == 1 ? "1 track · \(t.format)" : "\(t.files.count) tracks · \(t.format)")
+        case .lendOnly: return "Borrow on archive.org"
+        case .nothing: return "No downloadable audio"
+        }
+    }
     static func getPdf(_ bytes: Int64) -> String { "Keep PDF · \(QueueWords.bytes(bytes))" }
 
     /// What an item offers ("EPUB", "OCR text: may have errors · PDF", "Comic: its pages, to zoom · 4 parts").

@@ -1,5 +1,6 @@
 #if DEBUG
 import AVFAudio
+import GrangerCoreKit
 import SwiftUI
 
 /// Plan I6 Task 5's debug hook: `-debugPlay "<file>|<file>|tone:<seconds>"` plays those files as a queue at launch (through
@@ -38,9 +39,16 @@ enum DebugPlay {
 struct DebugPlayLabel: View {
     @Environment(\.voice) private var voice
     var body: some View {
-        Text(String(format: "%.1f", Double(voice?.media.positionMs ?? 0) / 1000))
+        Text(String(format: "%.1f", Double(ms) / 1000))
             .font(.caption2).opacity(0.01)
             .accessibilityIdentifier("debug-play-position")
+    }
+
+    /// The media's place; under the voice, the music's own (Plan I6 Task 7).
+    private var ms: Int64 {
+        guard let media = voice?.media else { return 0 }
+        if case let .voice(v) = onEnum(of: media.now) { return v.musicPositionMs }
+        return media.positionMs
     }
 }
 #endif

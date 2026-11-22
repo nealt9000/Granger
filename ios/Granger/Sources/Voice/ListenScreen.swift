@@ -4,8 +4,9 @@ import SwiftUI
 /// Listen, the fifth tab (Plan I5 call 7): in I5 its Reading part, Android's player Reader tab. While the voice is loaded:
 /// what it reads and the section, the sentence in large type between the ones around it, previous paragraph, back a
 /// sentence, play/pause, next sentence, next paragraph, Stop and Open; the text's chapters; the speed and the voice;
-/// the sleep timer. With nothing loaded: Resume the last thing read, and how to start. Then Music (Plan I6 Task 6): the
-/// music card and the Music shelf, as Android shows them under the card; audiobooks join in Task 7.
+/// the sleep timer, and the music under the voice with its level (Plan I6 Task 7). With nothing loaded: Resume the last
+/// thing read, and how to start. Then the media (Plan I6 Tasks 6 and 7): the card for a song or a book, and the Music and
+/// Audiobooks shelves, as Android shows them under the card.
 struct ListenScreen: View {
     @Environment(\.voice) private var voice
     @Environment(\.palette) private var palette
@@ -24,8 +25,7 @@ struct ListenScreen: View {
                 } else {
                     nothingRead
                 }
-                ListenMusic()
-                audioLater
+                ListenMedia()
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
@@ -33,6 +33,11 @@ struct ListenScreen: View {
         .background(palette.background)
         .navigationTitle("Listen")
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(value: Route.getMoreAudio) { Image(systemName: "plus") }
+                    .accessibilityLabel("Get more")
+                    .accessibilityIdentifier("listen-get-more")
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button("Find music on this phone") { openRoute(.mediaSettings) }
@@ -122,6 +127,10 @@ struct ListenScreen: View {
                 ForEach(voices, id: \.self) { v in Text(v.title).tag(v.id.encode()) }
             }
         }
+        if case let .voice(v) = onEnum(of: voice.media.now), let music = v.music {
+            Divider()
+            MusicUnderVoiceRow(music: music, playing: v.musicPlaying, hub: voice.hub)
+        }
         Divider()
         Button { showSleep = true } label: {
             HStack {
@@ -151,16 +160,6 @@ struct ListenScreen: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
-    }
-
-    /// Where Android lists Audiobooks under Music: they come to the iPhone with Plan I6 Task 7.
-    private var audioLater: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Audiobooks").font(Spectral.medium(16)).foregroundStyle(palette.tertiary)
-            Text("Your audiobooks and archive.org's spoken word come to Listen in a later update.")
-                .font(.footnote).foregroundStyle(palette.onSurfaceVariant)
-        }
-        .padding(.top, 24)
     }
 
     private func resumeLabel(_ last: LastRead) -> String {
@@ -252,37 +251,6 @@ struct SleepTimerSheet: View {
             }
             .navigationTitle("Sleep timer")
             .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-}
-
-/// The mini player above the tab bar (the spec's §5; Android's above the content): what the voice reads, its state,
-/// play/pause; a tap opens Listen.
-struct MiniPlayer: View {
-    let voice: VoiceCenter
-    let onOpen: () -> Void
-    @Environment(\.palette) private var palette
-
-    var body: some View {
-        if let now = voice.ui.now {
-            HStack(spacing: 12) {
-                Image(systemName: "headphones").foregroundStyle(palette.primary)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(now.title).font(.subheadline.weight(.semibold)).lineLimit(1)
-                    Text(voice.stateLine).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                }
-                Spacer(minLength: 4)
-                Button { voice.voice.player.playPause() } label: {
-                    Image(systemName: voice.ui.playing ? "pause.fill" : "play.fill").font(.title3).frame(width: 36, height: 36)
-                }
-                .accessibilityLabel(voice.ui.playing ? "Pause" : "Play")
-                .accessibilityIdentifier("mini-play-pause")
-            }
-            .padding(.horizontal, 16)
-            .contentShape(Rectangle())
-            .onTapGesture(perform: onOpen)
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("mini-player")
         }
     }
 }

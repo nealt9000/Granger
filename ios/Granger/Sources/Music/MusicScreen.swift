@@ -57,7 +57,8 @@ struct MusicScreen: View {
     private var empty: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("No music yet").font(.body).foregroundStyle(palette.onSurfaceVariant)
-            // Android also links Archive.org music here; archive.org's audio comes to the iPhone with Task 7.
+            Button("Archive.org music") { openRoute(.archiveAudio(kind: ArchiveKind.music.name)) }.buttonStyle(.bordered)
+                .accessibilityIdentifier("music-archive")
             Button("Music & audiobooks settings") { openRoute(.mediaSettings) }.buttonStyle(.bordered)
                 .accessibilityIdentifier("music-media-settings")
             Spacer()

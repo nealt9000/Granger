@@ -134,8 +134,26 @@ class IosLibrary(
     /** Moves when a voice has been unpacked (Plan I5 Task 8), so the voice list looks again. */
     val voicesChanged = MutableStateFlow(0)
 
-    private val runner = app.granger.core.downloads.DownloadRunner(downloadDao, transfer, onInstalled = { record ->
-        if (record.kind == app.granger.core.downloads.ItemKind.BOOK) {
+    /**
+     * Debug builds and UI tests (Plan I6 Task 7): a stand-in for the transfer and for LibriVox's and archive.org's
+     * answers, so a LibriVox download runs end to end with no network ([DebugLibriVox]). Null in normal use.
+     */
+    internal var debugTransfer: app.granger.core.downloads.FileTransfer? = null
+    internal var debugHttp: app.granger.core.archive.ArchiveHttp? = null
+
+    private val runnerTransfer = object : app.granger.core.downloads.FileTransfer {
+        override suspend fun download(request: app.granger.core.downloads.DownloadRequest, partPath: String, onProgress: (Long) -> Unit) =
+            (debugTransfer ?: transfer).download(request, partPath, onProgress)
+    }
+
+    /** Files a finished audio file (a LibriVox chapter, an archive.org track): set by [IosMusic], which owns the media downloader. */
+    internal var onMediaInstalled: (suspend (app.granger.core.downloads.DownloadRecord) -> Unit)? = null
+
+    private val runner = app.granger.core.downloads.DownloadRunner(downloadDao, runnerTransfer, onInstalled = { record ->
+        if (record.kind == app.granger.core.downloads.ItemKind.AUDIO) {
+            // A book's chapter or an album's track: the downloaded-media scan files it (Android's MediaDownloader.onFileInstalled).
+            onMediaInstalled?.invoke(record)
+        } else if (record.kind == app.granger.core.downloads.ItemKind.BOOK) {
             // A Granger Classic or an archive.org text joins the shelf (Android's fileBookRecord, Plan I5 Task 7).
             fileBookRecord(record)
         } else if (record.kind == app.granger.core.downloads.ItemKind.VOICE) {
@@ -148,7 +166,9 @@ class IosLibrary(
         }
     })
 
-    private val queue = app.granger.core.downloads.DownloadQueue(downloadDao, runner, queuePrefs, unmetered, connected = connected)
+    private val queue = app.granger.core.downloads.DownloadQueue(
+        downloadDao, runner, queuePrefs, { debugTransfer != null || unmetered() }, connected = { debugTransfer != null || connected() },
+    )
 
     private val scheduler = object : app.granger.core.downloads.DownloadScheduler {
         private var job: kotlinx.coroutines.Job? = null
@@ -219,17 +239,20 @@ class IosLibrary(
         }
     }
 
-    private val downloadPrefs = DefaultsDownloadPrefs("downloads")
+    internal val downloadPrefs = DefaultsDownloadPrefs("downloads")
 
     /** The one place downloads go on the iPhone: Documents (its free space and Granger's share of it). */
+    private val volumes = volumeAt(downloadRoot)
+
+    /** [root] as the iPhone's one download volume: its free space and Granger's share of the disk. */
     @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
-    private val volumes = app.granger.core.downloads.DownloadVolumes {
+    internal fun volumeAt(root: String) = app.granger.core.downloads.DownloadVolumes {
         val fm = platform.Foundation.NSFileManager.defaultManager
         val attrs = fm.attributesOfFileSystemForPath(downloadRoot, null)
         val total = (attrs?.get(platform.Foundation.NSFileSystemSize) as? platform.Foundation.NSNumber)?.longLongValue ?: 0L
         val granger = kotlinx.coroutines.runBlocking { downloads.records.first() }
             .filter { it.state == app.granger.core.downloads.DownloadState.INSTALLED }.sumOf { it.sizeBytes }
-        listOf(app.granger.core.downloads.DownloadVolume(downloadRoot, "This iPhone", false, freeBytes(), total, granger))
+        listOf(app.granger.core.downloads.DownloadVolume(root, "This iPhone", false, freeBytes(), total, granger))
     }
 
     /**
@@ -772,18 +795,41 @@ class IosLibrary(
 
     // archive.org (Plan I5 Task 7; App Store rules, call 9: published before 1930 only, no waiver).
 
-    private val archiveClient by lazy {
-        app.granger.core.archive.ArchiveOrgClient(app.granger.core.archive.KtorArchiveHttp(allowed = gateOpen), GrangerCoreEntry.userAgent(appVersion))
+    /** archive.org's and LibriVox's requests: through Ktor while the gate is open, or the debug stand-in. */
+    private val archiveHttp by lazy {
+        val real = app.granger.core.archive.KtorArchiveHttp(allowed = gateOpen)
+        app.granger.core.archive.ArchiveHttp { url, userAgent -> (debugHttp ?: real).get(url, userAgent) }
     }
 
-    /** archive.org's texts: search, shelves, an item's sheet, sets in parts, and Get through the shared queue. */
-    fun archiveOrg(): OwnedViewModel<app.granger.archive.ArchiveModel> = OwnedViewModel {
-        app.granger.archive.ArchiveModel(
-            client = archiveClient, downloads = downloads, bookshelf = bookshelf, prefs = app.granger.archive.FixedFilterArchivePrefs,
-            volumes = volumes, downloadPrefs = downloadPrefs, sidecarPath = { archiveSidecarDir }, appScope = scope,
-            languages = { languages() },
-        )
+    internal val archiveClient by lazy {
+        app.granger.core.archive.ArchiveOrgClient(archiveHttp, GrangerCoreEntry.userAgent(appVersion))
     }
+
+    /** LibriVox's catalog (Plan I6 Task 7), one request a second as on Android. */
+    internal val librivoxClient by lazy {
+        app.granger.core.archive.LibriVoxClient(archiveHttp, GrangerCoreEntry.userAgent(appVersion))
+    }
+
+    internal val appScope: CoroutineScope get() = scope
+
+    /** The library's languages, main first (archive.org's and LibriVox's lists keep their books). */
+    internal fun languagesNow(): List<String> = languages()
+
+    /** archive.org's texts: search, shelves, an item's sheet, sets in parts, and Get through the shared queue. */
+    fun archiveOrg(): OwnedViewModel<app.granger.archive.ArchiveModel> = archiveOrg(app.granger.core.archive.ArchiveKind.TEXTS, null)
+
+    /**
+     * archive.org's [kind] view: texts, or (Plan I6 Task 7) spoken word or music through [media], the media downloads,
+     * with the App Store's rules (call 9 of I5, as Android's release build): no waiver, so spoken word shows its note only.
+     */
+    internal fun archiveOrg(kind: app.granger.core.archive.ArchiveKind, media: app.granger.archive.ArchiveAudio?): OwnedViewModel<app.granger.archive.ArchiveModel> =
+        OwnedViewModel {
+            app.granger.archive.ArchiveModel(
+                client = archiveClient, downloads = downloads, bookshelf = bookshelf, prefs = app.granger.archive.FixedFilterArchivePrefs,
+                volumes = volumes, downloadPrefs = downloadPrefs, sidecarPath = { archiveSidecarDir }, appScope = scope,
+                kind = kind, media = media, languages = { languages() },
+            )
+        }
 
     /** What Open on an installed archive.org text reads: one book, or a set's parts in their collection. */
     suspend fun archiveOpenTarget(model: app.granger.archive.ArchiveModel, identifier: String): app.granger.archive.ArchiveOpen? = model.openTarget(identifier)
