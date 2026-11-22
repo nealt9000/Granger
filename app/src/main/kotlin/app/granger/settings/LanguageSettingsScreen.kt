@@ -27,20 +27,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import app.granger.R
+import app.granger.resolve
 import java.util.Locale
 
-/** Settings → Appearance → Language (Plan L2 Task 3), on [languages], with the library's languages (Plan L3) on [knowledge]. */
+/**
+ * Settings → Appearance → Language (Plan L2 Task 3), on [languages], with the library's languages (Plan L3) on
+ * [knowledge] through the shared [LanguageSettingsModel] (Plan I7 Task 1).
+ */
 @Composable
 fun LanguageSettingsScreen(languages: AppLanguages, knowledge: KnowledgeLanguages, onBack: () -> Unit) {
     val chosen by languages.language.collectAsStateWithLifecycle()
-    val library by knowledge.languages.collectAsStateWithLifecycle(emptyList())
-    val offered by knowledge.offered.collectAsStateWithLifecycle(emptyList())
-    LanguageSettingsContent(chosen, languages.phoneLocale(), languages::set, onBack, LibraryLanguages(library, offered, knowledge::set))
+    val model = viewModel { LanguageSettingsModel(knowledge) }
+    val library by model.ui.collectAsStateWithLifecycle()
+    LanguageSettingsContent(chosen, languages.phoneLocale(), languages::set, onBack, LibraryLanguages(library.chosen, library.offered, model::set))
 }
 
 /** The Language screen's second section (Plan L3): the knowledge languages [chosen] (main first) of those [offered]. */
-internal class LibraryLanguages(val chosen: List<String>, val offered: List<String>, val onChange: (List<String>) -> Unit)
+internal class LibraryLanguages(val chosen: List<String>, val offered: List<String>, val onChange: (List<String>) -> Unit) {
+    val ui get() = LanguageSettingsUi(chosen, offered)
+}
 
 /**
  * The Language screen: a list of sections, each an item with its own heading: "App language", then "Your library's
@@ -72,7 +79,7 @@ internal fun LanguageSettingsContent(
                     RadioGroup(AppLanguage.entries, chosen, { languageLabel(it, phone) }, onChoose)
                 }
             }
-            if (library != null && library.offered.size > 1) {
+            if (library != null && library.ui.showLibrary) {
                 item(key = "library") { LibraryLanguagesSection(library) }
             }
         }
@@ -85,39 +92,38 @@ internal fun LanguageSettingsContent(
  */
 @Composable
 private fun LibraryLanguagesSection(library: LibraryLanguages) {
+    val ui = library.ui
     Column {
-        SettingsHeader(stringResource(R.string.settings_language_library))
+        SettingsHeader(ui.heading.resolve())
         Text(
-            stringResource(R.string.settings_language_library_blurb),
+            ui.blurb.resolve(),
             Modifier.padding(horizontal = 16.dp),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        for (code in library.offered) {
-            val on = code in library.chosen
-            val main = library.chosen.firstOrNull() == code
+        for (row in ui.rows) {
             Row(
                 Modifier.fillMaxWidth()
-                    .toggleable(value = on, enabled = !(on && library.chosen.size == 1), role = Role.Checkbox) {
-                        library.onChange(KnowledgeLanguages.toggle(library.chosen, code))
+                    .toggleable(value = row.on, enabled = !row.locked, role = Role.Checkbox) {
+                        library.onChange(KnowledgeLanguages.toggle(library.chosen, row.code))
                     }
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Checkbox(checked = on, onCheckedChange = null, enabled = !(on && library.chosen.size == 1))
+                Checkbox(checked = row.on, onCheckedChange = null, enabled = !row.locked)
                 Column(Modifier.padding(start = 8.dp).weight(1f)) {
-                    Text(languageName(Locale.forLanguageTag(code)))
-                    if (main && library.chosen.size > 1) {
+                    Text(languageName(Locale.forLanguageTag(row.code)))
+                    row.note?.let {
                         Text(
-                            stringResource(R.string.settings_language_main),
+                            it.resolve(),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
-                if (on && !main) {
-                    TextButton(onClick = { library.onChange(KnowledgeLanguages.makeMain(library.chosen, code)) }) {
-                        Text(stringResource(R.string.settings_language_make_main))
+                if (row.canMakeMain) {
+                    TextButton(onClick = { library.onChange(KnowledgeLanguages.makeMain(library.chosen, row.code)) }) {
+                        Text(ui.makeMainLabel.resolve())
                     }
                 }
             }

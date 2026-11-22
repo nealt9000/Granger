@@ -223,6 +223,10 @@ object ScreenTextIds {
         "readiness_source_my_books" -> R.string.readiness_source_my_books
         "readiness_source_phone_media" -> R.string.readiness_source_phone_media
         "readiness_source_voices" -> R.string.readiness_source_voices
+        "settings_language_library" -> R.string.settings_language_library
+        "settings_language_library_blurb" -> R.string.settings_language_library_blurb
+        "settings_language_main" -> R.string.settings_language_main
+        "settings_language_make_main" -> R.string.settings_language_make_main
         "settings_voice_no_space" -> R.string.settings_voice_no_space
         "settings_voice_no_storage" -> R.string.settings_voice_no_storage
         "sources_adds_inside" -> R.string.sources_adds_inside
