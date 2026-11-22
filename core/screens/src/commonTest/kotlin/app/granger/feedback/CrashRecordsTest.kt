@@ -78,6 +78,20 @@ class CrashRecordsTest {
         assertTrue(newer.list().isEmpty())
     }
 
+    @Test fun aDiskWriteReportIsKeptButHomeDoesNotAsk() {
+        val log = log()
+        log.recordExits(emptyList())
+        clock = 2_000L
+        log.recordExits(listOf(PastExit(1_500L, CrashKind.DISK, "Writes: 1.2 GB in 24 h", null)))
+        assertEquals(CrashKind.DISK, log.list().single().kind)
+        assertNull(log.notice.value)
+        clock = 3_000L
+        log.recordExits(listOf(PastExit(2_500L, CrashKind.NATIVE, null, null), PastExit(2_600L, CrashKind.DISK, null, null)))
+        assertEquals(2_500L, log.notice.value?.timestamp) // the close behind the newer disk report
+        log.acknowledge()
+        assertNull(log.notice.value)
+    }
+
     @Test fun anAbortMessageIsTheSummary() {
         assertEquals("NoSuchMethodError: invoke([F)", CrashRecords.abortMessage("Abort message: 'NoSuchMethodError: invoke([F)'"))
         assertEquals("Uncaught exception", CrashRecords.abortMessage("[FATAL:file.cc:93] Uncaught exception"))

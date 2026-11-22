@@ -12,6 +12,7 @@
     <string name="feedback_kind_crash">Cierre inesperado</string>
     <string name="feedback_kind_native">Cierre inesperado (nativo)</string>
     <string name="feedback_kind_anr">No responde</string>
+    <string name="feedback_kind_disk">Demasiadas escrituras en disco</string>
     <string name="report_action">Reportar</string>
     <string name="report_title">Reportar esta respuesta</string>
     <string name="report_title_guess">Reportar esta mejor suposición</string>

@@ -14,6 +14,8 @@
     <string name="feedback_kind_crash">Crash</string>
     <string name="feedback_kind_native">Native crash</string>
     <string name="feedback_kind_anr">Not responding</string>
+    <!-- iOS only (MetricKit), never written on Android: the app wrote too much to storage in a day. -->
+    <string name="feedback_kind_disk">Too many disk writes</string>
     <!-- Report this answer (Play's AI-generated content policy): a flag on an Ask reply. The email stays English. -->
     <string name="report_action">Report</string>
     <string name="report_title">Report this answer</string>

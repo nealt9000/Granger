@@ -7,8 +7,11 @@ import kotlinx.coroutines.flow.asStateFlow
 /** A past run that ended badly, as the system remembers it: a crash in native code or an app-not-responding. */
 data class PastExit(val timestamp: Long, val kind: CrashKind, val description: String?, val trace: String?)
 
-/** [label] is the crash file's English, as a log; the screens name a kind in the phone's language. */
-enum class CrashKind(val label: String) { JAVA("Crash"), NATIVE("Native crash"), ANR("Not responding") }
+/**
+ * [label] is the crash file's English, as a log; the screens name a kind in the phone's language. [DISK] is iOS's
+ * MetricKit report of too many disk writes (Plan I7 Task 4): kept with the others, but not a close, so Home doesn't ask.
+ */
+enum class CrashKind(val label: String) { JAVA("Crash"), NATIVE("Native crash"), ANR("Not responding"), DISK("Too many disk writes") }
 
 /** One saved report, newest first in [CrashRecords.list]; [path] is the file's (Android adds `file`). */
 data class CrashReport(val path: String, val timestamp: Long, val kind: CrashKind, val summary: String)
@@ -80,7 +83,7 @@ class CrashRecords(
 
     /** The user sent a report or said not now: Home stops asking until the next crash. */
     fun acknowledge() {
-        list().firstOrNull()?.let { store.write(ACKNOWLEDGED, it.timestamp.toString()) }
+        list().firstOrNull { it.closed }?.let { store.write(ACKNOWLEDGED, it.timestamp.toString()) }
         refreshNotice()
     }
 
@@ -91,8 +94,11 @@ class CrashRecords(
      */
     fun refreshNotice() {
         val acknowledged = store.read(ACKNOWLEDGED)?.trim()?.toLongOrNull() ?: 0L
-        _notice.value = list().firstOrNull()?.takeIf { it.timestamp > acknowledged && fromThisBuild(it) }
+        _notice.value = list().firstOrNull { it.closed }?.takeIf { it.timestamp > acknowledged && fromThisBuild(it) }
     }
+
+    /** A crash or a hang closed the app; a disk-write report didn't. */
+    private val CrashReport.closed: Boolean get() = kind != CrashKind.DISK
 
     /** The report's header line (its second) names this build's version code: "Granger 0.1.1218 (1218) · …". */
     private fun fromThisBuild(report: CrashReport): Boolean =

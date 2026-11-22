@@ -119,5 +119,6 @@ private fun kindLabel(kind: CrashKind): String = stringResource(
         CrashKind.JAVA -> R.string.feedback_kind_crash
         CrashKind.NATIVE -> R.string.feedback_kind_native
         CrashKind.ANR -> R.string.feedback_kind_anr
+        CrashKind.DISK -> R.string.feedback_kind_disk
     },
 )
