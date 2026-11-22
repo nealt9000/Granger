@@ -15,6 +15,11 @@ final class VoiceCenter {
     var hub: IosPlayerHub { voice.hub }
     /// Music's sources, scan and models (Plan I6 Task 6).
     let music: MusicCenter
+    /// CarPlay's browse tree and the widget's model and buttons (Plan I6 Task 8).
+    let system: IosSystem
+    private let widget: WidgetPublisher
+    /// The app's one, for CarPlay's scene (which SwiftUI's environment doesn't reach).
+    static weak var shared: VoiceCenter?
     private(set) var ui: VoiceUi = VoiceUi.companion.IDLE
     private(set) var progress: VoiceProgress?
     private(set) var lastRead: LastRead?
@@ -33,6 +38,11 @@ final class VoiceCenter {
             Task { @MainActor in VoiceCenter.audioSession(wanted, spoken: true) }
         })
         music = MusicCenter(library: core.library, voice: voice)
+        let system = IosSystem(library: core.library, voice: voice, music: music.music)
+        self.system = system
+        widget = WidgetPublisher(system: system)
+        PlayerIntentHandlers.playPause = { system.widgetPlayPause() }
+        PlayerIntentHandlers.secondary = { system.widgetSecondary() }
         let player = voice.player
         let hub = voice.hub
         hub.audioSession = { on in
@@ -47,11 +57,12 @@ final class VoiceCenter {
         tasks.append(Task { @MainActor [weak self] in for await p in player.progress { self?.progress = p; self?.updateNowPlaying() } })
         tasks.append(Task { @MainActor [weak self] in for await l in player.lastRead { self?.lastRead = l } })
         tasks.append(Task { @MainActor [weak self] in for await n in player.notices { self?.notice = n.words } })
-        tasks.append(Task { @MainActor [weak self] in for await m in hub.ui { self?.media = m; self?.updateNowPlaying() } })
-        tasks.append(Task { @MainActor [weak self] in for await s in hub.saved { self?.saved = s } })
+        tasks.append(Task { @MainActor [weak self] in for await m in hub.ui { self?.media = m; self?.updateNowPlaying(); self?.updateWidget() } })
+        tasks.append(Task { @MainActor [weak self] in for await s in hub.saved { self?.saved = s; self?.updateWidget() } })
         tasks.append(Task { @MainActor [weak self] in for await n in hub.notices { self?.notice = PlayerViewModelKt.playerNotice(line: n).words } })
         remoteCommands()
         watchSession()
+        VoiceCenter.shared = self
         #if DEBUG
         // UI tests and checks: `-debugVoice <voice folder on the Mac>` installs that unpacked catalog voice.
         if let from = UserDefaults.standard.string(forKey: "debugVoice"), FileManager.default.fileExists(atPath: from) {
@@ -68,6 +79,9 @@ final class VoiceCenter {
     }
 
     var reading: Bool { ui.now != nil }
+
+    /// The player widget's snapshot, written when what it shows changes.
+    private func updateWidget() { widget.update(media: media, saved: saved) }
 
     /// The mini player shows: the voice reads, music or a book is loaded, or (as Android's restore() brings back) the
     /// last media mode has a saved song or book.

@@ -35,6 +35,8 @@ struct GrangerApp: App {
                 .environment(library)
                 .environment(\.core, core)
                 .environment(\.voice, voice)
+                // Local only flipped in Control Center (Plan I6 Task 8): the app follows.
+                .onAppear { settings.followLocalOnly() }
                 .task(id: "\(settings.wikiLanguage)|\(settings.canFetch)") {
                     library.watch(core)
                     // Get more's catalog: the shared source asks, Swift fetches and verifies (Plan I4 Task 6).
@@ -52,6 +54,7 @@ struct GrangerApp: App {
                 .onChange(of: scenePhase) { _, phase in
                     // Packs put in or taken out of Granger's folder in the Files app while away.
                     if phase == .active {
+                        settings.refreshLocalOnly()
                         Task { try? await core.library.refreshPacks() }
                         voice.music.foregrounded()
                     }
@@ -112,6 +115,7 @@ struct RootView: View {
             }
             #if DEBUG
             .overlay(alignment: .bottomLeading) { if DebugPlay.entries != nil { DebugPlayLabel() } }
+            .overlay(alignment: .topLeading) { if DebugSystem.on { DebugSystemControls().padding(.top, 60) } }
             #endif
             .fullScreenCover(isPresented: $onboarding) {
                 OnboardingScreen { readNow in

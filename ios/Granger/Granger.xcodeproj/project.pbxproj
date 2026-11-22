@@ -8,9 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		03AB204051EBD2F56B3039AC /* VoiceCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C55E4499EF79507A101C2D94 /* VoiceCenter.swift */; };
+		03BFB586ABC40093F340AC35 /* GrangerWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F55E0D078573EA81BAB0E2 /* GrangerWidgets.swift */; };
 		03D55B9BC49ADC8D2CA8633C /* PaletteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44830ECED20666BE9CE2F47 /* PaletteTests.swift */; };
 		04CFA2C87CFCD2BE87CC05AA /* AudiobookUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9227D21081FB98BFD93211A /* AudiobookUITests.swift */; };
 		066796D0E486FD8180F2CE11 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */; };
+		06D12B83802F3059A8FCB6BA /* DebugSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188A882EDDE6C2497AAA6486 /* DebugSystem.swift */; };
 		08FF2CF6BCD6E7AEB87BFA59 /* Organize.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF786378D095B314552709FA /* Organize.swift */; };
 		0A2CB1AEC0F8553E87E02339 /* LibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 651B9AE752157C30B90B5208 /* LibraryTests.swift */; };
 		0C01B3F83EA075BB4A4F2D48 /* ReadyOffline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB73E96EABD47541EEBCB973 /* ReadyOffline.swift */; };
@@ -20,6 +22,7 @@
 		11077F3DC9C2DAE4E8A56D1B /* ArchiveScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E609C72E4ED1AE5019BF79 /* ArchiveScreen.swift */; };
 		1424EFEE57F6296E47E2BB70 /* NetworkPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D30AA717E22E6D144A61AB /* NetworkPath.swift */; };
 		1686027DD9EB27E19DDF74D4 /* spectral_regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63249671AC1CC4288F670ABF /* spectral_regular.ttf */; };
+		18B435D393B120839C35035D /* SystemUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0EA1AB8E9D642E8055237C /* SystemUITests.swift */; };
 		1AFA13D56BD199C80C543B2B /* ClassicsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27583559CE695EAA07B0C90 /* ClassicsUITests.swift */; };
 		1BE4CF46B8D83410F915E442 /* GetMoreScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03090F336FA65931D0A18DE /* GetMoreScreen.swift */; };
 		2185F9611730D67D6F637BA0 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B47F986BFCA85901970F72F /* AppSettings.swift */; };
@@ -36,16 +39,20 @@
 		3A14C67A4ADC44BAECECC538 /* Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDFCCCB9DFC1E76B1696659 /* Core.swift */; };
 		3AF61DFC5F13ECA0F72BE3A4 /* AudioEngineSpikeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2074B6081B4EFCA8AE995A0D /* AudioEngineSpikeTests.swift */; };
 		3D55A87817244AB3D9BE38E9 /* YourSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C3FF10249E3C56B933C031 /* YourSources.swift */; };
+		40AFC30F89563810E51B8FBD /* WidgetPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97CCC23995E1952CD7965835 /* WidgetPublisher.swift */; };
 		4464B57976D673C32FD0E17D /* GZimBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = D4D2362C7FF79325E7EA0D49 /* GZimBridge.mm */; };
 		4610887B5F6AB842D10FCB10 /* ListenMusic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34056A8B030140CADDF12514 /* ListenMusic.swift */; };
 		47AE67A55A3B03EA5A5C8B8C /* ComicNatives.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E7A61628BD57EB5BAD3EAE /* ComicNatives.swift */; };
+		48B44966B74838A58662A7BF /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5976872BC24763F2ECB539E /* AppGroup.swift */; };
 		4E0AB676333916B0E39497E4 /* ReaderHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */; };
 		4E97B24CB10A90715C4B035A /* SherpaSpikeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE432CE0B5B26714EFA6EC60 /* SherpaSpikeTests.swift */; };
 		50A4399B70427222E9FA11D0 /* LibraryUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F836DFBA7941E1A0041B382 /* LibraryUITests.swift */; };
 		50C369F7955C73C5CA887E7D /* ClassicsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C63087F66C615BD7A386EFD /* ClassicsTests.swift */; };
 		536C52D33EBE10BE0DAC1B49 /* Wander.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B8BCA170A7DD61E455BF4A /* Wander.swift */; };
+		580CFF5625DBEED04C6A7FB2 /* GrangerWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B9EB45BA510225F88E9D5435 /* GrangerWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5A417EAAFA5C5139F90D9BEE /* ReadiumSpikeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A896CBCC324A443A77ABBBE /* ReadiumSpikeTests.swift */; };
 		5BEF749C83759BF661330A3D /* MusicCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D9F06023E2F9B1F6A8532D /* MusicCenter.swift */; };
+		5C569C238F942BA03E4ADF4E /* CarPlayScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03336925A977923934FEE97 /* CarPlayScene.swift */; };
 		5D41AC1AC37D9BD306DE6818 /* GrangerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CC01381BEC958CC5134EC02 /* GrangerApp.swift */; };
 		5F34AE2BC40DB71B6A082A54 /* ScreenText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 158BC7B9A64875C539254D15 /* ScreenText.swift */; };
 		60303BB343EDCA26F225D65A /* LibriVoxScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBEB1254E440116905F8D681 /* LibriVoxScreen.swift */; };
@@ -61,6 +68,7 @@
 		711103A9DB383DCAD57C4811 /* Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F52092A31F49258FD75CDE1 /* Navigation.swift */; };
 		748BD1AA8D9BC67C6B3904A2 /* BookReaderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 667361EE3B1A4EBB93B3D72E /* BookReaderModel.swift */; };
 		7577FFE4C7A82FA18ED619C7 /* GTagLib.mm in Sources */ = {isa = PBXBuildFile; fileRef = A898AA900FB3ACFC627C87AA /* GTagLib.mm */; };
+		778BDF615EC87283577FB534 /* SpeechSpikeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1439F499A6C92B68FA738B44 /* SpeechSpikeTests.swift */; };
 		7EA68110BD41341E41AC4485 /* spectral_medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5BB0D5B0B1CFDF9D94B1CDA8 /* spectral_medium.ttf */; };
 		83E90F2F900D9DF69287B976 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D5F373DED5327DC509AEA8 /* Theme.swift */; };
 		85BC2D700DB5328930D91075 /* EveryCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C540D9D295239E5AA86597DF /* EveryCollection.swift */; };
@@ -71,6 +79,7 @@
 		8F34AEA14CC1CF72DD11A89D /* SampleTextPdf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFD9C7522806E354AA2AF02 /* SampleTextPdf.swift */; };
 		986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B58EB0526BF3953E06E97BB /* SearchScreen.swift */; };
 		9B854D4F0FCC32CB799053DF /* SubjectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D3058117A3F244CE32A088 /* SubjectScreen.swift */; };
+		9B93C43F9AB45C2273EE5A29 /* CarPlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89759FAA9D0361D13A7FB45 /* CarPlayTests.swift */; };
 		9EA6919BF144ECF99425AC12 /* MediaSettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7A04D19690880BC5A09C1D0 /* MediaSettingsScreen.swift */; };
 		9F5563886606372B9762E838 /* ExploreScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFB750A6E9FB9C55AE3800C /* ExploreScreen.swift */; };
 		9F902A275AF6931581498D06 /* LibraryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BF841E7ECAFFE66B88DCEE3 /* LibraryScreen.swift */; };
@@ -93,6 +102,7 @@
 		C5E62EF00E1E8B5DB09ECE54 /* SherpaOnnxC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 917A8C6C283A2AABAF1560F8 /* SherpaOnnxC.xcframework */; };
 		C7373E9A829C9D7A028BE977 /* taglib.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9BA842E88FE86BBDF260216 /* taglib.xcframework */; };
 		C7C07D7256184A6C415A2BB5 /* MusicUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569C1AFF6DFF658AA105544D /* MusicUITests.swift */; };
+		CC62CC2763507FBC33AFD604 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5976872BC24763F2ECB539E /* AppGroup.swift */; };
 		CC6D823FAB90DA5CEE291CBA /* GrangerCoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = 681EB1E1CC7FEB0AA3916B17 /* GrangerCoreKit */; };
 		D0955022D1C8F15A709E6F4E /* libarchive.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F25A0ED632C9F4FDA0146A5 /* libarchive.xcframework */; };
 		D133214D01E3E09DFA4D0D83 /* TopicScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2610592677DE14DFF1A87D2B /* TopicScreen.swift */; };
@@ -117,6 +127,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1240508565CDBEDC602A6067 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8CFA5DFC8EB0E370FC06ACCA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 871A9733A0EA80CB1B1E2FD4;
+			remoteInfo = GrangerWidgets;
+		};
 		3F1A2CABAA1765D368C7EBF0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8CFA5DFC8EB0E370FC06ACCA /* Project object */;
@@ -134,6 +151,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		2E39D2460A7AD5D8BB1C8321 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				580CFF5625DBEED04C6A7FB2 /* GrangerWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ED5D1FA8C5FF27922FB2ED4B /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -154,9 +182,12 @@
 		0F25A0ED632C9F4FDA0146A5 /* libarchive.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libarchive.xcframework; path = ../Vendor/libarchive.xcframework; sourceTree = "<group>"; };
 		115B8EB413BD65B781604711 /* ZimSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZimSchemeHandler.swift; sourceTree = "<group>"; };
 		121EB01691142EB7DA202FBB /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		130BD723551F8E10E03EB986 /* GrangerWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GrangerWidgets.entitlements; sourceTree = "<group>"; };
+		1439F499A6C92B68FA738B44 /* SpeechSpikeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSpikeTests.swift; sourceTree = "<group>"; };
 		158BC7B9A64875C539254D15 /* ScreenText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenText.swift; sourceTree = "<group>"; };
 		170CB1BE3395EA1E0458E544 /* ListenScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenScreen.swift; sourceTree = "<group>"; };
 		1801DDBA6C0C6E397A58AAD7 /* MusicPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicPages.swift; sourceTree = "<group>"; };
+		188A882EDDE6C2497AAA6486 /* DebugSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSystem.swift; sourceTree = "<group>"; };
 		1BA2587DFAACB90883863228 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		1BF841E7ECAFFE66B88DCEE3 /* LibraryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryScreen.swift; sourceTree = "<group>"; };
 		1EDFCCCB9DFC1E76B1696659 /* Core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core.swift; sourceTree = "<group>"; };
@@ -192,6 +223,7 @@
 		5A896CBCC324A443A77ABBBE /* ReadiumSpikeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadiumSpikeTests.swift; sourceTree = "<group>"; };
 		5BB0D5B0B1CFDF9D94B1CDA8 /* spectral_medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = spectral_medium.ttf; sourceTree = "<group>"; };
 		5BED3609E3254C4F1A860F2E /* ArticleWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleWebView.swift; sourceTree = "<group>"; };
+		5C6C963FF441EB6696968BFA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5D1EA7F9943A3EBAA55DB8EC /* spectral_italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = spectral_italic.ttf; sourceTree = "<group>"; };
 		5E06BF9F8D252FFCBE4FB95F /* GZimBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GZimBridge.h; sourceTree = "<group>"; };
 		5E3500F27AA34AA7774ECA00 /* spectral_semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = spectral_semibold.ttf; sourceTree = "<group>"; };
@@ -218,8 +250,10 @@
 		917A8C6C283A2AABAF1560F8 /* SherpaOnnxC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = SherpaOnnxC.xcframework; path = ../Vendor/SherpaOnnxC.xcframework; sourceTree = "<group>"; };
 		928EAD1A6D263227DB358965 /* PdfKitEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PdfKitEngine.swift; sourceTree = "<group>"; };
 		93C3FF10249E3C56B933C031 /* YourSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YourSources.swift; sourceTree = "<group>"; };
+		97CCC23995E1952CD7965835 /* WidgetPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPublisher.swift; sourceTree = "<group>"; };
 		9A9A6B4F16D83F391D47CB26 /* KiwixArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KiwixArchiveTests.swift; sourceTree = "<group>"; };
 		9E35847AFB3E364F4A8476C8 /* MusicNativesImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicNativesImpl.swift; sourceTree = "<group>"; };
+		A03336925A977923934FEE97 /* CarPlayScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayScene.swift; sourceTree = "<group>"; };
 		A098A8E6EA348853B6D825D4 /* VoiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTests.swift; sourceTree = "<group>"; };
 		A1E7A61628BD57EB5BAD3EAE /* ComicNatives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComicNatives.swift; sourceTree = "<group>"; };
 		A27583559CE695EAA07B0C90 /* ClassicsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicsUITests.swift; sourceTree = "<group>"; };
@@ -228,7 +262,11 @@
 		A898AA900FB3ACFC627C87AA /* GTagLib.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = GTagLib.mm; sourceTree = "<group>"; };
 		AB73E96EABD47541EEBCB973 /* ReadyOffline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadyOffline.swift; sourceTree = "<group>"; };
 		B069F4AD283BB4B9F9E0F000 /* MusicScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicScreen.swift; sourceTree = "<group>"; };
+		B3F55E0D078573EA81BAB0E2 /* GrangerWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrangerWidgets.swift; sourceTree = "<group>"; };
 		B44830ECED20666BE9CE2F47 /* PaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteTests.swift; sourceTree = "<group>"; };
+		B5976872BC24763F2ECB539E /* AppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroup.swift; sourceTree = "<group>"; };
+		B89759FAA9D0361D13A7FB45 /* CarPlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayTests.swift; sourceTree = "<group>"; };
+		B9EB45BA510225F88E9D5435 /* GrangerWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = GrangerWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C03090F336FA65931D0A18DE /* GetMoreScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMoreScreen.swift; sourceTree = "<group>"; };
 		C4D2722559AB140D5CDEAF7A /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
 		C4D37AB85E00A4C58044DFD5 /* CollectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionScreen.swift; sourceTree = "<group>"; };
@@ -259,6 +297,7 @@
 		EC46457CA3D262762A1F6DB4 /* ReaderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderScreen.swift; sourceTree = "<group>"; };
 		EF786378D095B314552709FA /* Organize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Organize.swift; sourceTree = "<group>"; };
 		F9227D21081FB98BFD93211A /* AudiobookUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookUITests.swift; sourceTree = "<group>"; };
+		FB0EA1AB8E9D642E8055237C /* SystemUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemUITests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -287,6 +326,7 @@
 			children = (
 				2074B6081B4EFCA8AE995A0D /* AudioEngineSpikeTests.swift */,
 				C6286D5EB2243205D9C2FDDA /* BookShelfTests.swift */,
+				B89759FAA9D0361D13A7FB45 /* CarPlayTests.swift */,
 				2C63087F66C615BD7A386EFD /* ClassicsTests.swift */,
 				9A9A6B4F16D83F391D47CB26 /* KiwixArchiveTests.swift */,
 				651B9AE752157C30B90B5208 /* LibraryTests.swift */,
@@ -297,6 +337,7 @@
 				3F9135543A15FAD4A5F44C03 /* ReaderHostTests.swift */,
 				5A896CBCC324A443A77ABBBE /* ReadiumSpikeTests.swift */,
 				DE432CE0B5B26714EFA6EC60 /* SherpaSpikeTests.swift */,
+				1439F499A6C92B68FA738B44 /* SpeechSpikeTests.swift */,
 				A098A8E6EA348853B6D825D4 /* VoiceTests.swift */,
 			);
 			path = Tests;
@@ -320,6 +361,7 @@
 				B64E022698104377BB5F90A8 /* Sources */,
 				0E6B494E573153560DA0D469 /* Tests */,
 				AB4C0ACE382625949B448E6F /* UITests */,
+				19CC49F606BA2E9E0C80961F /* Widgets */,
 				D17E14981E9A3DECAC9B767F /* Frameworks */,
 				A42055D4DF7B61768499981C /* Products */,
 			);
@@ -333,6 +375,16 @@
 			path = Archive;
 			sourceTree = "<group>";
 		};
+		19CC49F606BA2E9E0C80961F /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				130BD723551F8E10E03EB986 /* GrangerWidgets.entitlements */,
+				B3F55E0D078573EA81BAB0E2 /* GrangerWidgets.swift */,
+				5C6C963FF441EB6696968BFA /* Info.plist */,
+			);
+			path = Widgets;
+			sourceTree = "<group>";
+		};
 		2CD75013E15EE0FD99F55660 /* Downloads */ = {
 			isa = PBXGroup;
 			children = (
@@ -342,6 +394,14 @@
 				28D30AA717E22E6D144A61AB /* NetworkPath.swift */,
 			);
 			path = Downloads;
+			sourceTree = "<group>";
+		};
+		33BA0900398430A2077514E0 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				B5976872BC24763F2ECB539E /* AppGroup.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		527AC6B7376A41B115A42D21 /* App */ = {
@@ -412,6 +472,7 @@
 				85551793AE689984ABF44FAE /* Granger.app */,
 				CB232453FDA28614FBE166F0 /* GrangerTests.xctest */,
 				E292BFB40CBDEA8F0A9C1151 /* GrangerUITests.xctest */,
+				B9EB45BA510225F88E9D5435 /* GrangerWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -440,6 +501,7 @@
 				7F0D2C6AA7832F3D9D55E154 /* PlayerUITests.swift */,
 				3B7E566216AD0EE6BE8F1CEB /* ReadAloudUITests.swift */,
 				DD4E0D95A9828108F9ABF60D /* SmokeTests.swift */,
+				FB0EA1AB8E9D642E8055237C /* SystemUITests.swift */,
 			);
 			path = UITests;
 			sourceTree = "<group>";
@@ -473,6 +535,8 @@
 				9C9D69453334EE2623FA1C1A /* Reader */,
 				DCC7CCC55520AE82044197B5 /* Search */,
 				0E93352BBC86098134FA0BD8 /* Settings */,
+				33BA0900398430A2077514E0 /* Shared */,
+				F26C94C5BA199376BB1D565A /* System */,
 				E1ECAE4BC87AE8691FB435C8 /* Topic */,
 				A9D1FDECDE7DC6F6901B98A9 /* Voice */,
 			);
@@ -574,6 +638,16 @@
 			path = Topic;
 			sourceTree = "<group>";
 		};
+		F26C94C5BA199376BB1D565A /* System */ = {
+			isa = PBXGroup;
+			children = (
+				A03336925A977923934FEE97 /* CarPlayScene.swift */,
+				188A882EDDE6C2497AAA6486 /* DebugSystem.swift */,
+				97CCC23995E1952CD7965835 /* WidgetPublisher.swift */,
+			);
+			path = System;
+			sourceTree = "<group>";
+		};
 		F59123625FAF36463DBF1BB3 /* Kiwix */ = {
 			isa = PBXGroup;
 			children = (
@@ -629,11 +703,13 @@
 				CDC97CD2DD2DA0DBEAEB5951 /* Sources */,
 				F2C6F0226C6D2EC33D6FFBC5 /* Resources */,
 				08CF3EFF0F46D38DEBCAD4F3 /* Frameworks */,
+				2E39D2460A7AD5D8BB1C8321 /* Embed Foundation Extensions */,
 				ED5D1FA8C5FF27922FB2ED4B /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1EC1ED5B8E0F1E6051744F5B /* PBXTargetDependency */,
 			);
 			name = Granger;
 			packageProductDependencies = (
@@ -664,6 +740,23 @@
 			productReference = CB232453FDA28614FBE166F0 /* GrangerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		871A9733A0EA80CB1B1E2FD4 /* GrangerWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CF65202271D386F08C907A0F /* Build configuration list for PBXNativeTarget "GrangerWidgets" */;
+			buildPhases = (
+				14C76FBE10B7A20ADCCAAE8B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GrangerWidgets;
+			packageProductDependencies = (
+			);
+			productName = GrangerWidgets;
+			productReference = B9EB45BA510225F88E9D5435 /* GrangerWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -681,6 +774,9 @@
 						ProvisioningStyle = Automatic;
 					};
 					61EB2BF74ED691C3544A85DE = {
+						ProvisioningStyle = Automatic;
+					};
+					871A9733A0EA80CB1B1E2FD4 = {
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -704,6 +800,7 @@
 			projectRoot = "";
 			targets = (
 				48A4F35F7F83CB45170EA029 /* Granger */,
+				871A9733A0EA80CB1B1E2FD4 /* GrangerWidgets */,
 				61EB2BF74ED691C3544A85DE /* GrangerTests */,
 				3C8584C282EB9898AEB4FEE6 /* GrangerUITests */,
 			);
@@ -727,6 +824,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		14C76FBE10B7A20ADCCAAE8B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				48B44966B74838A58662A7BF /* AppGroup.swift in Sources */,
+				03BFB586ABC40093F340AC35 /* GrangerWidgets.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		792AE5CF321C2E735D99BB36 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -739,6 +845,7 @@
 				8929C0B2AE9FAA5B3BDE946D /* PlayerUITests.swift in Sources */,
 				10C36F29A42424401008627F /* ReadAloudUITests.swift in Sources */,
 				B9F1FDCE26442AE3F6A3645E /* SmokeTests.swift in Sources */,
+				18B435D393B120839C35035D /* SystemUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -748,6 +855,7 @@
 			files = (
 				3AF61DFC5F13ECA0F72BE3A4 /* AudioEngineSpikeTests.swift in Sources */,
 				A8CDFA46C5579FA470A0A0F9 /* BookShelfTests.swift in Sources */,
+				9B93C43F9AB45C2273EE5A29 /* CarPlayTests.swift in Sources */,
 				50C369F7955C73C5CA887E7D /* ClassicsTests.swift in Sources */,
 				A6570A3E5D1D452C8684AA55 /* KiwixArchiveTests.swift in Sources */,
 				0A2CB1AEC0F8553E87E02339 /* LibraryTests.swift in Sources */,
@@ -758,6 +866,7 @@
 				4E0AB676333916B0E39497E4 /* ReaderHostTests.swift in Sources */,
 				5A417EAAFA5C5139F90D9BEE /* ReadiumSpikeTests.swift in Sources */,
 				4E97B24CB10A90715C4B035A /* SherpaSpikeTests.swift in Sources */,
+				778BDF615EC87283577FB534 /* SpeechSpikeTests.swift in Sources */,
 				6A3B1839A91963EAA7212554 /* VoiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -767,6 +876,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F8CC55DC0FEEFAEA8E7862F4 /* AppDelegate.swift in Sources */,
+				CC62CC2763507FBC33AFD604 /* AppGroup.swift in Sources */,
 				2185F9611730D67D6F637BA0 /* AppSettings.swift in Sources */,
 				11077F3DC9C2DAE4E8A56D1B /* ArchiveScreen.swift in Sources */,
 				BAB62659A4F6E15AC20344AF /* ArticleFooterViews.swift in Sources */,
@@ -778,10 +888,12 @@
 				748BD1AA8D9BC67C6B3904A2 /* BookReaderModel.swift in Sources */,
 				F6BB2E6CF6F7A5E10176BCE2 /* BookReaderScreen.swift in Sources */,
 				E983FA07FA4DEF2A29F2DC1F /* BroadSpread.swift in Sources */,
+				5C569C238F942BA03E4ADF4E /* CarPlayScene.swift in Sources */,
 				ADAE6AA039C5BD487398DE16 /* CollectionScreen.swift in Sources */,
 				47AE67A55A3B03EA5A5C8B8C /* ComicNatives.swift in Sources */,
 				3A14C67A4ADC44BAECECC538 /* Core.swift in Sources */,
 				BEFEC6C675C34F8076E81BBF /* DebugPlay.swift in Sources */,
+				06D12B83802F3059A8FCB6BA /* DebugSystem.swift in Sources */,
 				29E1C8E3A75EB297D1C74CEB /* DownloadsScreen.swift in Sources */,
 				85BC2D700DB5328930D91075 /* EveryCollection.swift in Sources */,
 				9F5563886606372B9762E838 /* ExploreScreen.swift in Sources */,
@@ -833,6 +945,7 @@
 				03AB204051EBD2F56B3039AC /* VoiceCenter.swift in Sources */,
 				68483D36617C170FD06A05B3 /* VoiceSettingsScreen.swift in Sources */,
 				536C52D33EBE10BE0DAC1B49 /* Wander.swift in Sources */,
+				40AFC30F89563810E51B8FBD /* WidgetPublisher.swift in Sources */,
 				3D55A87817244AB3D9BE38E9 /* YourSources.swift in Sources */,
 				EEA786A258038C318B5E9C30 /* ZimSchemeHandler.swift in Sources */,
 			);
@@ -841,6 +954,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1EC1ED5B8E0F1E6051744F5B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 871A9733A0EA80CB1B1E2FD4 /* GrangerWidgets */;
+			targetProxy = 1240508565CDBEDC602A6067 /* PBXContainerItemProxy */;
+		};
 		B7B4F7C9F10B1386EE568C6E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 48A4F35F7F83CB45170EA029 /* Granger */;
@@ -1050,6 +1168,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CODE_SIGN_ENTITLEMENTS = Granger.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Granger-Simulator.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1081,6 +1201,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CODE_SIGN_ENTITLEMENTS = Granger.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Granger-Simulator.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1106,6 +1228,48 @@
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
+		};
+		C97260007EE4B8A3A0C7ACE2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/GrangerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).widgets";
+				PRODUCT_NAME = GrangerWidgets;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		FC781BD940F75BE3E2721C3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/GrangerWidgets.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).widgets";
+				PRODUCT_NAME = GrangerWidgets;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -1133,6 +1297,15 @@
 			buildConfigurations = (
 				89BC728D5AACBE8D5974DB8D /* Debug */,
 				736F9968D7FC96C5F3E48ED6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CF65202271D386F08C907A0F /* Build configuration list for PBXNativeTarget "GrangerWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FC781BD940F75BE3E2721C3E /* Debug */,
+				C97260007EE4B8A3A0C7ACE2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

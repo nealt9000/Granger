@@ -18,8 +18,18 @@ final class AppSettings {
     var keepAdultOff: Bool { didSet { defaults.set(keepAdultOff, forKey: Keys.keepAdultOff); LibraryGate.shared.keepAdultOff = keepAdultOff } }
     /// The reader's text size, as a share of normal (Android's Aa: 80–200 %).
     var textScale: Double { didSet { defaults.set(textScale, forKey: Keys.textScale) } }
-    /// Local only (Plan O3): nothing goes out while it's on.
-    var localOnly: Bool { didSet { defaults.set(localOnly, forKey: Keys.localOnly); NetworkGate.shared.open = canFetch } }
+    /// Local only (Plan O3): nothing goes out while it's on. Kept in the app group's defaults since Plan I6 Task 8, so
+    /// Control Center's control can flip it; the app follows a flip made there ([followLocalOnly]).
+    var localOnly: Bool {
+        didSet {
+            guard localOnly != oldValue else { return }
+            if SharedLocalOnly.value != localOnly { SharedLocalOnly.set(localOnly) }
+            NetworkGate.shared.open = canFetch
+            AppSettings.localOnlyChanged?(localOnly)
+        }
+    }
+    /// Told when Local only changes, from here or the control (the widget snapshot and Control Center redraw).
+    nonisolated(unsafe) static var localOnlyChanged: ((Bool) -> Void)?
     /// Big downloads on Wi-Fi only (Android's Downloads setting, on by default): a waiting pack never uses mobile data.
     var wifiOnly: Bool { didSet { defaults.set(wifiOnly, forKey: Keys.wifiOnly); LibraryGate.shared.wifiOnly = wifiOnly } }
     /// The privacy line has been seen (Plan O5): until then nothing is asked of Wikimedia.
@@ -30,7 +40,7 @@ final class AppSettings {
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
         wikiLanguage = defaults.string(forKey: Keys.wikiLanguage) ?? AppSettings.phoneWikiLanguage()
         textScale = defaults.object(forKey: Keys.textScale) as? Double ?? 1.0
-        localOnly = defaults.bool(forKey: Keys.localOnly)
+        localOnly = AppSettings.sharedLocalOnly(defaults)
         privacySeen = defaults.bool(forKey: Keys.privacySeen)
         savePictures = defaults.object(forKey: Keys.savePictures) as? Bool ?? true
         savedCapMb = defaults.object(forKey: Keys.savedCapMb) as? Int ?? 300
@@ -43,6 +53,38 @@ final class AppSettings {
         LibraryGate.shared.savedCapMb = savedCapMb
         LibraryGate.shared.keepAdultOff = keepAdultOff
     }
+
+    /// Local only from the group's defaults. A `-localOnly` launch argument (the UI tests) wins and is copied there; a
+    /// phone that had it before Plan I6 Task 8 keeps it (moved from the app's own defaults).
+    private static func sharedLocalOnly(_ defaults: UserDefaults) -> Bool {
+        if let pinned = UserDefaults.standard.volatileDomain(forName: UserDefaults.argumentDomain)[Keys.localOnly] {
+            let on: Bool
+            if let b = pinned as? Bool { on = b } else { on = ["yes", "true", "1"].contains("\(pinned)".lowercased()) }
+            AppGroup.defaults.set(on, forKey: SharedLocalOnly.key)
+            return on
+        }
+        if AppGroup.defaults.object(forKey: SharedLocalOnly.key) == nil {
+            AppGroup.defaults.set(defaults.bool(forKey: Keys.localOnly), forKey: SharedLocalOnly.key)
+        }
+        return SharedLocalOnly.value
+    }
+
+    /// Follows Local only flipped outside the app (Control Center's control): its Darwin notification, and coming back
+    /// to the foreground in case one was missed.
+    func followLocalOnly() {
+        AppSettings.follower = { [weak self] in
+            DispatchQueue.main.async { self?.refreshLocalOnly() }
+        }
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), nil, { _, _, _, _, _ in AppSettings.follower?() },
+                                        SharedLocalOnly.changed as CFString, nil, .deliverImmediately)
+    }
+
+    func refreshLocalOnly() {
+        let shared = SharedLocalOnly.value
+        if shared != localOnly { localOnly = shared }
+    }
+
+    nonisolated(unsafe) private static var follower: (() -> Void)?
 
     /// Whether a request may go out now.
     var canFetch: Bool { privacySeen && !localOnly }

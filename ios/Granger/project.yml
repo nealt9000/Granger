@@ -55,6 +55,8 @@ targets:
         embed: true
       - sdk: libc++.tbd
       - sdk: libz.tbd
+      # The player widget and the Local only control (Plan I6 Task 8, call 7).
+      - target: GrangerWidgets
     info:
       path: Info.plist
       properties:
@@ -65,6 +67,15 @@ targets:
         LSSupportsOpeningDocumentsInPlace: true
         # Read aloud goes on with the screen locked (Plan I5 call 4).
         UIBackgroundModes: [audio]
+        # The app group the widget extension shares (Plan I6 call 7), read by both targets' code.
+        GrangerAppGroup: group.$(GRANGER_BUNDLE_PREFIX)
+        # CarPlay audio (Plan I6 call 6): the scene CarPlay connects. SwiftUI makes the phone's own window scene.
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations:
+            CPTemplateApplicationSceneSessionRoleApplication:
+              - UISceneConfigurationName: CarPlay
+                UISceneDelegateClassName: $(PRODUCT_MODULE_NAME).CarPlayScene
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(GRANGER_BUNDLE_PREFIX)
@@ -82,6 +93,33 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         SWIFT_OBJC_BRIDGING_HEADER: Sources/Kiwix/Granger-Bridging-Header.h
         CLANG_CXX_LANGUAGE_STANDARD: c++17
+        # The app group (call 7). CarPlay audio's entitlement (call 6) isn't granted yet (Neal requests it for I8), so only
+        # Simulator builds carry it; once Apple grants it, it goes into Granger.entitlements and the Simulator file goes.
+        CODE_SIGN_ENTITLEMENTS: Granger.entitlements
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]": Granger-Simulator.entitlements
+  GrangerWidgets:
+    type: app-extension
+    platform: iOS
+    # The shared folder holds the snapshot, Local only's key and the intents both targets know; no Kotlin core here.
+    sources:
+      - Widgets
+      - Sources/Shared
+    info:
+      path: Widgets/Info.plist
+      properties:
+        GrangerAppGroup: group.$(GRANGER_BUNDLE_PREFIX)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(GRANGER_BUNDLE_PREFIX).widgets
+        PRODUCT_NAME: GrangerWidgets
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Granger
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_ENTITLEMENTS: Widgets/GrangerWidgets.entitlements
   GrangerTests:
     type: bundle.unit-test
     platform: iOS
