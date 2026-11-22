@@ -76,6 +76,8 @@ struct MoveSheet: View {
     let current: String?
     let title: String
     var collectionFrom: String? = nil
+    /// An album moves only between Music's collections (Android's allowNewMediaType = false).
+    var allowNewMediaType = true
     let pick: (MovePick) -> Void
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
@@ -97,7 +99,7 @@ struct MoveSheet: View {
             return shelves.filter { $0.mediaType.id != from }.map { MoveChoiceExisting(id: $0.mediaType.id, name: $0.mediaType.name, indented: false) }
                 + [MoveChoiceNewMediaType.shared]
         }
-        return MoveChoicesKt.moveChoices(shelves: shelves, currentCollectionId: current, allowNewMediaType: true)
+        return MoveChoicesKt.moveChoices(shelves: shelves, currentCollectionId: current, allowNewMediaType: allowNewMediaType)
     }
 
     @ViewBuilder private func row(_ choice: MoveChoice) -> some View {

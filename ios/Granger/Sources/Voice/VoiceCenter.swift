@@ -13,6 +13,8 @@ import SwiftUI
 final class VoiceCenter {
     let voice: IosVoice
     var hub: IosPlayerHub { voice.hub }
+    /// Music's sources, scan and models (Plan I6 Task 6).
+    let music: MusicCenter
     private(set) var ui: VoiceUi = VoiceUi.companion.IDLE
     private(set) var progress: VoiceProgress?
     private(set) var lastRead: LastRead?
@@ -27,6 +29,7 @@ final class VoiceCenter {
             let wanted = on.boolValue
             Task { @MainActor in VoiceCenter.audioSession(wanted, spoken: true) }
         })
+        music = MusicCenter(library: core.library, voice: voice)
         let player = voice.player
         let hub = voice.hub
         hub.audioSession = { on in

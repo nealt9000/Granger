@@ -811,11 +811,24 @@ class IosLibrary(
 
     /** The shelves: media types, collections and where each book, pack and album is filed. */
     val shelves: app.granger.core.library.Shelves by lazy {
-        app.granger.core.library.RoomShelves(database, packLibrary, bookshelf, IosMediaLibrary(database))
+        app.granger.core.library.RoomShelves(database, packLibrary, bookshelf, media)
+    }
+
+    /**
+     * Music and audiobooks (Plan I6 Task 6): the shared library over library.db, which the phone scan (`IosMusic`) and
+     * the downloaded-media scanner file into, replacing I5's read-only rows.
+     */
+    val media: app.granger.core.library.MediaLibrary by lazy {
+        app.granger.core.library.RoomMediaLibrary(database) { app.granger.screens.nowMillis() }
+    }
+
+    /** The user's playlists. */
+    val playlists: app.granger.core.library.Playlists by lazy {
+        app.granger.core.library.RoomPlaylists(database) { app.granger.screens.nowMillis() }
     }
 
     /** Each shelf's view and sort (Android's "library_views" prefs), in UserDefaults under `library_views.`. */
-    private val shelfChoices by lazy {
+    internal val shelfChoices by lazy {
         val d = platform.Foundation.NSUserDefaults.standardUserDefaults
         app.granger.library.shelf.ShelfChoices(read = { d.stringForKey("library_views.$it") }, write = { k, v -> d.setObject(v, "library_views.$k") })
     }

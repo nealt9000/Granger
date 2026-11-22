@@ -51,7 +51,10 @@ struct GrangerApp: App {
                 }
                 .onChange(of: scenePhase) { _, phase in
                     // Packs put in or taken out of Granger's folder in the Files app while away.
-                    if phase == .active { Task { try? await core.library.refreshPacks() } }
+                    if phase == .active {
+                        Task { try? await core.library.refreshPacks() }
+                        voice.music.foregrounded()
+                    }
                 }
                 .preferredColorScheme(settings.appearance.colorScheme)
                 .themed()
@@ -259,6 +262,14 @@ struct RootView: View {
                     case let .remoteCollection(packId): RemoteCollectionScreen(packId: packId)
                     case .archive: ArchiveScreen()
                     case .voiceSettings: VoiceSettingsScreen()
+                    case let .music(id): MusicScreen(collectionId: id)
+                    case let .album(key): AlbumScreen(albumKey: key)
+                    case let .artist(name): ArtistScreen(name: name)
+                    case let .genre(name): GenreScreen(name: name)
+                    case let .musicFolder(p): MusicFolderScreen(path: p)
+                    case let .playlist(id): PlaylistScreen(playlistId: id)
+                    case .musicPlayer: MusicPlayerScreen()
+                    case .mediaSettings: MediaSettingsScreen()
                     }
                 }
         }

@@ -76,6 +76,12 @@ struct SettingsScreen: View {
                     LabeledContent("Voice", value: voiceSummary)
                 }
                 .accessibilityIdentifier("settings-voice")
+                NavigationLink {
+                    MediaSettingsScreen()
+                } label: {
+                    LabeledContent("Music & audiobooks", value: "Folders on this phone, and the player")
+                }
+                .accessibilityIdentifier("settings-media")
             }
             Section("Downloads") {
                 Toggle("Download on Wi-Fi only", isOn: $settings.wifiOnly)

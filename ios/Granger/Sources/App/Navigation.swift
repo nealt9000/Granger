@@ -50,6 +50,16 @@ enum Route: Hashable {
     case archive
     /// Settings › Voice, also Get more's Models & voices (Plan I5 Task 8).
     case voiceSettings
+    /// Music (Plan I6 Task 6): a Music collection's tabs (nil: all music), an album by its key, an artist, a genre, a
+    /// folder by its stored path, a playlist; the music player; Settings › Music & audiobooks.
+    case music(collectionId: String?)
+    case album(key: String)
+    case artist(name: String)
+    case genre(name: String)
+    case musicFolder(path: String)
+    case playlist(id: Int64)
+    case musicPlayer
+    case mediaSettings
 }
 
 /// What the user has read lately (Android's Continue / history): the last 50 articles, newest first.

@@ -156,7 +156,8 @@ class MediaFilePlayer(private val graph: AudioGraph) {
     }
 
     private fun open(path: String): AVAudioFile? = files[path] ?: run {
-        val url = if (path.startsWith("file:")) NSURL.URLWithString(path) else NSURL.fileURLWithPath(path)
+        // A file uri (`file:///…`), a Music library song (`ipod-library://…`, Plan I6 Task 6), or a plain path.
+        val url = if (path.contains("://")) NSURL.URLWithString(path) else NSURL.fileURLWithPath(path)
         url?.let { AVAudioFile(forReading = it, error = null) }?.also {
             if (files.size > 4) files.clear()
             files[path] = it

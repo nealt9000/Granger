@@ -45,6 +45,10 @@ targets:
       # libarchive 3.8.1's RAR reader for CBR comics (Plan I5 call 6): static, built by tools/ios/fetch-libarchive.sh, not in git.
       - framework: ../Vendor/libarchive.xcframework
         embed: false
+      # TagLib 2.3.2 for MP3 tags (Plan I6 call 3, Task 6's spike): static, built from Android's submodule by
+      # tools/ios/build-taglib.sh, not in git.
+      - framework: ../Vendor/taglib.xcframework
+        embed: false
       # sherpa-onnx 1.13.8 with onnxruntime inside, for the Piper voices (Plan I5 call 3): dynamic, fetched by
       # tools/ios/fetch-sherpa-onnx.sh, not in git.
       - framework: ../Vendor/SherpaOnnxC.xcframework
@@ -69,6 +73,8 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Granger
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        # Music library access (Plan I6 call 2): its songs that aren't protected play from Listen's Music.
+        INFOPLIST_KEY_NSAppleMusicUsageDescription: "Granger lists the songs in your Music library that it can play, beside the music you add from Files. It never changes them."
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MARKETING_VERSION: "0.1"

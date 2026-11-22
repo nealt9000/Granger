@@ -180,24 +180,6 @@ object MovedContainer {
 }
 
 /**
- * The music and audiobook rows the shelves file (Plan I5 Task 6): read from the library database; the iPhone has no
- * music library to scan until Plan I6, so [sync] and [forget] do nothing yet.
- */
-class IosMediaLibrary(db: app.granger.core.library.LibraryDatabase) : app.granger.core.library.MediaLibrary {
-    private val dao = db.mediaDao()
-    override val tracks = dao.observeMusic()
-    override val audiobooks = dao.observeAudiobooks()
-    override fun chapters(audiobookId: String) = dao.observeChapters(audiobookId)
-    override val allChapters = dao.observeAllChapters()
-    override val albumNotes = dao.observeAlbumNotes()
-    override suspend fun track(id: String) = dao.track(id)
-    override suspend fun audiobook(id: String) = dao.audiobook(id)
-    override suspend fun coverPaths(): Set<String> = dao.coverPaths().toSet()
-    override suspend fun sync(origin: app.granger.core.library.MediaOrigin, result: app.granger.core.library.ScanResult, keep: (uri: String) -> Boolean) = Unit
-    override suspend fun forget(trackIds: Collection<String>, audiobookIds: Collection<String>) = Unit
-}
-
-/**
  * A file picked in the Files app (Plan I5 Task 6), for the shared [app.granger.library.FileImports]: read from its
  * [path] (the picker's copy) under the [name] it had. A comic book archive (CBZ, CBR) is turned into a PDF of its
  * pictures first, in [scratch], as Android turns an archive.org comic into one; the shelf then imports that PDF. A

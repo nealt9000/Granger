@@ -26,7 +26,7 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | Settings: appearance, text, content (adult flags), Local only, offline pictures, Saved for now cap and Clear | Same | I2 (basics), I3 (content, keeping) | [x] |
 | App language (English/Español) and knowledge languages | Per-app language, knowledge languages | I7 | [ ] |
 | Voice settings (voice, pace, downloads) | Same | I5 | [x] (I5 Task 8: the shared VoiceSettingsModel: Reads with (Granger voices, the system voice in use, System voices (n)), Granger voices to Get/Cancel/Retry/Remove through the shared queue with licence and attribution, Speed 0.7–2.0×, Mark the sentence being read; also Get more › Models & voices) |
-| Media settings (music folders, scans) | ≈ Files imports and the Music library | I6 | [ ] |
+| Media settings (music folders, scans) | ≈ Files imports and the Music library | I6 | [ ] Task 6 built (Music library access, picked folders, Import from Files, Rescan now, ReplayGain, skip once there's an audiobook; no Show in other apps: Documents is always in Files; no headset autoplay, call 10); ticked at Task 9 |
 | Local only Quick Settings tile | ≈ Control Center control (iOS 18+ `ControlWidget`) | I6 | [ ] |
 
 ## Wikipedia online and keeping
@@ -97,7 +97,7 @@ Legend: **[ ]** to do · **[x]** done on the iPhone · **≈** done with the iOS
 | --- | --- | --- | --- |
 | Read aloud in both readers (Piper voices: Owl, Nanny, Professor; system voices), sentence marks | sherpa-onnx Piper + AVSpeechSynthesizer | I5 | [x] (I5 Task 8: sherpa-onnx 1.13.8's iOS framework through the shared ReadAloudEngine into AVAudioEngine; system voices by AVSpeechSynthesizer's buffers; articles marked by Android's page script, books by a Readium decoration, both followed until a scroll or turn by hand; listen starts at the page's first words or the saved place; ≈ a book's sentences are walked from its XHTML by the shared EpubReadSource, where Android walks Readium Kotlin's content iterator; PDFs and fixed-layout books aren't read, as on Android) |
 | Listen: Reading tab (chapters, speed, sleep, saved place), music under it | Same | I5 | [ ] I5 part ✓ (Task 8: the sentence between its neighbours, paragraph/sentence transport, Stop, Open, Chapters, speed with presets, the voice, the sleep timer (5–60 min with the fade, End of chapter), Resume the last thing read at its sentence; music under the voice and the audio shelves with I6, said on the screen) |
-| Music: albums, artists, genres, folders, playlists, queue | ≈ Files imports + the Music library's non-DRM items | I6 | [ ] |
+| Music: albums, artists, genres, folders, playlists, queue | ≈ Files imports + the Music library's non-DRM items | I6 | [ ] Task 6 built (the shared scan over Documents/Music, picked folders and the Music library; tags by AVAsset, TagLib for MP3; Ogg Vorbis left out: iOS can't decode it); the Music library path is untested until a device (I8); ticked at Task 9 |
 | Audiobooks and LibriVox (passive until one is on the phone), bookmarks | Same | I6 | [ ] |
 | Lock screen / notification controls, media session | Now Playing + remote commands | I5 (reading), I6 (music) | [ ] I5 part ✓ (Task 8: MPNowPlayingInfoCenter "Reading · title" with the section, play/pause/toggle/stop and next/previous sentence; background audio mode, AVAudioSession playback/spoken audio; a call or headphones out pauses) |
 | Android Auto | ≈ CarPlay audio (Apple entitlement requested in I6) | I6 | [ ] |

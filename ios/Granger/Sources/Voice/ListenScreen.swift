@@ -4,8 +4,8 @@ import SwiftUI
 /// Listen, the fifth tab (Plan I5 call 7): in I5 its Reading part, Android's player Reader tab. While the voice is loaded:
 /// what it reads and the section, the sentence in large type between the ones around it, previous paragraph, back a
 /// sentence, play/pause, next sentence, next paragraph, Stop and Open; the text's chapters; the speed and the voice;
-/// the sleep timer. With nothing loaded: Resume the last thing read, and how to start. Music and audiobooks (and
-/// archive.org's audio) join Listen in I6, where Android shows their shelves under the card.
+/// the sleep timer. With nothing loaded: Resume the last thing read, and how to start. Then Music (Plan I6 Task 6): the
+/// music card and the Music shelf, as Android shows them under the card; audiobooks join in Task 7.
 struct ListenScreen: View {
     @Environment(\.voice) private var voice
     @Environment(\.palette) private var palette
@@ -24,6 +24,7 @@ struct ListenScreen: View {
                 } else {
                     nothingRead
                 }
+                ListenMusic()
                 audioLater
             }
             .padding(.horizontal, 24)
@@ -31,6 +32,15 @@ struct ListenScreen: View {
         }
         .background(palette.background)
         .navigationTitle("Listen")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button("Find music on this phone") { openRoute(.mediaSettings) }
+                } label: { Image(systemName: "ellipsis.circle") }
+                .accessibilityLabel("More")
+                .accessibilityIdentifier("listen-more")
+            }
+        }
         .accessibilityIdentifier("listen-root")
         .task(id: "\(voice?.ui.now?.sourceKey ?? "")|\(voice?.ui.now?.section ?? "")") {
             chapters = try? await voice?.voice.player.chapters()
@@ -143,11 +153,11 @@ struct ListenScreen: View {
         .padding(.vertical, 40)
     }
 
-    /// Where Android lists Music and Audiobooks under the card: they come to the iPhone with Plan I6.
+    /// Where Android lists Audiobooks under Music: they come to the iPhone with Plan I6 Task 7.
     private var audioLater: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Music and audiobooks").font(Spectral.medium(16)).foregroundStyle(palette.tertiary)
-            Text("Your music, audiobooks and archive.org's spoken word come to Listen in a later update.")
+            Text("Audiobooks").font(Spectral.medium(16)).foregroundStyle(palette.tertiary)
+            Text("Your audiobooks and archive.org's spoken word come to Listen in a later update.")
                 .font(.footnote).foregroundStyle(palette.onSurfaceVariant)
         }
         .padding(.top, 24)

@@ -403,7 +403,10 @@ class IosVoice(
     val player = VoicePlayer(output, installed, prefs, playback, ::source, scope, { app.granger.screens.nowMillis() }, audioSession)
 
     /** Music, audiobooks and the voice behind the shared PlayerHub (Plan I6 Task 5). */
-    val hub = IosPlayerHub(graph, IosMediaLibrary(library.database), playback, DefaultsPlayerPrefs(), player, player.ui, scope,
+    /** The player's prefs (`player.<key>`): the hub reads them, Media settings write them (Plan I6 Task 6). */
+    val playerPrefs = DefaultsPlayerPrefs()
+
+    val hub = IosPlayerHub(graph, library.media, playback, playerPrefs, player, player.ui, scope,
         { app.granger.screens.nowMillis() })
 
     // Books' contents for a restore with no reader open: remembered as the reader opens each book.

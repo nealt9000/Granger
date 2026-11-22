@@ -1017,7 +1017,7 @@ class IosPlayerHub(
 
         /** A hub on its own scope over [database] (tests): [voiceUi] stands in for the voice. */
         fun standalone(graph: AudioGraph, database: app.granger.core.library.LibraryDatabase, prefs: DefaultsPlayerPrefs, voiceUi: MutableStateFlow<VoiceUi>): IosPlayerHub =
-            IosPlayerHub(graph, IosMediaLibrary(database), database.playbackDao(), prefs, null, voiceUi,
+            IosPlayerHub(graph, app.granger.core.library.RoomMediaLibrary(database), database.playbackDao(), prefs, null, voiceUi,
                 CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default), { app.granger.screens.nowMillis() })
 
         /** Tests: a voice state to set by hand. */
