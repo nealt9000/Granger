@@ -168,6 +168,15 @@ When I6 merges, every parity row marked I6 is ticked or carries an agreed reason
   - Now Playing with remote next/previous;
   - playback going on in the background.
   - Also time how long a 300 MB M4B takes to start.
+  - Spike passed 2026-11-21 (about 15 minutes). `AudioEngineSpikeTests` (unit, offline manual rendering, so measured exactly) and `PlayerUITests` (background), every fixture a generated sine.
+    - Gapless: two 2 s files scheduled back to back on one `AVAudioPlayerNode`, longest near-silence where they meet 0.02 ms (one sample, the sine's zero crossing), for 16-bit PCM and for AAC in M4A alike. `AVAudioFile` already trims AAC's encoder priming (an AAC 2 s file reads as exactly 88,200 frames).
+    - Mix: music on a second node at `MIX_LEVEL` 0.3 measures 0.300 of full level, under a mono 22,050 Hz node (the Piper voice's format) on the same main mixer; with the voice the sum is heard over it (RMS 0.226 against 0.106).
+    - Gain above 1.0: `AVAudioUnitEQ`'s global gain at +6 dB gives 1.995× (10^(6/20)). A node's `volume` of 2.0 also gave 2.000× in the Simulator, but Apple documents 0–1, so the boost and ReplayGain's +dB go through the EQ.
+    - Speed: `AVAudioUnitTimePitch` at 2× plays a 2 s file in 1.01 s, at 0.5× in 4.02 s, pitch kept.
+    - Now Playing: `MPNowPlayingInfoCenter` takes and returns music's info; next/previous track and skip ±30 s take targets and enable. The Simulator can't press a remote button, so the targets themselves are called through the same closures the voice's next/previous sentence already use (I5); a hardware press waits for a device (I8).
+    - Background: a 60 s tone through `-debugPlay` (a playback session, `UIBackgroundModes: audio`) played 9.8 s while the app was 9.6 s on the home screen.
+    - Long M4B: a 302 MB, 2.61 h AAC M4B (afconvert from a 330 Hz tone, CBR 256 kbps) opens with its length in 51 ms, and a segment from its middle is heard 50 ms after `play()`. About 0.1 s in all.
+    - Skip silence (call 10): `AVAudioEngine` has nothing like ExoPlayer's silence skipping. Doing it means decoding to buffers, cutting quiet runs out and scheduling the rest, with a clock that maps heard time back to the file's for the saved place and chapters. That isn't clean, so it becomes "≈ later" in the parity row; the iPhone keeps the book's `skipSilence` value untouched so Android's choice survives a backup.
 - [ ] Build `IosPlayerHub` over the engine: the music queue, an audiobook's chapters and place, the modes (shuffle, repeat, speed, boost, ReplayGain), the sleep timer, and auto-rewind. Skip silence per call 10.
 - [ ] Bring Now Playing and remote commands up to music and audiobooks, including skip ±30 s and chapter marks. A call or unplugged headphones pause playback, as with the voice.
 - [ ] Unit tests on the engine (gapless scheduling, the saved place, the mix level). Fixtures are generated tones.

@@ -107,6 +107,9 @@ struct RootView: View {
                 if let debugNotice { Text(debugNotice).font(.caption).padding(6).background(.thinMaterial).accessibilityIdentifier("debug-import-notice")
                     .task { try? await Task.sleep(for: .seconds(8)); self.debugNotice = nil } }
             }
+            #if DEBUG
+            .overlay(alignment: .bottomLeading) { if DebugPlay.entries != nil { DebugPlayLabel() } }
+            #endif
             .fullScreenCover(isPresented: $onboarding) {
                 OnboardingScreen { readNow in
                     onboarding = false
