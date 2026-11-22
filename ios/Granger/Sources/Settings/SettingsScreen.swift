@@ -93,6 +93,18 @@ struct SettingsScreen: View {
                 }
                 .accessibilityIdentifier("settings-media")
             }
+            Section {
+                // Models (Android's row, Plan I7 call 6): the embedder search by meaning uses, and the voices.
+                NavigationLink {
+                    SourceScreen(scope: .models, domain: nil, family: nil, bookSet: nil)
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Models")
+                        Text("AI models for this phone").font(.footnote).foregroundStyle(palette.onSurfaceVariant)
+                    }
+                }
+                .accessibilityIdentifier("settings-models")
+            }
             Section("Downloads") {
                 Toggle("Download on Wi-Fi only", isOn: $settings.wifiOnly)
                     .onChange(of: settings.wifiOnly) { _, on in
@@ -123,6 +135,16 @@ struct SettingsScreen: View {
                 }
                 LabeledContent("Version", value: Core.version)
                 Link("GPLv3 · source on GitHub", destination: URL(string: "https://github.com/nealt9000/Granger")!)
+                // The libraries and assets the app bundles, with their licences (Plan I7 call 8).
+                NavigationLink {
+                    LicencesScreen()
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Open-source licences")
+                        Text("The libraries, fonts and voices Granger is built with").font(.footnote).foregroundStyle(palette.onSurfaceVariant)
+                    }
+                }
+                .accessibilityIdentifier("settings-licences")
                 Text("© AETHERBOUND LLC").font(.footnote).foregroundStyle(.secondary)
             }
             Section {

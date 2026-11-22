@@ -1,0 +1,51 @@
+{
+  "_comment": "Plan I7 call 8: every library and asset the iPhone app bundles, with its licence text (texts/). make_licences.py writes ios/Granger/Resources/Licences.json from this; its --check fails when an Xcode package (Package.resolved) or a vendor script (tools/ios/fetch-*.sh, build-*.sh) has no entry here. 'from' says where a library comes in: app, package:<Package.resolved identity>, vendor:<script>, kotlin (the shared core), asset or voices (downloaded, not bundled).",
+  "libraries": [
+    {"name": "Granger", "licence": "GPL-3.0-or-later", "url": "https://github.com/nealt9000/Granger", "from": "app", "texts": ["gpl-3.0"],
+     "note": "Copyright © AETHERBOUND LLC.\nAdditional permission under GNU GPL version 3 section 7: [placeholder: the App Store distribution permission comes with the first App Store release (Plan I8)]."},
+
+    {"name": "Readium Swift Toolkit", "version": "3.11.1", "licence": "BSD-3-Clause", "url": "https://github.com/readium/swift-toolkit", "from": "package:swift-toolkit", "texts": ["readium"]},
+    {"name": "CryptoSwift", "version": "1.10.0", "licence": "zlib-style (with attribution)", "url": "https://github.com/krzyzanowskim/CryptoSwift", "from": "package:cryptoswift", "texts": ["cryptoswift"]},
+    {"name": "DifferenceKit", "version": "1.3.0", "licence": "Apache-2.0", "url": "https://github.com/ra1028/DifferenceKit", "from": "package:differencekit", "texts": ["apache-2.0"]},
+    {"name": "Fuzi", "version": "4.0.1", "licence": "MIT", "url": "https://github.com/readium/Fuzi", "from": "package:fuzi", "texts": ["fuzi"]},
+    {"name": "GCDWebServer", "version": "4.0.1", "licence": "BSD-3-Clause", "url": "https://github.com/readium/GCDWebServer", "from": "package:gcdwebserver", "texts": ["gcdwebserver"]},
+    {"name": "SQLite.swift", "version": "0.17.0", "licence": "MIT", "url": "https://github.com/stephencelis/SQLite.swift", "from": "package:sqlite.swift", "texts": ["sqlite-swift"]},
+    {"name": "SwiftSoup", "version": "2.14.4", "licence": "MIT", "url": "https://github.com/scinfu/SwiftSoup", "from": "package:swiftsoup", "texts": ["swiftsoup"]},
+    {"name": "Zip", "version": "2.1.2", "licence": "MIT", "url": "https://github.com/marmelroy/Zip", "from": "package:zip", "texts": ["zip"]},
+    {"name": "ZIPFoundation", "version": "3.0.2", "licence": "MIT", "url": "https://github.com/readium/ZIPFoundation", "from": "package:zipfoundation", "texts": ["zipfoundation"]},
+
+    {"name": "libkiwix (CoreKiwix)", "version": "14.2.1", "licence": "GPL-3.0-or-later", "url": "https://github.com/kiwix/libkiwix", "from": "vendor:fetch-corekiwix.sh", "texts": ["gpl-3.0"]},
+    {"name": "libzim", "licence": "GPL-2.0-or-later", "url": "https://github.com/openzim/libzim", "from": "vendor:fetch-corekiwix.sh", "texts": ["gpl-2.0"]},
+    {"name": "Xapian", "licence": "GPL-2.0-or-later", "url": "https://xapian.org", "from": "vendor:fetch-corekiwix.sh", "texts": ["gpl-2.0"]},
+    {"name": "ICU", "licence": "Unicode-3.0", "url": "https://icu.unicode.org", "from": "vendor:fetch-corekiwix.sh", "texts": ["icu"]},
+    {"name": "libcurl", "licence": "curl", "url": "https://curl.se", "from": "vendor:fetch-corekiwix.sh", "texts": ["curl"]},
+    {"name": "GNU libmicrohttpd", "licence": "LGPL-2.1-or-later", "url": "https://www.gnu.org/software/libmicrohttpd/", "from": "vendor:fetch-corekiwix.sh", "texts": ["libmicrohttpd"]},
+    {"name": "Zstandard", "licence": "BSD-3-Clause", "url": "https://github.com/facebook/zstd", "from": "vendor:fetch-corekiwix.sh", "texts": ["zstd"]},
+    {"name": "XZ Utils (liblzma)", "licence": "0BSD", "url": "https://tukaani.org/xz/", "from": "vendor:fetch-corekiwix.sh", "texts": ["xz-0bsd"]},
+    {"name": "zlib", "licence": "Zlib", "url": "https://zlib.net", "from": "vendor:fetch-corekiwix.sh", "texts": ["zlib"]},
+    {"name": "pugixml", "licence": "MIT", "url": "https://pugixml.org", "from": "vendor:fetch-corekiwix.sh", "texts": ["pugixml"]},
+    {"name": "Mustache (kainjow)", "licence": "BSL-1.0", "url": "https://github.com/kainjow/Mustache", "from": "vendor:fetch-corekiwix.sh", "texts": ["mustache-boost-1.0"]},
+
+    {"name": "libarchive", "version": "3.8.1", "licence": "BSD-2-Clause", "url": "https://www.libarchive.org", "from": "vendor:fetch-libarchive.sh", "texts": ["libarchive"]},
+    {"name": "TagLib", "version": "2.3.2", "licence": "MPL-1.1 (linked statically; also LGPL-2.1)", "url": "https://taglib.org", "from": "vendor:build-taglib.sh", "texts": ["mpl-1.1", "lgpl-2.1"]},
+    {"name": "sherpa-onnx", "version": "1.13.8", "licence": "Apache-2.0", "url": "https://github.com/k2-fsa/sherpa-onnx", "from": "vendor:fetch-sherpa-onnx.sh", "texts": ["apache-2.0"]},
+    {"name": "ONNX Runtime", "licence": "MIT", "url": "https://onnxruntime.ai", "from": "vendor:fetch-sherpa-onnx.sh", "texts": ["onnxruntime"]},
+    {"name": "piper-phonemize", "licence": "MIT", "url": "https://github.com/rhasspy/piper-phonemize", "from": "vendor:fetch-sherpa-onnx.sh", "texts": ["piper-phonemize"]},
+    {"name": "eSpeak NG", "licence": "GPL-3.0-or-later", "url": "https://github.com/espeak-ng/espeak-ng", "from": "vendor:fetch-sherpa-onnx.sh", "texts": ["gpl-3.0"]},
+    {"name": "LiteRT-LM", "version": "0.18.0", "licence": "Apache-2.0", "url": "https://github.com/google-ai-edge/LiteRT-LM", "from": "vendor:fetch-litertlm.sh", "texts": ["litert-lm"],
+     "note": "Its third-party notices (Abseil, XNNPACK, TensorFlow Lite and the others it is built with) ship inside the app with the framework, in CLiteRTLM.framework/third_party_licenses.bundle."},
+
+    {"name": "Kotlin standard library, kotlinx.coroutines, kotlinx.serialization, kotlinx-io", "version": "Kotlin 2.4.21, coroutines 1.11.0, serialization 1.11.0, kotlinx-io 0.9.3", "licence": "Apache-2.0", "url": "https://kotlinlang.org", "from": "kotlin", "texts": ["apache-2.0"]},
+    {"name": "AndroidX Room, SQLite and Lifecycle (Kotlin Multiplatform)", "version": "Room 2.8.5, SQLite 2.6.2, Lifecycle 2.11.0", "licence": "Apache-2.0", "url": "https://developer.android.com/jetpack/androidx", "from": "kotlin", "texts": ["apache-2.0"]},
+    {"name": "SQLite", "licence": "Public domain", "url": "https://sqlite.org/copyright.html", "from": "kotlin", "texts": [],
+     "note": "The SQLite source code is in the public domain: anyone is free to copy, modify, publish, use, compile, sell or distribute it, for any purpose, commercial or non-commercial, and by any means."},
+    {"name": "Ktor client", "version": "3.6.1", "licence": "Apache-2.0", "url": "https://ktor.io", "from": "kotlin", "texts": ["apache-2.0"]},
+    {"name": "SKIE", "version": "0.10.16", "licence": "Apache-2.0", "url": "https://skie.touchlab.co", "from": "kotlin", "texts": ["apache-2.0"]},
+    {"name": "Ksoup", "version": "0.2.6", "licence": "MIT", "url": "https://github.com/fleeksoft/ksoup", "from": "kotlin", "texts": ["ksoup"]},
+
+    {"name": "Spectral (typeface)", "licence": "OFL-1.1", "url": "https://github.com/productiontype/Spectral", "from": "asset", "texts": ["ofl-spectral"]},
+
+    {"name": "Piper voices (downloaded)", "licence": "MIT (Piper), CC BY 4.0 (LibriTTS-R text), public domain (LJ Speech), GPL-3.0 (espeak-ng data)", "url": "https://github.com/rhasspy/piper", "from": "voices", "texts": ["piper", "cc-by-4.0"],
+     "note": "Granger's voices (Owl, Nanny, Professor) were trained for Granger on speech from Granger's own Qwen3-TTS voice (Apache-2.0), reading sentences from LibriTTS-R (Koizumi et al., 2023; CC BY 4.0) and public-domain Project Gutenberg books, fine-tuned from Piper's LJ Speech model (public domain) with piper1-gpl (GPL-3.0). The LJ Speech voice is Piper's (MIT), trained on the public-domain LJ Speech dataset. Each voice comes with espeak-ng's data (GPL-3.0, text above) and is spoken through sherpa-onnx."}
+  ]
+}

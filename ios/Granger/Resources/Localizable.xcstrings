@@ -2085,6 +2085,16 @@
         }
       }
     },
+    "AI models for this phone" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelos de IA para este teléfono"
+          }
+        }
+      }
+    },
     "About" : {
       "localizations" : {
         "es" : {
@@ -5701,6 +5711,16 @@
         }
       }
     },
+    "Models" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelos"
+          }
+        }
+      }
+    },
     "Models & voices" : {
       "localizations" : {
         "es" : {
@@ -6887,6 +6907,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abrir la lámina"
+          }
+        }
+      }
+    },
+    "Open-source licences" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licencias de código abierto"
           }
         }
       }
@@ -9124,6 +9154,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "El correo incluye"
+          }
+        }
+      }
+    },
+    "The libraries, fonts and voices Granger is built with" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las bibliotecas, fuentes y voces con las que está hecho Granger"
           }
         }
       }

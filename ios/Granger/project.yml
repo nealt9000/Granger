@@ -148,6 +148,11 @@ targets:
       - name: Spanish for every word on screen
         script: /usr/bin/python3 "$SRCROOT/../../tools/ios/make_text_ids.py" --check --build "$CONFIGURATION_TEMP_DIR"
         basedOnDependencyAnalysis: false
+      # Plan I7 call 8: a test build fails when an Xcode package or a vendor script brings a library the licences
+      # screen doesn't list, or Licences.json is out of date.
+      - name: Every library in the licences
+        script: /usr/bin/python3 -I "$SRCROOT/../../tools/ios/make_licences.py" --check
+        basedOnDependencyAnalysis: false
   GrangerUITests:
     type: bundle.ui-testing
     platform: iOS

@@ -20,6 +20,8 @@ Sources/Reader/PageBridge.swift: var e = document.getElementById('\(escaped)'); 
 # EmbeddingGemma's prompts, read by the model (Plan I7 call 6)
 Sources/Search/LiteRtEmbedder.swift: task: search result | query: \(text)
 Sources/Search/LiteRtEmbedder.swift: title: \(named.isEmpty ? "none" : named) | text: \(text)
+# The licences screen's bundled file's name (Plan I7 call 8)
+Sources/Settings/LicencesScreen.swift: Licences
 # PDFKit's reasons go to the shared PdfOpening as data (a log line, not a screen)
 Sources/Books/PdfKitEngine.swift: PDFKit can't read \((path as NSString).lastPathComponent)
 Sources/Books/PdfKitEngine.swift: needs a password
