@@ -223,6 +223,8 @@ When I7 merges, the parity list has no open row except the ones that need a devi
       - "less than a minute left" → "falta menos de un minuto"
       - Info.plist, the Music library prompt → "Granger muestra las canciones de tu biblioteca de Música que puede reproducir, junto a la música que agregas desde Archivos. Nunca las modifica."
 
+  - Lead's check 2026-11-22: full Simulator suite from an uninstalled app 86 tests, 83 passed, 3 skipped, 0 failed; no Granger crash reports; Spanish screenshots looked at (Home, Music). Gotcha: `make_text_ids.py --check` run by hand reads the newest Granger build in DerivedData, which may be main's checkout (no `L(…)`), and then reports ~1,000 literals as unseen; run it after building this checkout, or pass `--build`. The test build's own pre-build check is unaffected.
+
 ### Task 4: Languages, feedback, crashes, privacy
 - [ ] Settings › Language: the app language row (call 2) and the knowledge languages screen on the shared model; onboarding's language step as call 2 says.
 - [ ] Spanish knowledge end to end: Spanish Wikipedia online, a Spanish pack, Clásicos, the Spanish time index and topic records, the rooms' Spanish descriptions, all reached from the knowledge language.
