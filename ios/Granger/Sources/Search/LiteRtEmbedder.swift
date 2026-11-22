@@ -1,4 +1,5 @@
 import CLiteRTLM
+import GrangerCoreKit
 import Foundation
 
 /// EmbeddingGemma 2 (.litertlm) on LiteRT-LM 0.18.0's embedding engine (Plan I7 call 6), the iPhone's
@@ -58,4 +59,29 @@ final class LiteRtEmbedder {
         guard count > 0, let values = litert_lm_embedding_response_get_values(response) else { throw Failure.compute }
         return Array(UnsafeBufferPointer(start: values, count: count))
     }
+}
+
+/// The core's way into LiteRT-LM (`EmbedderNatives`): it decides which model and when, this loads it.
+final class EmbedderNativesImpl: NSObject, EmbedderNatives {
+    func load(modelPath: String, cacheDir: String) -> (any EmbedderHandle)? {
+        (try? LiteRtEmbedder(modelPath: modelPath, cacheDir: cacheDir)).map(EmbedderHandleImpl.init)
+    }
+}
+
+/// One loaded embedder for the core: a query's vector as raw floats.
+final class EmbedderHandleImpl: NSObject, EmbedderHandle {
+    private let embedder: LiteRtEmbedder
+    init(_ embedder: LiteRtEmbedder) { self.embedder = embedder }
+
+    func embedQuery(text: String) -> Data? {
+        guard let vector = try? embedder.embedQuery(text) else { return nil }
+        return vector.withUnsafeBufferPointer { Data(buffer: $0) }
+    }
+
+    func embedDocument(title: String, text: String) -> Data? {
+        guard let vector = try? embedder.embedDocument(title: title, text: text) else { return nil }
+        return vector.withUnsafeBufferPointer { Data(buffer: $0) }
+    }
+
+    func close() { embedder.close() }
 }

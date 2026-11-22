@@ -44,6 +44,11 @@ struct SearchScreen: View {
             guard let core else { return }
             await model.search(query, lang: settings.mainLanguage, core: core, online: settings.canFetch)
         }
+        .task {
+            // The embedder loads as Search opens, so the first query's meaning isn't the slow one (Android's warm).
+            guard let core else { return }
+            try? await core.library.warmBest()
+        }
         .onAppear {
             model.reloadRecent()
             if let initial, query.isEmpty { query = initial }

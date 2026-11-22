@@ -202,6 +202,8 @@ class IosLibrary(
     private val sidecars = app.granger.core.downloads.Sidecars(downloads, wifiOnly, wanted = { kind ->
         when (kind) {
             app.granger.core.downloads.SidecarKind.QID_INDEX, app.granger.core.downloads.SidecarKind.LINKS -> IosFeatures.LINKED_CLASSICS
+            // Search vectors serve search by meaning: an iPhone without it doesn't fetch them (Android's includeVectors).
+            app.granger.core.downloads.SidecarKind.VECTORS -> meaning.on
             else -> true
         }
     })
@@ -234,12 +236,37 @@ class IosLibrary(
         scope.launch {
             downloads.records.collect { records ->
                 runCatching { sidecars.reconcile(catalog, records) }
+                // The embedder follows the first search vectors, once (Plan SQ Phase 6, Plan I7 call 6).
+                if (meaning.on) runCatching { embedderDownloads.reconcile(catalog, records) }
                 runCatching { attachBookManifests(records) }
             }
         }
     }
 
     internal val downloadPrefs = DefaultsDownloadPrefs("downloads")
+
+    /** The embedder follows the first search vectors, once; the marker (UserDefaults) keeps a removal in Models. */
+    private val embedderDownloads = app.granger.core.downloads.EmbedderDownloads(
+        downloads, wifiOnly = wifiOnly,
+        followed = { platform.Foundation.NSUserDefaults.standardUserDefaults.boolForKey(EMBEDDER_FOLLOWED) },
+        markFollowed = { platform.Foundation.NSUserDefaults.standardUserDefaults.setBool(true, EMBEDDER_FOLLOWED) },
+    )
+
+    private val totalRamBytes: Long = platform.Foundation.NSProcessInfo.processInfo.physicalMemory.toLong()
+
+    /**
+     * Search by meaning (Plan I7 call 6): EmbeddingGemma 2 through Swift's LiteRT-LM, the packs' vector files and the
+     * dense half of Best matches, as Android's. Swift sets [IosMeaning.natives] at start.
+     */
+    val meaning: IosMeaning = IosMeaning(
+        totalRamBytes,
+        records = { downloads.records.first() },
+        catalogEmbedders = { catalog?.models.orEmpty().filter { it.role == app.granger.core.catalog.ModelRole.EMBEDDER }.mapTo(HashSet()) { it.id } },
+        packs = { packLibrary.packs.first() },
+        archive = packLibrary::archive,
+        cacheDir = "$cacheDir/embedder",
+        io = app.granger.screens.ioDispatcher,
+    )
 
     /** The one place downloads go on the iPhone: Documents (its free space and Granger's share of it). */
     private val volumes = volumeAt(downloadRoot)
@@ -264,8 +291,8 @@ class IosLibrary(
             app.granger.sources.SourceViewModel(
                 scope = scope, catalog = catalogSource, downloads = downloads, library = packLibrary, volumes = volumes,
                 prefs = downloadPrefs, appScope = scope_, removeBook = { },
-                // The iPhone runs no on-device model yet (Ask is off in every build; voices come in I5).
-                canRun = { false }, askOn = false, meaningSearch = false,
+                // The iPhone runs the embedder where Android would (Ask is off in every build).
+                canRun = { IosMeaning.canRun(it, totalRamBytes) }, askOn = false, meaningSearch = meaning.on,
                 countsDocuments = { pack -> pack.isBookPack },
                 io = app.granger.screens.ioDispatcher, domain = domain, family = family,
                 knowledge = kotlinx.coroutines.flow.flowOf(languages()), voiceTitle = null, bookSet = bookSet,
@@ -347,12 +374,13 @@ class IosLibrary(
 
     /**
      * Search's Best matches over the packs (Plan SQ, I4 Task 9): Ask's keyword retrieval ranked as Android ranks it, one
-     * row per article (a pack family's copies are one row). Keyword-only: search by meaning waits for an embedder here.
+     * row per article (a pack family's copies are one row). With search by meaning (Plan I7 call 6) the query's vector
+     * through the packs' vector files too, merged as Android merges them.
      */
     private val bestMatches by lazy {
         app.granger.core.research.BestMatches(
             finder = app.granger.core.library.PackPassageFinder(library = packLibrary),
-            dense = null, embed = null,
+            dense = meaning.finder, embed = { q -> meaning.embed(q) },
             articleKey = {
                 val families = packLibrary.packs.first().filter { it.name.isNotBlank() }.associate { it.id to app.granger.core.library.TitleMatch.family(it.name) }
                 ({ p: app.granger.core.research.Passage ->
@@ -363,9 +391,48 @@ class IosLibrary(
     }
 
     /** The Best matches for [query] over the packs; empty with no pack. */
-    suspend fun best(query: String): List<app.granger.core.research.BestMatches.Match> =
-        if (packLibrary.packs.first().none { it.status == app.granger.core.library.PackStatus.OK }) emptyList()
-        else runCatching { bestMatches.find(query).matches }.getOrDefault(emptyList())
+    suspend fun best(query: String): List<app.granger.core.research.BestMatches.Match> = bestResult(query)?.matches.orEmpty()
+
+    /** Best matches for [query] with how they were found (by meaning, its times); null with no pack or on a failure. */
+    suspend fun bestResult(query: String): app.granger.core.research.BestMatches.Result? {
+        if (packLibrary.packs.first().none { it.status == app.granger.core.library.PackStatus.OK }) return null
+        val result = runCatching { bestMatches.find(query) }.getOrNull() ?: return null
+        // Each query's meaning step timed, so a slow phone drops to keywords alone (Android's EmbedSpeed).
+        if (result.byMeaning && result.embedMs + result.denseMs > 0) meaning.speed.record(result.embedMs + result.denseMs)
+        return result
+    }
+
+    /** Loads the embedder ahead of the first query (Search opened); nothing without search by meaning. */
+    suspend fun warmBest() = bestMatches.warm()
+
+    /**
+     * Tests (Plan I7 Task 5): a vector file for pack [packId] built here, as `tools/vectors/build.py` builds the catalog's,
+     * from the articles its full-text search finds for [words] (each article's passages, titled), written to [out] and
+     * listed for search by meaning. Needs [IosMeaning.debugModelPath] or an installed embedder. Returns the rows written.
+     */
+    suspend fun debugWriteVectors(packId: String, words: List<String>, out: String): Int {
+        val pack = packLibrary.packs.first().firstOrNull { it.id == packId } ?: return 0
+        val archive = packLibrary.archive(packId) ?: return 0
+        val vectors = ArrayList<FloatArray>()
+        val hashes = ArrayList<String>()
+        val keys = ArrayList<app.granger.core.vectors.ChunkKey>()
+        val paths = words.flatMap { w -> archive.searchWithoutSnippets(w, 3).map { it.path } }.distinct()
+        for (path in paths) {
+            val item = archive.read(path) ?: continue
+            val html = item.bytes.decodeToString()
+            val title = Regex("<title[^>]*>(.*?)</title>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)).find(html)?.groupValues?.get(1)?.trim().orEmpty()
+            app.granger.core.research.HtmlPassages.split(html).forEachIndexed { i, part ->
+                val v = meaning.embedDocument(title, part.text) ?: return@forEachIndexed
+                vectors += v
+                hashes += app.granger.core.text.Chunkers.hash(part.text)
+                keys += app.granger.core.vectors.ChunkKey(path, i)
+            }
+        }
+        if (vectors.isEmpty()) return 0
+        app.granger.core.vectors.VectorFile.write(out, vectors, vectors.first().size, hashes, keys, app.granger.core.text.Chunkers.VERSION, NO_SHA, NO_SHA)
+        meaning.debugVectors = meaning.debugVectors.filterNot { it.first == out } + (out to pack.name)
+        return vectors.size
+    }
 
     /**
      * Search over the packs (titles, near titles, full text) and the shelf's books (titles, authors and their words,
@@ -1193,7 +1260,7 @@ class IosLibrary(
         return OwnedViewModel {
             app.granger.onboarding.OnboardingViewModel(
                 catalog = catalogSource, library = packLibrary, downloads = downloads, volumes = volumes, prefs = downloadPrefs,
-                askTier = false, canRun = { false }, totalRamBytes = platform.Foundation.NSProcessInfo.processInfo.physicalMemory.toLong(),
+                askTier = false, canRun = { IosMeaning.canRun(it, totalRamBytes) }, totalRamBytes = totalRamBytes,
                 onboardingPrefs = onboardingPrefs, askOn = false, research = false, dense = false, countryCode = countryCode,
                 offerVoice = true, io = app.granger.screens.ioDispatcher, now = { app.granger.screens.nowMillis() },
                 knowledge = knowledge, setKnowledge = { langs -> knowledge.value = langs; setKnowledge(langs) },
@@ -1268,7 +1335,7 @@ class IosLibrary(
         }
 
     /** The catalog as Get more's shared model reads it (Android's CatalogRepository); Swift fetches and verifies it. */
-    val catalogSource = IosCatalogSource()
+    val catalogSource = IosCatalogSource(includeVectors = meaning.on)
 
     private val remoteRecords = app.granger.core.online.RemoteRecords(
         app.granger.core.online.UrlSessionFetch(userAgent = GrangerCoreEntry.userAgent(appVersion)),
@@ -1524,9 +1591,12 @@ class OwnedViewModel<T : androidx.lifecycle.ViewModel>(make: () -> T) {
 /**
  * The catalog for the shared screens (Plan I4 Task 6). Swift downloads and verifies it (CryptoKit) and hands it over
  * through [publish]; [load] and [refresh] ask Swift for it through [fetch]. As a release build without Ask on Android
- * lists it: only evaluated models, no search vectors (the iPhone runs neither yet).
+ * lists it: only evaluated models, and search vectors where search by meaning runs ([includeVectors]).
  */
-class IosCatalogSource : app.granger.core.catalog.CatalogSource {
+class IosCatalogSource(
+    /** Search vectors are listed (sizes, the review, the downloads) where search by meaning runs, as Android's. */
+    private val includeVectors: Boolean = false,
+) : app.granger.core.catalog.CatalogSource {
     private val _state = MutableStateFlow(app.granger.core.catalog.CatalogState())
     override val state: StateFlow<app.granger.core.catalog.CatalogState> get() = _state
 
@@ -1535,7 +1605,7 @@ class IosCatalogSource : app.granger.core.catalog.CatalogSource {
 
     fun publish(catalog: Catalog?) {
         _state.value = if (catalog == null) _state.value.copy(refreshing = false)
-        else app.granger.core.catalog.CatalogState(catalog.forBuild(includeUnevaluatedModels = false, includeVectors = false), app.granger.screens.nowMillis())
+        else app.granger.core.catalog.CatalogState(catalog.forBuild(includeUnevaluatedModels = false, includeVectors = includeVectors), app.granger.screens.nowMillis())
     }
 
     override suspend fun load() { if (_state.value.catalog == null) fetch(false) }
@@ -1654,3 +1724,9 @@ data class ArticleRef(val packId: String, val path: String)
 data class PackDocumentResult(val book: app.granger.core.library.Book?, val problem: PackDocumentProblem?, val notListed: Boolean)
 
 data class OpenIndex(val kind: IndexKind, val source: String, val path: String)
+
+/** UserDefaults: the embedder has followed the first search vectors once (Android's `embedder-followed` file). */
+private const val EMBEDDER_FOLLOWED = "embedder.followed"
+
+/** A vector file's embedder or source sha256 when there is none to name (a test's file). */
+private val NO_SHA = "0".repeat(64)

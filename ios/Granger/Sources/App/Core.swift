@@ -60,6 +60,8 @@ final class Core: PageSource {
             booksDir: booksFolder.path,
             pdfCovers: PdfKitCovers()
         )
+        // Search by meaning (Plan I7 call 6): EmbeddingGemma 2 on LiteRT-LM, loaded by the core when Best matches need it.
+        library.meaning.natives = EmbedderNativesImpl()
         Core.shared = self
         NetworkPath.shared.changed = { [weak self] in self?.library.networkChanged() }
         library.startDownloads()

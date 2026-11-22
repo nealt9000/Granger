@@ -137,7 +137,7 @@ class IosPiperSpeech internal constructor(
     }
 }
 
-private fun floats(data: NSData): FloatArray {
+internal fun floats(data: NSData): FloatArray {
     val n = (data.length / 4u).toInt()
     val out = FloatArray(n)
     if (n > 0) out.usePinned { memcpy(it.addressOf(0), data.bytes, (n * 4).convert()) }
