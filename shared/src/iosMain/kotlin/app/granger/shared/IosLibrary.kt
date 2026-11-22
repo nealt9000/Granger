@@ -1143,6 +1143,25 @@ class IosLibrary(
 
     // ---- Onboarding (Plan I4 Task 8): the shared first run, Pick a start and quick wins, and the voice (Plan I5 Task 8).
 
+    // ---- Languages and feedback (Plan I7 Task 1): the shared models; the screens come in Task 4.
+
+    /** The knowledge languages (Android's `KnowledgeLanguages`): the phone's language by default, when the catalog has it. */
+    val knowledgeLanguages: app.granger.settings.KnowledgeLanguagesModel by lazy {
+        app.granger.settings.KnowledgeLanguagesModel(
+            DefaultsKnowledgePrefs(),
+            kotlinx.coroutines.flow.flowOf(app.granger.screens.phoneLanguage()),
+            catalogSource.state.map { it.catalog?.languages.orEmpty() }.distinctUntilChanged(),
+        )
+    }
+
+    /** Settings › Language's knowledge section. */
+    fun languageSettings(): OwnedViewModel<app.granger.settings.LanguageSettingsModel> =
+        OwnedViewModel { app.granger.settings.LanguageSettingsModel(knowledgeLanguages) }
+
+    /** The crash log in `crashes/` (Android's layout), its reports headed with [facts]. */
+    fun crashRecords(facts: app.granger.feedback.BuildFacts): app.granger.feedback.CrashRecords =
+        app.granger.feedback.CrashRecords(IosCrashStore("$dir/crashes"), facts, { app.granger.screens.nowMillis() }, ::crashStamp)
+
     /** Whether the first run was finished or skipped once. */
     val onboardingPrefs = DefaultsOnboardingPrefs()
 
