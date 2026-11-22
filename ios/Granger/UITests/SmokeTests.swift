@@ -98,6 +98,9 @@ final class SmokeTests: XCTestCase {
         if app.buttons["keep-remove"].waitForExistence(timeout: 20) { app.buttons["keep-remove"].tap() }
         let keep = app.buttons["keep"]
         XCTAssertTrue(keep.waitForExistence(timeout: 20), "the Keep button")
+        // Since Plan I6 Task 7 the mini player can hold the last song above the tab bar, over the page's foot: scroll
+        // the button up from under it first.
+        scrollAboveMiniPlayer(app, keep)
         keep.tap()
         XCTAssertTrue(app.buttons["keep-remove"].waitForExistence(timeout: 60), "kept")
         XCTAssertTrue(app.otherElements["mark-on-phone"].waitForExistence(timeout: 10) || app.images["mark-on-phone"].exists
@@ -115,8 +118,20 @@ final class SmokeTests: XCTestCase {
             try? app.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir + "/kept-offline.png"))
         }
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        app.buttons["keep-remove"].tap()
+        let remove = app.buttons["keep-remove"]
+        XCTAssertTrue(remove.waitForExistence(timeout: 10))
+        scrollAboveMiniPlayer(app, remove)
+        remove.tap()
         XCTAssertTrue(app.buttons["keep"].waitForExistence(timeout: 10), "removed")
+    }
+
+    /// Scrolls [element] up until it's clear of the mini player (iOS 26's bottom accessory, which XCTest still reports
+    /// as hittable through).
+    private func scrollAboveMiniPlayer(_ app: XCUIApplication, _ element: XCUIElement) {
+        let mini = app.descendants(matching: .any)["mini-player"].firstMatch
+        for _ in 0..<5 where mini.exists && element.frame.maxY > mini.frame.minY - 8 {
+            app.scrollViews.firstMatch.swipeUp(velocity: .slow)
+        }
     }
 
     /// The whole topic page (Plan I3 Task 7): trail, years, their time, more in the room, closest topics.
