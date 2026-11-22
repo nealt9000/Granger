@@ -18,6 +18,9 @@ settings:
   base:
     # The Swift 6 toolchain in language mode 5: Kotlin's exported types aren't Sendable.
     SWIFT_VERSION: "5.0"
+    # The compiler lists every literal on screen for the String Catalog (Plan I7 Task 3: make_text_ids.py reads them).
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     # GrangerCore ships arm64 slices only (Apple-silicon Macs and iPhones).
     "EXCLUDED_ARCHS[sdk=iphonesimulator*]": x86_64
 targets:
@@ -26,8 +29,10 @@ targets:
     platform: iOS
     sources:
       - Sources
+      # Localizable.xcstrings and InfoPlist.xcstrings are written by tools/ios/make_text_ids.py (Plan I7 Task 3);
+      # ios-only-strings.json is its input, not a resource.
       - path: Resources
-        excludes: ["Fonts"]
+        excludes: ["Fonts", "ios-only-strings.json"]
       - path: Resources/Fonts
         buildPhase: resources
     dependencies:
@@ -104,6 +109,8 @@ targets:
     sources:
       - Widgets
       - Sources/Shared
+      # The widget's and Control Center's words, from the app's catalog.
+      - Resources/Localizable.xcstrings
     info:
       path: Widgets/Info.plist
       properties:
@@ -128,8 +135,15 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: $(GRANGER_BUNDLE_PREFIX).tests
+        # The words check below reads the app's .stringsdata and Android's strings.xml outside this target.
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
     dependencies:
       - target: Granger
+    # Plan I7 Task 3: a test build fails when a word on screen has no Spanish, or the catalog is out of date.
+    preBuildScripts:
+      - name: Spanish for every word on screen
+        script: /usr/bin/python3 "$SRCROOT/../../tools/ios/make_text_ids.py" --check --build "$CONFIGURATION_TEMP_DIR"
+        basedOnDependencyAnalysis: false
   GrangerUITests:
     type: bundle.ui-testing
     platform: iOS

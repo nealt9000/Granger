@@ -55,9 +55,9 @@ enum Naming {
 
     var title: String {
         switch self {
-        case .rename: "Rename collection"
-        case .newCollection: "New collection"
-        case .newMediaType: "New media type"
+        case .rename: L("Rename collection")
+        case .newCollection: L("New collection")
+        case .newMediaType: L("New media type")
         }
     }
 }

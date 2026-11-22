@@ -24,12 +24,12 @@ struct SearchScreen: View {
                 Text(settings.canFetch ? "Nothing in your library for that. Try fewer words." : "Nothing on this phone for that. Online results appear when you're connected.")
                     .foregroundStyle(palette.onSurfaceVariant)
             } else {
-                group("Best matches", hits: model.best, all: $model.allBest, showAll: { "Show all \($0) best match\($0 == 1 ? "" : "es")" },
-                      fewer: "Show fewer best matches")
-                group("Titles", hits: model.titles, all: $model.allTitles, showAll: { "Show all \($0) title\($0 == 1 ? "" : "s")" },
-                      fewer: "Show fewer titles")
-                group("Articles", hits: model.pages, all: $model.allPages, showAll: { "Show all \($0) article match\($0 == 1 ? "" : "es")" },
-                      fewer: "Show fewer article matches")
+                group(L("Best matches"), hits: model.best, all: $model.allBest, showAll: { L("Show all \($0) best matches") },
+                      fewer: L("Show fewer best matches"))
+                group(L("Titles"), hits: model.titles, all: $model.allTitles, showAll: { L("Show all \($0) titles") },
+                      fewer: L("Show fewer titles"))
+                group(L("Articles"), hits: model.pages, all: $model.allPages, showAll: { L("Show all \($0) article matches") },
+                      fewer: L("Show fewer article matches"))
             }
         }
         .listStyle(.plain)

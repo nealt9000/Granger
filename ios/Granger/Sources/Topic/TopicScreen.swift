@@ -60,12 +60,12 @@ struct TopicScreen: View {
                 .lineSpacing(4)
         }
         actions(topic)
-        if let time = topic.time { TimeCard(time: time, words: .english) }
+        if let time = topic.time { TimeCard(time: time, words: .app) }
         if let place = topic.place, let room = place.room, !place.more.isEmpty {
-            ArticleGrid(title: "More in \(room.name(language: lang))", articles: Array(place.more.prefix(6)), lang: lang)
+            ArticleGrid(title: L("More in \(room.name(language: lang))"), articles: Array(place.more.prefix(6)), lang: lang)
         }
         if let related = topic.related, !related.isEmpty {
-            ArticleGrid(title: "Closest topics", articles: related, lang: lang)
+            ArticleGrid(title: L("Closest topics"), articles: related, lang: lang)
         }
         NavigationLink(value: Route.wander(packId: packId, path: path)) {
             Text("Wander from here").font(Spectral.medium(17)).frame(maxWidth: .infinity).padding(.vertical, 4)
@@ -81,7 +81,7 @@ struct TopicScreen: View {
             }
             .buttonStyle(.borderedProminent)
             .accessibilityIdentifier("read-full")
-            if pack == nil { HintCard(id: "keep", text: "Keep puts this article on your phone (●). What you read is saved for now (○) until space runs short.") }
+            if pack == nil { HintCard(id: "keep", text: L("Keep puts this article on your phone (●). What you read is saved for now (○) until space runs short.")) }
             // Keeping is for Wikipedia online: a pack's article is on this phone already.
             if pack == nil { KeepButton(lang: lang, title: path) }
             if topic.done && ((topic.related?.count ?? 0) + (topic.time?.people.count ?? 0) + (topic.place?.more.count ?? 0)) >= 3 {
@@ -127,7 +127,7 @@ private struct Trail: View {
 
     var body: some View {
         let subject = ScreenText.strings[Subject.companion.of(id: place.subject)?.labelKey ?? ""] ?? place.subject
-        let steps = ["Explore", subject] + (place.room.map { [$0.name(language: lang)] } ?? [])
+        let steps = [L("Explore"), subject] + (place.room.map { [$0.name(language: lang)] } ?? [])
         trailText(steps: steps, here: title, palette: palette)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("You are here: \(steps.joined(separator: ", ")), \(title)")
@@ -169,7 +169,7 @@ private struct TopicHeaderView: View {
                             .accessibilityAddTraits(.isHeader)
                         MarkView(lang: lang, title: path)
                     }
-                    if let mark { SpanLine(mark: mark, words: .english) }
+                    if let mark { SpanLine(mark: mark, words: .app) }
                 }
             }
         }
@@ -186,7 +186,7 @@ struct SpanLine: View {
         let years = words.of(m: mark)
         let age: Int32? = mark.kind == .life ? mark.y1.map { AgesKt.ageOf(y0: mark.y0, md0: mark.md0, y1: $0.int64Value, md1: mark.md1?.int32Value ?? 0) } : nil
         VStack(alignment: .leading, spacing: 4) {
-            Text(age.map { "\(years) · aged \($0)" } ?? years)
+            Text(age.map { L("\(years) · aged \($0)") } ?? years)
                 .font(Spectral.medium(17)).foregroundStyle(palette.primary)
             if mark.kind != .point {
                 RoundedRectangle(cornerRadius: 3).fill(palette.primary).frame(height: 6)
@@ -207,7 +207,7 @@ private struct TimeCard: View {
         let from = min(mark.y0, time.people.map(\.y0).min() ?? mark.y0)
         let to = max(mark.end(now: now), time.people.map { $0.end(now: now) }.max() ?? mark.y0)
         let span = max(1, to - from)
-        Card(title: mark.kind == .life ? "Their time" : "At the same time") {
+        Card(title: mark.kind == .life ? L("Their time") : L("At the same time")) {
             NavigationLink(value: Route.timeline(packId: mark.packId, path: mark.path)) {
                 Text("Open in Timeline").font(Spectral.medium(17)).foregroundStyle(palette.tertiary)
             }
@@ -367,14 +367,14 @@ struct FlowLayout: Layout {
 }
 
 extension YearWords {
-    /// Android's English wording (home_timeline_*).
-    static let english = YearWords(
-        bc: "%1$s BC", circa: "c. %1$s", millionAgo: "%1$s million years ago", billionAgo: "%1$s billion years ago",
-        rangeText: "Timeline from %1$s to %2$s. Use the step buttons below to move through it.", living: "%1$s –",
+    /// Android's wording (home_timeline_*) in the app's language, from ScreenText.
+    static let app = YearWords(
+        bc: ScreenText.word("home_timeline_bc"), circa: ScreenText.word("home_timeline_circa"),
+        millionAgo: ScreenText.word("home_timeline_million_ago"), billionAgo: ScreenText.word("home_timeline_billion_ago"),
+        rangeText: ScreenText.word("home_timeline_range"), living: ScreenText.word("home_timeline_living"),
         num: { n in n.int64Value.formatted(.number.grouping(.automatic)) },
-        decimal: { v in String(format: "%.1f", v.doubleValue) }
-    )
-}
+        decimal: { v in v.doubleValue.formatted(.number.precision(.fractionLength(1))) }
+    )}
 
 @Observable
 final class TopicModel {

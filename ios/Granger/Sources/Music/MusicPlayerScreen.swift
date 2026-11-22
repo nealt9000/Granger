@@ -59,12 +59,12 @@ final class PlayerHolder {
     /// "Now playing · 2 of 10", "Under the voice · 2 of 10", "Paused · 2 of 10" (Android's top label for music).
     var topLabel: String {
         switch onEnum(of: ui.now) {
-        case let .music(m): return "Now playing · \(m.index + 1) of \(m.queueSize)"
-        case let .voice(v): if let m = v.music { return "Under the voice · \(m.index + 1) of \(m.queueSize)" }
+        case let .music(m): return L("Now playing · \(m.index + 1) of \(m.queueSize)")
+        case let .voice(v): if let m = v.music { return L("Under the voice · \(m.index + 1) of \(m.queueSize)") }
         default: break
         }
-        if let s = saved.music { return "Paused · \(s.index + 1) of \(s.queue.count)" }
-        return "Music"
+        if let s = saved.music { return L("Paused · \(s.index + 1) of \(s.queue.count)") }
+        return L("Music")
     }
 }
 
@@ -148,7 +148,7 @@ struct MusicPlayerScreen: View {
                                 .foregroundStyle(shown.music.repeat != 0 ? palette.primary : palette.onSurface)
                         }
                         .disabled(!live)
-                        .accessibilityLabel(["Repeat off", "Repeat all", "Repeat one"][Int(shown.music.repeat) % 3])
+                        .accessibilityLabel([L("Repeat off"), L("Repeat all"), L("Repeat one")][Int(shown.music.repeat) % 3])
                     }
                     .font(.title3)
                     // Five buttons in a row were wider than the phone at the largest sizes.

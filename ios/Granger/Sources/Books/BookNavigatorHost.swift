@@ -83,12 +83,12 @@ final class BookHostController: UIViewController, EPUBNavigatorDelegate, PDFNavi
             navigator = p
         } else {
             let actions = [
-                EditingAction(title: "Copy", action: #selector(grangerCopy(_:))),
-                EditingAction(title: "Highlight", action: #selector(grangerHighlight(_:))),
-                EditingAction(title: "Note", action: #selector(grangerNote(_:))),
-                EditingAction(title: "Define", action: #selector(grangerDefine(_:))),
-                EditingAction(title: "Search", action: #selector(grangerSearch(_:))),
-                EditingAction(title: "Read from here", action: #selector(grangerReadAloud(_:))),
+                EditingAction(title: L("Copy"), action: #selector(grangerCopy(_:))),
+                EditingAction(title: L("Highlight"), action: #selector(grangerHighlight(_:))),
+                EditingAction(title: L("Note"), action: #selector(grangerNote(_:))),
+                EditingAction(title: L("Define"), action: #selector(grangerDefine(_:))),
+                EditingAction(title: L("Search"), action: #selector(grangerSearch(_:))),
+                EditingAction(title: L("Read from here"), action: #selector(grangerReadAloud(_:))),
             ]
             var templates = HTMLDecorationTemplate.defaultTemplates()
             templates[Self.referenceStyle.id] = Self.referenceTemplate

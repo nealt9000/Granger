@@ -163,14 +163,14 @@ struct ListenScreen: View {
     }
 
     private func resumeLabel(_ last: LastRead) -> String {
-        if let s = last.section, !s.isEmpty { return "Resume \(last.title) · \(s)" }
-        return "Resume \(last.title)"
+        if let s = last.section, !s.isEmpty { return L("Resume \(last.title) · \(s)") }
+        return L("Resume \(last.title)")
     }
 
     private func sleepLine(_ ui: VoiceUi) -> String {
-        if ui.sleepAtChapterEnd { return "End of chapter" }
-        if let ms = ui.sleepRemainingMs?.int64Value { return "Stops in \(formatTime(ms))" }
-        return "Off"
+        if ui.sleepAtChapterEnd { return L("End of chapter") }
+        if let ms = ui.sleepRemainingMs?.int64Value { return L("Stops in \(formatTime(ms))") }
+        return L("Off")
     }
 
     /// The page being read, in its reader (Android's Open).
@@ -186,7 +186,7 @@ struct ListenScreen: View {
 
 /// "Chapter 3" for an untitled chapter, as Android's chapterName.
 func chapterName(_ title: String, _ index: Int) -> String {
-    title.trimmingCharacters(in: .whitespaces).isEmpty ? "Chapter \(index + 1)" : title
+    title.trimmingCharacters(in: .whitespaces).isEmpty ? L("Chapter \(index + 1)") : title
 }
 
 /// "4:05" or "1:02:03".
@@ -240,7 +240,7 @@ struct SleepTimerSheet: View {
                     }
                 }
                 ForEach(Self.minutes, id: \.self) { m in
-                    Button(m == 1 ? "1 minute" : "\(m) minutes") {
+                    Button("\(m) minutes") {
                         player.startSleepTimer(setting: SleepSettingAfter(ms: Int64(m) * 60_000))
                         onDone()
                     }

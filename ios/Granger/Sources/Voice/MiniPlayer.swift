@@ -126,11 +126,11 @@ struct MiniPlayer: View {
 
     private func secondaryLabel(_ item: Item) -> String {
         switch item {
-        case .voice: return "Back a sentence"
-        case .music: return "Next track"
+        case .voice: return L("Back a sentence")
+        case .music: return L("Next track")
         case .book:
             let s = holder.model?.skipBackS() ?? 30
-            return s == 1 ? "Back 1 second" : "Back \(s) seconds"
+            return L("Back \(s) seconds")
         }
     }
 

@@ -102,7 +102,7 @@ private struct AlbumsAndSongs: View {
                     }
                     .padding(.horizontal, 16)
                 }
-                if !songs.isEmpty { heading("Songs") }
+                if !songs.isEmpty { heading(L("Songs")) }
                 ForEach(Array(songs.enumerated()), id: \.element.id) { i, t in
                     SongRow(track: t, holder: holder, dialog: $dialog, onPlay: { onPlay(i, false) })
                 }
@@ -132,7 +132,7 @@ struct ArtistScreen: View {
             if let page {
                 let source = MusicSources.shared.artist(name: page.name)
                 AlbumsAndSongs(
-                    sections: page.sections.map { ($0.group.label.words, $0.albums) } + (page.appearsOn.isEmpty ? [] : [("Appears on", page.appearsOn)]),
+                    sections: page.sections.map { ($0.group.label.words, $0.albums) } + (page.appearsOn.isEmpty ? [] : [(L("Appears on"), page.appearsOn)]),
                     songs: page.songs, holder: holder, dialog: $dialog
                 ) { i, shuffle in play(holder, page.songs, i, source, shuffle: shuffle) }
             }
@@ -162,7 +162,7 @@ struct GenreScreen: View {
         Group {
             if let page {
                 let source = MusicSources.shared.genre(name: page.name)
-                AlbumsAndSongs(sections: page.albums.isEmpty ? [] : [("Albums", page.albums)], songs: page.songs, holder: holder, dialog: $dialog) { i, shuffle in
+                AlbumsAndSongs(sections: page.albums.isEmpty ? [] : [(L("Albums"), page.albums)], songs: page.songs, holder: holder, dialog: $dialog) { i, shuffle in
                     play(holder, page.songs, i, source, shuffle: shuffle)
                 }
             }

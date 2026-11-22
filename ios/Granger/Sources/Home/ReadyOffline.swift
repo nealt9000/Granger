@@ -20,16 +20,16 @@ enum ReadyWords {
     }
 
     static func eyebrow(_ ui: ReadyOfflineUi) -> String {
-        ui.recent == 1 ? "Ready offline · your last read" : "Ready offline · your last \(ui.recent) reads"
+        L("Ready offline · your last \(ui.recent) reads")
     }
 
     static func headline(_ ui: ReadyOfflineUi) -> String {
-        "\(ui.offline) of your \(ui.recent) recent read\(ui.recent == 1 ? " works" : "s work") offline"
+        L("\(ui.offline) of your \(ui.recent) recent reads work offline")
     }
 
     static func suggestion(_ s: Suggestion) -> String {
-        if s.packId == nil { return s.covers == 1 ? "Keep the one you read · \(QueueWords.bytes(s.bytes))" : "Keep the \(s.covers) you read · \(QueueWords.bytes(s.bytes))" }
-        return "Get \(s.title) · \(QueueWords.bytes(s.bytes)) · covers \(s.about ? "about " : "")\(s.covers) of them"
+        if s.packId == nil { return L("Keep the \(s.covers) you read · \(QueueWords.bytes(s.bytes))") }
+        return s.about ? L("Get \(s.title) · \(QueueWords.bytes(s.bytes)) · covers about \(s.covers) of them") : L("Get \(s.title) · \(QueueWords.bytes(s.bytes)) · covers \(s.covers) of them")
     }
 }
 
@@ -47,9 +47,9 @@ struct ReadyOfflineBody: View {
             Text(ReadyWords.headline(ui)).font(Spectral.medium(26)).foregroundStyle(palette.onSurface)
                 .accessibilityIdentifier("ready-headline")
             HStack(spacing: 14) {
-                legend(palette.secondary, "On this phone")
-                legend(palette.tertiary, "Saved for now")
-                legend(palette.surfaceContainerHighest, "Online")
+                legend(palette.secondary, L("On this phone"))
+                legend(palette.tertiary, L("Saved for now"))
+                legend(palette.surfaceContainerHighest, L("Online"))
             }
             .font(.caption)
             ForEach(ui.subjects, id: \.subjectId) { bar in subjectBar(bar) }
@@ -94,7 +94,7 @@ struct ReadyOfflineBody: View {
         if let packId = s.packId {
             Task {
                 let r = try? await core.library.getPack(id: packId)
-                note = r is EnqueueResultNoSpace ? "Not enough room for \(s.title)." : "\(s.title) is on its way: see Downloads."
+                note = r is EnqueueResultNoSpace ? L("Not enough room for \(s.title).") : L("\(s.title) is on its way: see Downloads.")
             }
         } else {
             let refs = s.articles.compactMap { p -> ArticleRef? in
@@ -102,7 +102,7 @@ struct ReadyOfflineBody: View {
                 return ArticleRef(packId: lang, path: title)
             }
             core.library.keepTheRead(articles: refs)
-            note = "Keeping them: each is marked ● when it's on this phone."
+            note = L("Keeping them: each is marked ● when it's on this phone.")
         }
     }
 }
@@ -152,7 +152,7 @@ struct OutfittingScreen: View {
                 }
             }
             if let ui = ready.ui { Section { ReadyOfflineBody(ui: ui).padding(.vertical, 6) } }
-            Section(header: heading("Kept articles")) {
+            Section(header: heading(L("Kept articles"))) {
                 if !updates.isEmpty {
                     HStack {
                         Text(updates.count == 1 ? "1 kept article has a newer version" : "\(updates.count) kept articles have a newer version").foregroundStyle(palette.onSurface)
@@ -176,15 +176,15 @@ struct OutfittingScreen: View {
                     .foregroundStyle(palette.onSurfaceVariant)
             }
             if let report {
-                Section(header: heading("Ready for anything"), footer: Text("What a phone needs when nothing else is there.")) {
+                Section(header: heading(L("Ready for anything")), footer: Text("What a phone needs when nothing else is there.")) {
                     ForEach(report.domains, id: \.id) { d in domainRow(d) }
                 }
-                Section(header: heading("By source")) {
+                Section(header: heading(L("By source"))) {
                     ForEach(report.storage.filter { $0.items > 0 || $0.bytes > 0 }, id: \.source) { row in
                         HStack {
                             Text(ScreenText.strings[row.source.titleKey] ?? row.source.name).foregroundStyle(palette.onSurface)
                             Spacer()
-                            Text("\(QueueWords.bytes(row.bytes)) · \(row.items) item\(row.items == 1 ? "" : "s")").foregroundStyle(palette.onSurfaceVariant)
+                            Text("\(QueueWords.bytes(row.bytes)) · \(row.items) items").foregroundStyle(palette.onSurfaceVariant)
                         }
                     }
                     NavigationLink(value: Route.downloads) { Text("Downloads") }
@@ -219,14 +219,14 @@ struct OutfittingScreen: View {
         let essentials = QueueWords.bytes(d.essentialBytes)
         let line: String
         switch d.coverage {
-        case .comprehensive: line = "Comprehensive · \(held)"
-        case .basic: line = "Basic · \(held) of \(QueueWords.bytes(d.comprehensiveBytes))"
+        case .comprehensive: line = L("Comprehensive · \(held)")
+        case .basic: line = L("Basic · \(held) of \(QueueWords.bytes(d.comprehensiveBytes))")
         default:
             if d.installedBytes == 0, let note = d.emptyNote { line = note.words }
-            else if d.installedBytes > 0 && d.essentialBytes > 0 { line = "No essentials yet · \(held) held · the essentials are \(essentials)" }
-            else if d.installedBytes > 0 { line = "No essentials yet · \(held) held" }
-            else if d.essentialBytes > 0 { line = "Nothing yet · the essentials are \(essentials)" }
-            else { line = "Nothing yet" }
+            else if d.installedBytes > 0 && d.essentialBytes > 0 { line = L("No essentials yet · \(held) held · the essentials are \(essentials)") }
+            else if d.installedBytes > 0 { line = L("No essentials yet · \(held) held") }
+            else if d.essentialBytes > 0 { line = L("Nothing yet · the essentials are \(essentials)") }
+            else { line = L("Nothing yet") }
         }
         let fraction = d.comprehensiveBytes > 0 ? min(1, Double(d.installedBytes) / Double(d.comprehensiveBytes)) : (d.coverage == .comprehensive ? 1 : 0)
         return VStack(alignment: .leading, spacing: 4) {

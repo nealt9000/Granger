@@ -37,7 +37,7 @@ final class ReaderWebView: WKWebView {
     override func buildMenu(with builder: any UIMenuBuilder) {
         super.buildMenu(with: builder)
         guard let onReadFromHere else { return }
-        let read = UIAction(title: "Read from here", image: UIImage(systemName: "headphones")) { _ in onReadFromHere() }
+        let read = UIAction(title: L("Read from here"), image: UIImage(systemName: "headphones")) { _ in onReadFromHere() }
         builder.insertChild(UIMenu(options: .displayInline, children: [read]), atStartOfMenu: .standardEdit)
     }
 }

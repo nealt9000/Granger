@@ -1,0 +1,16 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSAppleMusicUsageDescription" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Granger muestra las canciones de tu biblioteca de Música que puede reproducir, junto a la música que agregas desde Archivos. Nunca las modifica."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

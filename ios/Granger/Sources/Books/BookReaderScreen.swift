@@ -338,20 +338,20 @@ struct TextSettingsSheet: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 if isPdf {
-                    setting("Pages") {
-                        chips([(false, "Page by page"), (true, "Scroll")], prefs.pdfScroll) { v in onChange(change(prefs) { $0.pdfScroll = v }) }
+                    setting(L("Pages")) {
+                        chips([(false, L("Page by page")), (true, L("Scroll"))], prefs.pdfScroll) { v in onChange(change(prefs) { $0.pdfScroll = v }) }
                     }
-                    setting("Fit") {
-                        chips([(false, "Whole page"), (true, "Width")], prefs.pdfFitWidth) { v in onChange(change(prefs) { $0.pdfFitWidth = v }) }
+                    setting(L("Fit")) {
+                        chips([(false, L("Whole page")), (true, L("Width"))], prefs.pdfFitWidth) { v in onChange(change(prefs) { $0.pdfFitWidth = v }) }
                     }
-                    setting("Theme") {
-                        chips([(ReadingTheme.app, "Match app"), (.day, "Day"), (.night, "Night")], prefs.theme == .sepia ? .day : prefs.theme) { v in onChange(change(prefs) { $0.theme = v }) }
+                    setting(L("Theme")) {
+                        chips([(ReadingTheme.app, L("Match app")), (.day, L("Day")), (.night, L("Night"))], prefs.theme == .sepia ? .day : prefs.theme) { v in onChange(change(prefs) { $0.theme = v }) }
                     }
                 } else {
-                    setting("Typeface") {
-                        chips([(Typeface.serif, "Serif"), (.sans, "Sans")], prefs.typeface) { v in onChange(change(prefs) { $0.typeface = v }) }
+                    setting(L("Typeface")) {
+                        chips([(Typeface.serif, L("Serif")), (.sans, L("Sans"))], prefs.typeface) { v in onChange(change(prefs) { $0.typeface = v }) }
                     }
-                    setting("Size") {
+                    setting(L("Size")) {
                         HStack(spacing: 12) {
                             Button("−") { onChange(change(prefs) { $0.fontScale -= ReadingPrefs.companion.FONT_SCALE_STEP }) }
                                 .buttonStyle(.bordered).disabled(prefs.fontScale <= ReadingPrefs.companion.MIN_FONT_SCALE)
@@ -363,28 +363,28 @@ struct TextSettingsSheet: View {
                                 .accessibilityLabel("Larger text")
                         }
                     }
-                    setting("Line spacing") {
+                    setting(L("Line spacing")) {
                         Slider(value: Binding(get: { lineHeight ?? prefs.lineHeight }, set: { lineHeight = $0 }),
                                in: ReadingPrefs.companion.MIN_LINE_HEIGHT...ReadingPrefs.companion.MAX_LINE_HEIGHT) { editing in
                             if !editing, let v = lineHeight { onChange(change(prefs) { $0.lineHeight = v }); lineHeight = nil }
                         }
                     }
-                    setting("Margins") {
+                    setting(L("Margins")) {
                         Slider(value: Binding(get: { margins ?? prefs.margins }, set: { margins = $0 }),
                                in: ReadingPrefs.companion.MIN_MARGINS...ReadingPrefs.companion.MAX_MARGINS) { editing in
                             if !editing, let v = margins { onChange(change(prefs) { $0.margins = v }); margins = nil }
                         }
                     }
-                    setting("Alignment") {
-                        chips([(Align.start, "Left"), (.justify, "Justified")], prefs.align) { v in onChange(change(prefs) { $0.align = v }) }
+                    setting(L("Alignment")) {
+                        chips([(Align.start, L("Left")), (.justify, L("Justified"))], prefs.align) { v in onChange(change(prefs) { $0.align = v }) }
                     }
-                    setting("Theme") {
-                        chips([(ReadingTheme.app, "Match app"), (.day, "Day"), (.sepia, "Sepia"), (.night, "Night")], prefs.theme) { v in onChange(change(prefs) { $0.theme = v }) }
+                    setting(L("Theme")) {
+                        chips([(ReadingTheme.app, L("Match app")), (.day, L("Day")), (.sepia, L("Sepia")), (.night, L("Night"))], prefs.theme) { v in onChange(change(prefs) { $0.theme = v }) }
                     }
                     // Only a book with links offers their level (Android's hasLinks).
                     if hasLinks {
                         setting(BookWords.referenceLinks) {
-                            chips([(LinkLevel.off, "Off"), (.light, "Light"), (.more, "More")], prefs.referenceLinks) { v in onChange(change(prefs) { $0.referenceLinks = v }) }
+                            chips([(LinkLevel.off, ScreenText.word("ebook_links_off")), (.light, L("Light")), (.more, L("More"))], prefs.referenceLinks) { v in onChange(change(prefs) { $0.referenceLinks = v }) }
                         }
                     }
                 }
@@ -446,6 +446,17 @@ struct HighlightSheet: View {
     @State private var deleted = false
     @FocusState private var noteFocused: Bool
 
+    /// The colour's spoken name, a whole phrase per colour as Android has it (ebook_highlight_*).
+    static func colorLabel(_ name: String) -> String {
+        switch name {
+        case "yellow": L("yellow highlight")
+        case "green": L("green highlight")
+        case "blue": L("blue highlight")
+        case "pink": L("pink highlight")
+        default: name
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(mark.text).lineLimit(3).font(.callout)
@@ -458,7 +469,7 @@ struct HighlightSheet: View {
                             color = name
                             model.model?.updateHighlight(mark: edited())
                         }
-                        .accessibilityLabel("\(name) highlight")
+                        .accessibilityLabel(Self.colorLabel(name))
                         .accessibilityAddTraits(.isButton)
                 }
             }

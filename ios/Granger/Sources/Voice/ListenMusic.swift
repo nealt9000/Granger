@@ -71,7 +71,7 @@ struct ListenMedia: View {
             let (live, playing): (Bool, Bool) = switch card {
             case let .music(_, l, p), let .book(_, l, p): (l, p)
             }
-            let label = !live ? "Last played" : playing ? "Now playing" : "Paused"
+            let label = !live ? L("Last played") : playing ? L("Now playing") : L("Paused")
             HStack(spacing: 12) {
                 switch card {
                 case let .music(m, _, _):
@@ -121,9 +121,9 @@ struct ListenMedia: View {
     private var empty: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Nothing to listen to yet").font(Spectral.medium(18)).foregroundStyle(palette.onSurface).padding(.top, 8)
-            source("LibriVox", "Public-domain audiobooks, read by volunteers", .librivox, id: "listen-librivox")
-            source("Archive.org audiobooks", "Spoken word from the Internet Archive", .archiveAudio(kind: ArchiveKind.spokenWord.name), id: "listen-archive-audiobooks")
-            source("Archive.org music", "Recordings from the Internet Archive", .archiveAudio(kind: ArchiveKind.music.name), id: "listen-archive-music")
+            source("LibriVox", L("Public-domain audiobooks, read by volunteers"), .librivox, id: "listen-librivox")
+            source(L("Archive.org audiobooks"), L("Spoken word from the Internet Archive"), .archiveAudio(kind: ArchiveKind.spokenWord.name), id: "listen-archive-audiobooks")
+            source(L("Archive.org music"), L("Recordings from the Internet Archive"), .archiveAudio(kind: ArchiveKind.music.name), id: "listen-archive-music")
             Button("Find music on this phone") { openRoute(.mediaSettings) }
                 .buttonStyle(.bordered)
                 .accessibilityIdentifier("listen-find-music")
@@ -151,13 +151,13 @@ struct ListenMedia: View {
         if open {
             if music {
                 NavigationLink(value: Route.music(collectionId: nil)) {
-                    row("All music", MusicWords.albums(kind.allCollections.reduce(0) { $0 + $1.albums.count }))
+                    row(L("All music"), MusicWords.albums(kind.allCollections.reduce(0) { $0 + $1.albums.count }))
                 }
                 .accessibilityIdentifier("listen-all-music")
             } else {
                 let n = kind.allCollections.reduce(0) { $0 + $1.audiobooks.count }
                 NavigationLink(value: Route.audiobooks(collectionId: nil)) {
-                    row("All audiobooks", n == 1 ? "1 audiobook" : "\(n) audiobooks")
+                    row(L("All audiobooks"), L("\(n) audiobooks"))
                 }
                 .accessibilityIdentifier("listen-all-audiobooks")
             }

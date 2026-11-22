@@ -39,10 +39,10 @@ final class AudiobooksHolder {
 
 /// Audiobooks' words (Android's strings_audiobooks.xml).
 enum AudiobookWords {
-    static func author(_ a: String) -> String { a.trimmingCharacters(in: .whitespaces).isEmpty ? "Unknown author" : a }
+    static func author(_ a: String) -> String { a.trimmingCharacters(in: .whitespaces).isEmpty ? L("Unknown author") : a }
     static func percent(_ f: Float) -> String { "\(min(99, max(1, Int((f * 100).rounded()))))%" }
-    static let missing = "Missing"
-    static let finished = "Finished"
+    static let missing = L("Missing")
+    static let finished = L("Finished")
 }
 
 /// A book's square cover, or the themed tile with its title and headphones (Android's AudiobookCover).
@@ -317,20 +317,20 @@ struct AudiobookScreen: View {
 
     private func progressLine(_ page: AudiobookPage) -> String {
         switch page.listening {
-        case .finished: return "Finished"
-        case .unplayed: return "Not started"
+        case .finished: return L("Finished")
+        case .unplayed: return L("Not started")
         default:
             let left = max(0, page.progress.durationMs - page.progress.positionMs)
-            return "\(Int(page.fraction * 100))% · \(formatTime(left)) left"
+            return L("\(Int(page.fraction * 100))% · \(formatTime(left)) left")
         }
     }
 
     private func downloadLine(_ status: ItemStatus, _ page: AudiobookPage) -> String {
         switch onEnum(of: status) {
-        case .queued, .downloading: return "Downloading: \(page.filesDone) of \(page.filesTotal) chapters"
-        case let .failed(f): return f.reason.map { "Stopped: \($0)" } ?? "Stopped"
-        case let .partial(p): return "\(p.done) of \(p.total) chapters on this phone"
-        default: return page.filesTotal == 1 ? "1 chapter on this phone" : "\(page.filesTotal) chapters on this phone"
+        case .queued, .downloading: return L("Downloading: \(page.filesDone) of \(page.filesTotal) chapters")
+        case let .failed(f): return f.reason.map { L("Stopped: \($0)") } ?? L("Stopped")
+        case let .partial(p): return L("\(p.done) of \(p.total) chapters on this phone")
+        default: return L("\(page.filesTotal) chapters on this phone")
         }
     }
 }

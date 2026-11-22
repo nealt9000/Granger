@@ -34,31 +34,31 @@ enum Words {
     static func span(_ e: Era) -> String { of(e.spanKey) }
     static func eraFrom(_ e: Era) -> String {
         switch e {
-        case .prehistory: "before 3000 BC"
-        case .ancient: "the ancient world"
-        case .middleAges: "the Middle Ages"
-        case .earlyModern: "1500 to 1800"
-        case .c19: "the 1800s"
-        case .wars: "1900 to 1945"
-        default: "1946 or later"
+        case .prehistory: L("before 3000 BC")
+        case .ancient: L("the ancient world")
+        case .middleAges: L("the Middle Ages")
+        case .earlyModern: L("1500 to 1800")
+        case .c19: L("the 1800s")
+        case .wars: L("1900 to 1945")
+        default: L("1946 or later")
         }
     }
     static func dated(_ s: Share) -> String {
         switch s {
-        case .nearlyAll: "Nearly all the dated topics"
-        case .threeInFour: "About three in four dated topics"
-        case .twoInThree: "About two in three dated topics"
-        case .half: "About half the dated topics"
-        case .oneInThree: "About one in three dated topics"
-        case .oneInFour: "About one in four dated topics"
-        case .oneInFive: "About one in five dated topics"
-        default: "About one in ten dated topics"
+        case .nearlyAll: L("Nearly all the dated topics")
+        case .threeInFour: L("About three in four dated topics")
+        case .twoInThree: L("About two in three dated topics")
+        case .half: L("About half the dated topics")
+        case .oneInThree: L("About one in three dated topics")
+        case .oneInFour: L("About one in four dated topics")
+        case .oneInFive: L("About one in five dated topics")
+        default: L("About one in ten dated topics")
         }
     }
     static func count(_ n: Int32) -> String { Int(n).formatted() }
-    static func topics(_ n: Int32) -> String { n == 1 ? "1 topic" : "\(count(n)) topics" }
-    static func rooms(_ n: Int32) -> String { n == 1 ? "1 room" : "\(count(n)) rooms" }
-    static func subjects(_ n: Int) -> String { n == 1 ? "1 subject" : "\(n) subjects" }
+    static func topics(_ n: Int32) -> String { n == 1 ? L("1 topic") : L("\(count(n)) topics") }
+    static func rooms(_ n: Int32) -> String { n == 1 ? L("1 room") : L("\(count(n)) rooms") }
+    static func subjects(_ n: Int) -> String { L("\(n) subjects") }
 }
 
 /// Explore's landing (Android's ExploreContent, Plan EX): today's spread, the library's subject doors, Through time,
@@ -108,7 +108,7 @@ struct ExploreScreen: View {
 
     @ViewBuilder private func spread(_ topic: FeaturedTopic, skipped: Int32) -> some View {
         let a = topic.article
-        Eyebrow(text: skipped == 0 ? "\(Self.dayWords) · today's spread" : "Another spread").padding(.horizontal, 16).padding(.bottom, 10)
+        Eyebrow(text: skipped == 0 ? L("\(Self.dayWords) · today's spread") : L("Another spread")).padding(.horizontal, 16).padding(.bottom, 10)
         let plates = [PlateItem(id: "spread:0", title: a.title, picture: a.picture, whole: a.whole)]
             + topic.figures.enumerated().map { i, f in PlateItem(id: "spread:\(i + 1)", title: f.caption, picture: f.picture, whole: f.picture.hasSuffix(".w.jpg")) }
         NavigationLink(value: route(a)) { OpeningPlates(plates: plates, numbered: plates.count > 1) }
@@ -118,7 +118,7 @@ struct ExploreScreen: View {
             let subject = Words.subject(topic.subject)
             SpreadHead(eyebrow: topic.room.map { "\(subject) · \($0.name(language: "en"))" } ?? subject, title: a.title, standfirst: topic.sentence, large: true)
             if !topic.figures.isEmpty { Captions(lines: [a.title] + topic.figures.map(\.caption)) }
-            let holds = [topic.kinds > 0 ? "\(topic.kinds) kinds" : nil, topic.people > 0 ? "\(topic.people) people" : nil, topic.chapters > 0 ? "\(topic.chapters) chapters" : nil].compactMap { $0 }
+            let holds = [topic.kinds > 0 ? L("\(topic.kinds) kinds") : nil, topic.people > 0 ? L("\(topic.people) people") : nil, topic.chapters > 0 ? L("\(topic.chapters) chapters") : nil].compactMap { $0 }
             if !holds.isEmpty { Text("On this spread: \(holds.joined(separator: ", ")).").font(.callout).foregroundStyle(palette.onSurfaceVariant) }
             HStack(spacing: 8) {
                 NavigationLink(value: route(a)) { Text("Open the spread").font(.callout.weight(.medium)).padding(.horizontal, 18).padding(.vertical, 12) }
@@ -138,17 +138,17 @@ struct ExploreScreen: View {
     @ViewBuilder private func library(_ ui: ExploreUi) -> some View {
         let counted = ui.doors.filter { $0.count > 0 }
         let subjects = Words.subjects(ui.doors.count)
-        let eyebrow = ui.rooms > 0 ? "The library · \(subjects), \(Words.rooms(ui.rooms))" : "The library · \(subjects)"
+        let eyebrow = ui.rooms > 0 ? L("The library · \(subjects), \(Words.rooms(ui.rooms))") : L("The library · \(subjects)")
         let finding = counted.count >= 4
-        let title = finding ? "\(Words.subject(counted[0].subject)), \(Words.subject(counted[1].subject)) and \(Words.subject(counted[2].subject)) are your largest subjects" : "Subjects"
+        let title = finding ? L("\(Words.subject(counted[0].subject)), \(Words.subject(counted[1].subject)) and \(Words.subject(counted[2].subject)) are your largest subjects") : L("Subjects")
         let standfirst: String = {
             var out: [String] = []
             if finding, let small = counted.last, let big = counted.first {
                 let times = Int((Double(big.count) / Double(small.count)).rounded())
-                out.append(times >= 2 ? "\(Words.subject(small.subject)) is the smallest, with \(Words.topics(small.count)); \(Words.subject(big.subject)) has \(times) times as many."
-                           : "\(Words.subject(small.subject)) is the smallest, with \(Words.topics(small.count)).")
+                out.append(times >= 2 ? L("\(Words.subject(small.subject)) is the smallest, with \(Words.topics(small.count)); \(Words.subject(big.subject)) has \(times) times as many.")
+                           : L("\(Words.subject(small.subject)) is the smallest, with \(Words.topics(small.count))."))
             }
-            out.append("Each picture opens its subject.")
+            out.append(L("Each picture opens its subject."))
             return out.joined(separator: " ")
         }()
         SpreadHead(eyebrow: eyebrow, title: title, standfirst: standfirst).padding(.horizontal, 16).padding(.top, 36).padding(.bottom, 12)
@@ -165,12 +165,12 @@ struct ExploreScreen: View {
     }
 
     @ViewBuilder private func time(_ ui: ExploreUi) -> some View {
-        let opens = "Each line opens its era on the Timeline."
+        let opens = L("Each line opens its era on the Timeline.")
         if let busiest = ExploreModelKt.busiestEra(eras: ui.eras) {
-            SpreadHead(eyebrow: "Through time", title: "\(Words.dated(busiest.second! as Share)) are from \(Words.eraFrom(busiest.first!.era))", standfirst: opens)
+            SpreadHead(eyebrow: L("Through time"), title: L("\(Words.dated(busiest.second! as Share)) are from \(Words.eraFrom(busiest.first!.era))"), standfirst: opens)
                 .padding(.horizontal, 16).padding(.top, 36).padding(.bottom, 10)
         } else {
-            SpreadHead(eyebrow: nil, title: "Through time", standfirst: opens).padding(.horizontal, 16).padding(.top, 36).padding(.bottom, 10)
+            SpreadHead(eyebrow: nil, title: L("Through time"), standfirst: opens).padding(.horizontal, 16).padding(.top, 36).padding(.bottom, 10)
         }
         let most = max(1, ui.eras.map(\.count).max() ?? 1)
         ForEach(ui.eras, id: \.era) { row in
@@ -189,11 +189,11 @@ struct ExploreScreen: View {
     @ViewBuilder private func ways(_ ui: ExploreUi) -> some View {
         let games = 6
         let ways: [(String, String, Route)] = [
-            ui.noSubjects ? nil : ("Anywhere in your library", "Wander", Route.wander(packId: nil, path: nil)),
-            ui.eras.isEmpty ? nil : ("\(games) games with the dates in your library", "Games", Route.games),
-            ("Wikipedia and your packs", "Your sources", Route.yourSources),
+            ui.noSubjects ? nil : (L("Anywhere in your library"), L("Wander"), Route.wander(packId: nil, path: nil)),
+            ui.eras.isEmpty ? nil : (L("\(games) games with the dates in your library"), L("Games"), Route.games),
+            (L("Wikipedia and your packs"), L("Your sources"), Route.yourSources),
         ].compactMap { $0 }
-        if !ways.isEmpty { WaysOn(title: "Ways on", ways: ways).padding(.top, 30) }
+        if !ways.isEmpty { WaysOn(title: L("Ways on"), ways: ways).padding(.top, 30) }
     }
 
     private func route(_ a: ExploreArticle) -> Route {
@@ -355,7 +355,7 @@ struct DoorRowView: View {
         let names = door.packs.map(\.title) + door.collections.map(\.title)
         if door.count > 0 { return Words.topics(door.count) }
         if names.count == 1 { return names[0] }
-        return "\(names.count) sources"
+        return L("\(names.count) sources")
     }
 }
 
@@ -418,7 +418,7 @@ struct WaysOn: View {
 struct RoomsSeenLine: View {
     let seen: Int32
     let total: Int32
-    var label = "Rooms you have seen"
+    var label = L("Rooms you have seen")
     @Environment(\.palette) private var palette
 
     var body: some View {

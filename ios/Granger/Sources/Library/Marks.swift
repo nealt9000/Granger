@@ -72,11 +72,11 @@ struct KeepButton: View {
     }
 
     private var label: String {
-        if working { return "Keeping…" }
-        if let kept { return kept.withPictures ? "Kept · Remove" : "Kept text · Remove" }
-        let word = settings.savePictures ? "Keep" : "Keep text"
-        guard let size else { return word }
-        return "\(word) · \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))"
+        if working { return L("Keeping…") }
+        if let kept { return kept.withPictures ? L("Kept · Remove") : L("Kept text · Remove") }
+        guard let size else { return settings.savePictures ? L("Keep") : L("Keep text") }
+        let bytes = ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
+        return settings.savePictures ? L("Keep · \(bytes)") : L("Keep text · \(bytes)")
     }
 
     private func refresh() {
@@ -169,7 +169,7 @@ struct LocalOnlyBanner: View {
                     Spacer(minLength: 8)
                     Button("Turn off") { settings.localOnly = false }.font(Spectral.medium(17)).accessibilityIdentifier("local-only-off")
                 }
-                HintCard(id: "offline", text: "Greyed things need the internet.")
+                HintCard(id: "offline", text: L("Greyed things need the internet."))
             }
             .padding(14)
             .background(palette.surfaceContainerHigh, in: RoundedRectangle(cornerRadius: 12))

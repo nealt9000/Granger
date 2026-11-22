@@ -99,7 +99,7 @@ struct LibriVoxScreen: View {
                 .presentationDetents([.medium, .large])
             }
         }
-        .alert(removing?.title.map { "Remove \($0)?" } ?? "Remove this book?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
+        .alert(removing?.title.map { L("Remove \($0)?") } ?? L("Remove this book?"), isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
             Button("Remove", role: .destructive) { if let id = removing?.id { holder.model?.remove(id: id) }; removing = nil }
             Button("Keep", role: .cancel) { removing = nil }
         } message: { Text("This deletes its files. Your place and bookmarks are kept.") }
@@ -154,7 +154,7 @@ struct LibriVoxBookSheet: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
                 let book = sheet.book
-                let title = book.map { LibriVoxTextKt.decodeEntities(text: $0.title) }.flatMap { $0.isEmpty ? nil : $0 } ?? fallbackTitle ?? "LibriVox book"
+                let title = book.map { LibriVoxTextKt.decodeEntities(text: $0.title) }.flatMap { $0.isEmpty ? nil : $0 } ?? fallbackTitle ?? L("LibriVox book")
                 Text(title).font(Spectral.medium(22)).foregroundStyle(palette.onSurface)
                 if sheet.loading { ProgressView().frame(maxWidth: .infinity).padding(24) }
                 if let error = sheet.error { Text(error.words).foregroundStyle(palette.error) }
@@ -172,8 +172,7 @@ struct LibriVoxBookSheet: View {
                         switch onEnum(of: offer) {
                         case let .files(f):
                             let n = f.files.count
-                            let chapters = n == 1 ? "1 chapter" : "\(n) chapters"
-                            Text(sheet.sizeBytes.map { "\(chapters) · \(QueueWords.bytes($0.int64Value))" } ?? chapters).font(.callout.weight(.medium))
+                            Text(sheet.sizeBytes.map { L("\(n) chapters · \(QueueWords.bytes($0.int64Value))") } ?? L("\(n) chapters")).font(.callout.weight(.medium))
                         case .incomplete:
                             if case .notInstalled = onEnum(of: sheet.status) { Text("This book's files aren't all on archive.org.").foregroundStyle(palette.onSurfaceVariant) }
                         case .notOnArchive:
@@ -184,7 +183,7 @@ struct LibriVoxBookSheet: View {
                 switch onEnum(of: sheet.status) {
                 case .queued, .downloading:
                     if sheet.filesTotal > 0 {
-                        Text(sheet.filesTotal == 1 ? "Downloading: \(sheet.filesDone) of 1 chapter" : "Downloading: \(sheet.filesDone) of \(sheet.filesTotal) chapters")
+                        Text("Downloading: \(sheet.filesDone) of \(sheet.filesTotal) chapters")
                     }
                 default: EmptyView()
                 }

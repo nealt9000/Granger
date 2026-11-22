@@ -28,47 +28,49 @@ enum QueueWords {
     static func timeLeft(_ millis: Int64) -> String {
         let minutes = Double(millis) / 60_000
         switch minutes {
-        case ..<1: return "less than a minute left"
-        case ..<10: return "about \(max(1, Int(minutes.rounded()))) min left"
-        case ..<55: return "about \(Int((minutes / 5).rounded()) * 5) min left"
-        case ..<(47.5 * 60): return "about \(max(1, Int((minutes / 60).rounded()))) h left"
-        default: let d = Int((minutes / 1440).rounded()); return "about \(d) day\(d == 1 ? "" : "s") left"
+        case ..<1: return L("less than a minute left")
+        case ..<10: return L("about \(max(1, Int(minutes.rounded()))) min left")
+        case ..<55: return L("about \(Int((minutes / 5).rounded()) * 5) min left")
+        case ..<(47.5 * 60): return L("about \(max(1, Int((minutes / 60).rounded()))) h left")
+        default: let d = Int((minutes / 1440).rounded()); return L("about \(d) days left")
         }
     }
 
     /// "in 40 s", "in 2 min", "in 3 h".
     static func inTime(_ millis: Int64) -> String {
         let s = max(1, millis / 1000)
-        if s < 60 { return "in \(s) s" }
-        if s < 3600 { return "in \((s + 30) / 60) min" }
-        return "in \((s + 1800) / 3600) h"
+        if s < 60 { return L("in \(s) s") }
+        if s < 3600 { return L("in \((s + 30) / 60) min") }
+        return L("in \((s + 1800) / 3600) h")
     }
 
     /// 1 is "Next", then "2nd in line", "3rd in line"…
     static func place(_ n: Int32) -> String {
-        if n <= 1 { return "Next" }
+        if n <= 1 { return L("Next") }
         let f = NumberFormatter()
         f.numberStyle = .ordinal
-        return "\(f.string(from: NSNumber(value: n)) ?? "\(n)") in line"
+        let ordinal = f.string(from: NSNumber(value: n)) ?? "\(n)"
+        return L("\(ordinal) in line")
     }
 
     static func reason(_ r: WaitReason, now: Int64) -> String {
         switch onEnum(of: r) {
-        case .paused: "Paused"
-        case .waitingForWifi: "Waiting for Wi-Fi"
-        case .meteredWifi: "Waiting: this Wi-Fi is marked as metered"
-        case let .retrying(t): "Trying again \(inTime(t.at - now)) (attempt \(t.attempt) of \(DownloadRecordKt.MAX_ATTEMPTS))"
-        case let .needsSpace(s): "Needs \(bytes(s.bytes)) more space"
+        case .paused: L("Paused")
+        case .waitingForWifi: L("Waiting for Wi-Fi")
+        case .meteredWifi: L("Waiting: this Wi-Fi is marked as metered")
+        case let .retrying(t): L("Trying again \(inTime(t.at - now)) (attempt \(t.attempt) of \(DownloadRecordKt.MAX_ATTEMPTS))")
+        case let .needsSpace(s): L("Needs \(bytes(s.bytes)) more space")
         case let .inLine(p): place(p.place)
         }
     }
 
     /// "3 of 14 · 1.2 GB of 9.8 GB · about 25 min left", or "Paused · 2 waiting".
     static func header(_ s: QueueSummary) -> String {
-        if s.paused { return "Paused · \(s.waiting.count) waiting" }
-        var line = "\(s.filesDone) of \(s.files) · \(bytes(s.bytesDone)) of \(bytes(s.bytes))"
-        if let left = s.timeLeftMillis?.int64Value { line += " · " + timeLeft(left) }
-        return line
+        if s.paused { return L("Paused · \(s.waiting.count) waiting") }
+        if let left = s.timeLeftMillis?.int64Value {
+            return L("\(s.filesDone) of \(s.files) · \(bytes(s.bytesDone)) of \(bytes(s.bytes)) · \(timeLeft(left))")
+        }
+        return L("\(s.filesDone) of \(s.files) · \(bytes(s.bytesDone)) of \(bytes(s.bytes))")
     }
 }
 
@@ -90,13 +92,13 @@ struct DownloadsScreen: View {
                 if !s.waiting.isEmpty {
                     Section(header: heading("Up next")) {
                         ForEach(s.waiting, id: \.record.itemId) { w in
-                            row(w.record, line: "\(QueueWords.bytes(w.record.bytesDone)) of \(QueueWords.bytes(w.record.sizeBytes)) · \(QueueWords.reason(w.reason, now: Int64(Date().timeIntervalSince1970 * 1000)))")
+                            row(w.record, line: L("\(QueueWords.bytes(w.record.bytesDone)) of \(QueueWords.bytes(w.record.sizeBytes)) · \(QueueWords.reason(w.reason, now: Int64(Date().timeIntervalSince1970 * 1000)))"))
                         }
                     }
                 }
                 if !s.stopped.isEmpty {
                     Section(header: heading("Stopped")) {
-                        ForEach(s.stopped, id: \.itemId) { r in row(r, line: r.error ?? "Stopped", stopped: true) }
+                        ForEach(s.stopped, id: \.itemId) { r in row(r, line: r.error ?? L("Stopped"), stopped: true) }
                     }
                 }
             }
@@ -107,7 +109,7 @@ struct DownloadsScreen: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(r.title).font(Spectral.regular(19)).foregroundStyle(palette.onSurface)
-                                Text(r.kind.isCompanion ? "Search index · \(QueueWords.bytes(r.sizeBytes))" : QueueWords.bytes(r.sizeBytes))
+                                Text(r.kind.isCompanion ? L("Search index · \(QueueWords.bytes(r.sizeBytes))") : QueueWords.bytes(r.sizeBytes))
                                     .font(.callout).foregroundStyle(palette.onSurfaceVariant)
                             }
                             Spacer()
@@ -132,7 +134,7 @@ struct DownloadsScreen: View {
         return holder.records.filter { $0.state == .installed && Double($0.updatedAt) >= start }.sorted { $0.updatedAt > $1.updatedAt }
     }
 
-    private func heading(_ s: String) -> some View { Text(s).font(Spectral.medium(16)).foregroundStyle(palette.tertiary) }
+    private func heading(_ s: LocalizedStringKey) -> some View { Text(s).font(Spectral.medium(16)).foregroundStyle(palette.tertiary) }
 
     @ViewBuilder private func header(_ s: QueueSummary) -> some View {
         Section {
@@ -159,8 +161,8 @@ struct DownloadsScreen: View {
     }
 
     private func currentRow(_ r: DownloadRecord, _ s: QueueSummary) -> some View {
-        var line = "\(QueueWords.bytes(s.currentBytesDone)) of \(QueueWords.bytes(r.sizeBytes))"
-        if let rate = s.bytesPerSecond?.int64Value { line += " · \(QueueWords.bytes(rate))/s" }
+        let line = s.bytesPerSecond.map { L("\(QueueWords.bytes(s.currentBytesDone)) of \(QueueWords.bytes(r.sizeBytes)) · \(QueueWords.bytes($0.int64Value))/s") }
+            ?? L("\(QueueWords.bytes(s.currentBytesDone)) of \(QueueWords.bytes(r.sizeBytes))")
         return VStack(alignment: .leading, spacing: 6) {
             row(r, line: line)
             ProgressView(value: r.sizeBytes > 0 ? Double(s.currentBytesDone) / Double(r.sizeBytes) : 0).tint(palette.primary)
@@ -199,7 +201,7 @@ struct DownloadsCard: View {
     var body: some View {
         NavigationLink(value: Route.downloads) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(summary.paused ? "Downloads paused" : (summary.current.map { "Downloading \($0.title)" } ?? "Downloads waiting"))
+                Text(summary.paused ? L("Downloads paused") : (summary.current.map { L("Downloading \($0.title)") } ?? L("Downloads waiting")))
                     .font(Spectral.medium(19)).foregroundStyle(palette.onSurface)
                 ProgressView(value: Double(summary.fraction)).tint(palette.primary)
                 Text(QueueWords.header(summary)).font(.callout).foregroundStyle(palette.onSurfaceVariant)

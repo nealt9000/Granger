@@ -16,7 +16,7 @@ struct YourSourcesScreen: View {
 
     var body: some View {
         List {
-            Section(header: heading("Online")) {
+            Section(header: heading(L("Online"))) {
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Wikipedia").font(Spectral.regular(19))
@@ -30,7 +30,7 @@ struct YourSourcesScreen: View {
                 .accessibilityIdentifier("source-online")
             }
             if !bookPacks.isEmpty {
-                Section(header: heading("Books")) {
+                Section(header: heading(L("Books"))) {
                     ForEach(bookPacks, id: \.id) { p in
                         NavigationLink(value: Route.bookPack(pack: p.id)) {
                             VStack(alignment: .leading, spacing: 3) {
@@ -105,8 +105,8 @@ struct YourSourcesScreen: View {
 
     private func line(_ p: Pack) -> String {
         switch p.status {
-        case .missing: return "Missing: the file is gone"
-        case .corrupt: return "Damaged: it can't be read"
+        case .missing: return L("Missing: the file is gone")
+        case .corrupt: return L("Damaged: it can't be read")
         default: return [QueueWords.bytes(p.sizeBytes), String(p.date.prefix(7))].filter { !$0.isEmpty }.joined(separator: " · ")
         }
     }

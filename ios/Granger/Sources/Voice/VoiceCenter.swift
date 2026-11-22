@@ -229,7 +229,7 @@ final class VoiceCenter {
             return
         case .voice:
             guard let now = ui.now else { return }
-            info[MPMediaItemPropertyTitle] = "Reading · \(now.title)"
+            info[MPMediaItemPropertyTitle] = L("Reading · \(now.title)")
             info[MPMediaItemPropertyAlbumTitle] = now.title
             if let section = now.section, !section.isEmpty { info[MPMediaItemPropertyArtist] = section }
             playing = ui.playing
@@ -268,9 +268,10 @@ final class VoiceCenter {
     /// The mini player's state line, in Android's words: "Reading · Chapter 3", "Paused · Chapter 3", "Finished reading".
     var stateLine: String {
         guard let now = ui.now else { return "" }
-        let head = now.ended ? "Finished reading" : (ui.playing ? "Reading" : "Paused")
-        if let s = now.section, !s.isEmpty { return "\(head) · \(s)" }
-        return head
+        if let s = now.section, !s.isEmpty {
+            return now.ended ? L("Finished reading · \(s)") : (ui.playing ? L("Reading · \(s)") : L("Paused · \(s)"))
+        }
+        return now.ended ? L("Finished reading") : (ui.playing ? L("Reading") : L("Paused"))
     }
 }
 

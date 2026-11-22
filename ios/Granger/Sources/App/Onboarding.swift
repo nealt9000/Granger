@@ -121,7 +121,7 @@ struct OnboardingScreen: View {
                     }
                 }
             }
-            Section(header: heading("Pick a start")) {
+            Section(header: heading(L("Pick a start"))) {
                 ForEach(ui.starts, id: \.id) { start in
                     Button { model.chooseStart(id: start.id) } label: {
                         HStack(alignment: .top, spacing: 10) {
@@ -140,7 +140,7 @@ struct OnboardingScreen: View {
                 if let second = ui.secondLine { lineToggle(second, on: ui.secondChosen) { model.toggleSecond() } }
             }
             if !ui.regions.countries.isEmpty || ui.region != nil {
-                Section(header: heading("A map"), footer: Text("A map of where you are, for finding your way with no signal.")) {
+                Section(header: heading(L("A map")), footer: Text("A map of where you are, for finding your way with no signal.")) {
                     if let r = ui.region {
                         HStack {
                             Text("\(r.place ?? r.pack.title) · \(QueueWords.bytes(r.pack.sizeBytes))").foregroundStyle(palette.onSurface)
@@ -153,7 +153,7 @@ struct OnboardingScreen: View {
                 }
             }
             if !ui.additions.isEmpty {
-                Section(header: heading("Quick wins"), footer: Text("Add packs for what you'll use Granger for. Outfitting can change this later.")) {
+                Section(header: heading(L("Quick wins")), footer: Text("Add packs for what you'll use Granger for. Outfitting can change this later.")) {
                     ForEach(ui.additions, id: \.useCase.id) { a in
                         Toggle(isOn: Binding(get: { ui.useCaseIds.contains(a.useCase.id) }, set: { _ in model.toggleUseCase(id: a.useCase.id) })) {
                             VStack(alignment: .leading, spacing: 2) {
@@ -176,7 +176,7 @@ struct OnboardingScreen: View {
 
     private func lineToggle(_ line: Line, on: Bool, toggle: @escaping () -> Void) -> some View {
         Toggle(isOn: Binding(get: { on }, set: { _ in toggle() })) {
-            Text("\(line.title.words) · \(line.installed ? "on this iPhone" : QueueWords.bytes(line.bytes))").font(.callout)
+            Text(line.installed ? L("\(line.title.words) · on this iPhone") : "\(line.title.words) · \(QueueWords.bytes(line.bytes))").font(.callout)
         }
         .disabled(line.installed)
     }

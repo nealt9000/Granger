@@ -5,6 +5,17 @@ import SwiftUI
 enum MusicTab: String, CaseIterable, Identifiable {
     case albums = "Albums", artists = "Artists", songs = "Songs", genres = "Genres", playlists = "Playlists", folders = "Folders"
     var id: String { rawValue }
+    /// The tab's name as shown.
+    var label: String {
+        switch self {
+        case .albums: L("Albums")
+        case .artists: L("Artists")
+        case .songs: L("Songs")
+        case .genres: L("Genres")
+        case .playlists: L("Playlists")
+        case .folders: L("Folders")
+        }
+    }
 }
 
 /// One Music collection's tabs, or "All music" (Android's MusicScreen over the shared MusicViewModel, Plan I6 Task 6).
@@ -23,7 +34,7 @@ struct MusicScreen: View {
     var body: some View {
         VStack(spacing: 0) {
             Picker("Tab", selection: $tab) {
-                ForEach(MusicTab.allCases) { Text($0.rawValue).tag($0) }
+                ForEach(MusicTab.allCases) { Text($0.label).tag($0) }
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 12).padding(.vertical, 6)
@@ -104,7 +115,7 @@ private struct SongsTab: View {
 
     var body: some View {
         let songs = ui.songs
-        let source = MusicSources.shared.songs(title: ui.title.words.isEmpty ? "Songs" : ui.title.words)
+        let source = MusicSources.shared.songs(title: ui.title.words.isEmpty ? L("Songs") : ui.title.words)
         let index = Self.positions(songs)
         ScrollViewReader { proxy in
             ScrollView {
@@ -121,7 +132,7 @@ private struct SongsTab: View {
                         .accessibilityIdentifier("songs-sort")
                     }
                     .padding(.horizontal, 16).padding(.vertical, 6)
-                    if songs.isEmpty { EmptyLine(text: "No songs") }
+                    if songs.isEmpty { EmptyLine(text: L("No songs")) }
                     ForEach(ui.songSections.sections, id: \.letter) { section in
                         if ui.songSections.lettered { MusicLetter(letter: section.letter) }
                         ForEach(section.items, id: \.key) { item in
@@ -151,7 +162,7 @@ private struct AlbumsTab: View {
 
     var body: some View {
         if ui.albumSections.isEmpty {
-            EmptyLine(text: "No albums")
+            EmptyLine(text: L("No albums"))
         } else {
             ScrollViewReader { proxy in
                 ScrollView {
@@ -202,7 +213,7 @@ private struct ArtistsTab: View {
 
     var body: some View {
         if ui.artistSections.isEmpty {
-            EmptyLine(text: "No artists")
+            EmptyLine(text: L("No artists"))
         } else {
             ScrollViewReader { proxy in
                 ScrollView {
@@ -334,7 +345,7 @@ struct PlaylistDialogs: ViewModifier {
     }
 
     private var title: String {
-        if case .rename = naming { return "Rename playlist" }
-        return "New playlist"
+        if case .rename = naming { return L("Rename playlist") }
+        return L("New playlist")
     }
 }

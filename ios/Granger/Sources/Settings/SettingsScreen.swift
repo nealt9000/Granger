@@ -14,9 +14,9 @@ struct SettingsScreen: View {
 
     /// The voice that reads, or "Read aloud" (Android's Voice row summary).
     private var voiceSummary: String {
-        guard let installed = voice?.voice.installed.voices.value, !installed.isEmpty else { return "Read aloud" }
+        guard let installed = voice?.voice.installed.voices.value, !installed.isEmpty else { return L("Read aloud") }
         let chosen = voice?.voice.prefs.voiceId.value
-        return (installed.first { $0.id.encode() == chosen?.encode() } ?? installed.first)?.title ?? "Read aloud"
+        return (installed.first { $0.id.encode() == chosen?.encode() } ?? installed.first)?.title ?? L("Read aloud")
     }
 
     var body: some View {
@@ -79,7 +79,7 @@ struct SettingsScreen: View {
                 NavigationLink {
                     MediaSettingsScreen()
                 } label: {
-                    LabeledContent("Music & audiobooks", value: "Folders on this phone, and the player")
+                    LabeledContent("Music & audiobooks", value: L("Folders on this phone, and the player"))
                 }
                 .accessibilityIdentifier("settings-media")
             }

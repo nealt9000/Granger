@@ -108,7 +108,7 @@ struct WanderScreen: View {
                         .overlay(node.onPhone ? nil : RoundedRectangle(cornerRadius: 10).stroke(palette.outline, style: StrokeStyle(lineWidth: 1, dash: [4])))
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel(node.onPhone ? "Go to \(node.title)" : "\(node.title), not on this phone")
+                    .accessibilityLabel(node.onPhone ? L("Go to \(node.title)") : L("\(node.title), not on this phone"))
                 }
             }
         }

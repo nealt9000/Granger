@@ -99,7 +99,7 @@ struct LibraryScreen: View {
         ForEach(ui.kinds, id: \.id) { kind in
             if kind.id == "books" {
                 VStack(alignment: .leading, spacing: 8) {
-                    Eyebrow(text: "Collections").padding(.horizontal, 16)
+                    Eyebrow(text: L("Collections")).padding(.horizontal, 16)
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(alignment: .top, spacing: 14) {
                             ForEach(kind.collections, id: \.collection.id) { row in
@@ -177,7 +177,7 @@ struct ReadingNowView: View {
     var body: some View {
         if !now.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                Eyebrow(text: "Reading now")
+                Eyebrow(text: L("Reading now"))
                 HStack(alignment: .top, spacing: 12) {
                     cover(now[0], width: 150, large: true)
                     VStack(spacing: 12) { ForEach(now.dropFirst().prefix(2), id: \.book.id) { cover($0, width: 92, large: false) } }
@@ -258,7 +258,7 @@ struct FinishedView: View {
     var body: some View {
         if !books.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
-                Eyebrow(text: "Finished").padding(.horizontal, 16)
+                Eyebrow(text: L("Finished")).padding(.horizontal, 16)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
                         ForEach(books, id: \.id) { b in
@@ -275,7 +275,7 @@ struct FinishedView: View {
 
 /// The shelf's counts in words (Android's countText and plurals).
 enum ShelfWords {
-    static func books(_ n: Int) -> String { n == 1 ? "1 book" : "\(n) books" }
+    static func books(_ n: Int) -> String { L("\(n) books") }
 
     /// "3 packs · 1 book": what a collection row holds, a folder's being its children's.
     static func count(_ row: CollectionRow) -> String {
@@ -284,9 +284,9 @@ enum ShelfWords {
         let books = rows.reduce(0) { $0 + $1.books.count }
         let albums = rows.reduce(0) { $0 + $1.albums.count }
         return [
-            packs > 0 ? (packs == 1 ? "1 pack" : "\(packs) packs") : nil,
+            packs > 0 ? L("\(packs) packs") : nil,
             books > 0 ? Self.books(books) : nil,
-            albums > 0 ? (albums == 1 ? "1 album" : "\(albums) albums") : nil,
+            albums > 0 ? L("\(albums) albums") : nil,
         ].compactMap { $0 }.joined(separator: " · ")
     }
 }
@@ -331,7 +331,7 @@ enum BookImport {
                 files.append(core.library.pickedFile(path: folder.appendingPathComponent("missing-\(i)").path, name: url.lastPathComponent))
             }
         }
-        guard let summary = try? await core.library.importPicked(files: files) else { return "Nothing was imported." }
+        guard let summary = try? await core.library.importPicked(files: files) else { return L("Nothing was imported.") }
         return summary.text().words
     }
 

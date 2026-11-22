@@ -113,7 +113,7 @@ struct BookSourceLine: View {
         case .notInstalled, .partial:
             HStack(spacing: 6) {
                 if case .notInstalled = onEnum(of: row.status), core?.library.canReadNow(itemId: row.id) == true {
-                    Button(reading ? "Opening…" : BkWords.readNow) { readNow() }.buttonStyle(.borderless).disabled(reading)
+                    Button(reading ? L("Opening…") : BkWords.readNow) { readNow() }.buttonStyle(.borderless).disabled(reading)
                         .accessibilityIdentifier("read-now-\(row.id)")
                 }
                 Button("Keep") { model.get(itemId: row.id) }.buttonStyle(.bordered).accessibilityIdentifier("get-\(row.id)")

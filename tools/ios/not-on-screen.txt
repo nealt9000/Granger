@@ -1,0 +1,30 @@
+# Swift literals that look like English but are never shown or spoken (make_text_ids.py --check's lint skips them),
+# or are names that read the same in every language. One per line: <path under ios/Granger>: <literal as written>.
+# Data and code, not words
+Sources/App/GrangerApp.swift: Netherfield
+Sources/Books/BookNavigatorHost.swift: .granger-ref { border-bottom: 1.5px dotted; box-sizing: border-box; pointer-events: none; }
+Sources/Books/PdfKitEngine.swift: Link
+Sources/Books/PdfKitEngine.swift: Tr
+Sources/Books/PdfKitEngine.swift: Tf
+Sources/Books/PdfKitEngine.swift: Font
+Sources/Books/PdfKitEngine.swift: Tj
+Sources/Books/PdfKitEngine.swift: Do
+Sources/Books/PdfKitEngine.swift: Subtype
+Sources/Books/PdfKitEngine.swift: Image
+Sources/Books/PdfKitEngine.swift: Width
+Sources/Books/PdfKitEngine.swift: Height
+Sources/Music/MusicNativesImpl.swift: MUSICBRAINZ ALBUM TYPE
+Sources/Music/MusicNativesImpl.swift: MUSICBRAINZ ALBUM ARTIST
+Sources/Reader/PageBridge.swift: document.documentElement.style.webkitTextSizeAdjust = '\(Int((scale * 100).rounded()))%';
+Sources/Reader/PageBridge.swift: var e = document.getElementById('\(escaped)'); if (e) { e.scrollIntoView({ block: 'start' }); }
+# PDFKit's reasons go to the shared PdfOpening as data (a log line, not a screen)
+Sources/Books/PdfKitEngine.swift: PDFKit can't read \((path as NSString).lastPathComponent)
+Sources/Books/PdfKitEngine.swift: needs a password
+# Debug-only (a -debug… launch argument's play source) and the widget gallery's sample track
+Sources/Voice/VoiceCenter.swift: Debug
+Widgets/GrangerWidgets.swift: Mars, the Bringer of War
+Widgets/GrangerWidgets.swift: Gustav Holst
+# Names, the same in Spanish
+Sources/Downloads/GetMoreScreen.swift: Kiwix
+Sources/Search/SearchScreen.swift: Wikipedia
+Sources/Topic/TopicScreen.swift: Wikipedia

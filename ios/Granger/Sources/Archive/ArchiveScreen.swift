@@ -64,7 +64,7 @@ struct ArchiveScreen: View {
                                 }
                             }
                         }
-                        Text(ui.kind == .texts ? ArchiveWords.filterNote : "Showing public-domain recordings only: published before \(ui.filterYear).")
+                        Text(ui.kind == .texts ? ArchiveWords.filterNote : L("Showing public-domain recordings only: published before \(ui.filterYear)."))
                             .font(.caption).foregroundStyle(palette.onSurfaceVariant)
                     }
                     if let notice = ui.notice {
@@ -113,14 +113,14 @@ struct ArchiveScreen: View {
         .alert("Remove?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
             Button("Remove", role: .destructive) { if let id = removing { holder.model?.remove(identifier: id) }; removing = nil }
             Button("Keep", role: .cancel) { removing = nil }
-        } message: { Text(kind == .texts ? ArchiveWords.removeBody : "This deletes its files. Your place and bookmarks are kept.") }
+        } message: { Text(kind == .texts ? ArchiveWords.removeBody : L("This deletes its files. Your place and bookmarks are kept.")) }
     }
 
     private var prompt: String {
         switch kind {
-        case .spokenWord: "Search archive.org audiobooks"
-        case .music: "Search archive.org music"
-        default: "Search archive.org texts"
+        case .spokenWord: L("Search archive.org audiobooks")
+        case .music: L("Search archive.org music")
+        default: L("Search archive.org texts")
         }
     }
 
@@ -139,11 +139,11 @@ struct ArchiveScreen: View {
         guard let c = holder.ui?.confirm else { return "" }
         let size = QueueWords.bytes(c.bytes)
         switch c.what {
-        case .pdf: return "This PDF is \(size). Download it?"
-        case .part: return "This part is \(size). Download it?"
-        case .set: return "This set is \(size). Download it?"
-        case .parts: return c.count == 1 ? "This part is \(size). Download it?" : "These \(c.count) parts are \(size). Download them?"
-        default: return "This download is \(size). Download it?"
+        case .pdf: return L("This PDF is \(size). Download it?")
+        case .part: return L("This part is \(size). Download it?")
+        case .set: return L("This set is \(size). Download it?")
+        case .parts: return L("These \(c.count) parts are \(size). Download them?")
+        default: return L("This download is \(size). Download it?")
         }
     }
 
@@ -233,7 +233,7 @@ struct ArchiveItemSheet: View {
                 switch onEnum(of: sheet.pdfStatus) {
                 case .notInstalled: Button(ArchiveWords.getPdf(pdf)) { model.get(identifier: sheet.identifier, pdf: true) }.buttonStyle(.bordered)
                 case .installed, .updateAvailable: Text("PDF in your library").font(.caption)
-                default: Text(ArchiveWords.status(sheet.pdfStatus).map { "PDF: \($0)" } ?? "").font(.caption).foregroundStyle(palette.onSurfaceVariant)
+                default: Text(ArchiveWords.status(sheet.pdfStatus).map { L("PDF: \($0)") } ?? "").font(.caption).foregroundStyle(palette.onSurfaceVariant)
                 }
             }
         }
@@ -272,7 +272,7 @@ struct ArchiveItemSheet: View {
                 switch onEnum(of: offer) {
                 case .download:
                     let all = !sheet.parts.isEmpty
-                    let label = sheet.sizeBytes.map { (all ? "Keep all · " : "Keep · ") + QueueWords.bytes($0.int64Value) } ?? (all ? "Keep all" : "Keep")
+                    let label = sheet.sizeBytes.map { all ? L("Keep all · \(QueueWords.bytes($0.int64Value))") : L("Keep · \(QueueWords.bytes($0.int64Value))") } ?? (all ? L("Keep all") : L("Keep"))
                     Button(label) { model.get(identifier: sheet.identifier, pdf: false) }.buttonStyle(.borderedProminent)
                         .accessibilityIdentifier("archive-keep")
                 case .lendOnly:
@@ -286,7 +286,7 @@ struct ArchiveItemSheet: View {
 
     /// A set's parts in order, each with its size and where its download stands, Keep or Remove on its own.
     @ViewBuilder private var parts: some View {
-        Text(sheet.parts.count == 1 ? "1 part" : "\(sheet.parts.count) parts").font(Spectral.medium(20))
+        Text("\(sheet.parts.count) parts").font(Spectral.medium(20))
         ForEach(sheet.parts, id: \.number) { part in
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 2) {
@@ -310,22 +310,22 @@ struct ArchiveItemSheet: View {
 
 /// archive.org's words (Android's strings_archive.xml).
 enum ArchiveWords {
-    static let filterNote = "Showing public-domain texts only: published 1930 or earlier."
-    static let download = "Keep"
-    static let dontAskAgain = "Don't ask again"
-    static let removeBody = "This deletes the file. Your place, bookmarks and highlights are kept."
-    static let spokenWordNote = "Archive.org dates spoken-word recordings by their text, not the recording, so Granger can't tell which are in the public domain. LibriVox recordings all are."
+    static let filterNote = L("Showing public-domain texts only: published 1930 or earlier.")
+    static let download = L("Keep")
+    static let dontAskAgain = L("Don't ask again")
+    static let removeBody = L("This deletes the file. Your place, bookmarks and highlights are kept.")
+    static let spokenWordNote = L("Archive.org dates spoken-word recordings by their text, not the recording, so Granger can't tell which are in the public domain. LibriVox recordings all are.")
 
     /// What an audio item offers: its format on a row, "7 tracks · VBR MP3" once its files are known.
     static func audio(_ offer: AudioOffer?) -> String? {
         guard let offer else { return nil }
         switch onEnum(of: offer) {
-        case let .tracks(t): return t.files.isEmpty ? t.format : (t.files.count == 1 ? "1 track · \(t.format)" : "\(t.files.count) tracks · \(t.format)")
-        case .lendOnly: return "Borrow on archive.org"
-        case .nothing: return "No downloadable audio"
+        case let .tracks(t): return t.files.isEmpty ? t.format : L("\(t.files.count) tracks · \(t.format)")
+        case .lendOnly: return L("Borrow on archive.org")
+        case .nothing: return L("No downloadable audio")
         }
     }
-    static func getPdf(_ bytes: Int64) -> String { "Keep PDF · \(QueueWords.bytes(bytes))" }
+    static func getPdf(_ bytes: Int64) -> String { L("Keep PDF · \(QueueWords.bytes(bytes))") }
 
     /// What an item offers ("EPUB", "OCR text: may have errors · PDF", "Comic: its pages, to zoom · 4 parts").
     static func offer(_ offer: Offer?, sheet: ItemSheet?) -> String? {
@@ -333,26 +333,26 @@ enum ArchiveWords {
         switch onEnum(of: offer) {
         case let .download(d):
             let kind: String = switch d.kind {
-            case .epub: d.pdf != nil ? "EPUB made from a scan · PDF" : "EPUB"
-            case .text: "Plain text"
-            case .ocrText: d.pdf != nil ? "OCR text: may have errors · PDF" : "OCR text: may have errors"
+            case .epub: d.pdf != nil ? L("EPUB made from a scan · PDF") : "EPUB"
+            case .text: L("Plain text")
+            case .ocrText: d.pdf != nil ? L("OCR text: may have errors · PDF") : L("OCR text: may have errors")
             case .pdf: "PDF"
-            case .comic: "Comic: its pages, to zoom"
+            case .comic: L("Comic: its pages, to zoom")
             }
-            return d.isSet ? "\(kind) · \(d.parts.count) parts" : kind
-        case .lendOnly: return "Borrow on archive.org"
-        case .nothing: return "No downloadable text"
+            return d.isSet ? L("\(kind) · \(d.parts.count) parts") : kind
+        case .lendOnly: return L("Borrow on archive.org")
+        case .nothing: return L("No downloadable text")
         }
     }
 
     /// Where a download stands, in a row or the sheet; nil when there's nothing to say.
     static func status(_ s: ItemStatus) -> String? {
         switch onEnum(of: s) {
-        case let .queued(q): q.lastError.map { "Retrying: \($0)" } ?? (q.wifiOnly ? "Waiting for Wi-Fi" : "Queued")
-        case let .downloading(d): "Downloading · \(Int(d.fraction * 100))%"
-        case let .failed(f): f.reason.map { "Stopped: \($0)" } ?? "Stopped"
-        case .installed: "In your library"
-        case let .partial(p): "\(p.done) of \(p.total) in your library"
+        case let .queued(q): q.lastError.map { L("Retrying: \($0)") } ?? (q.wifiOnly ? L("Waiting for Wi-Fi") : L("Queued"))
+        case let .downloading(d): L("Downloading · \(Int(d.fraction * 100))%")
+        case let .failed(f): f.reason.map { L("Stopped: \($0)") } ?? L("Stopped")
+        case .installed: L("In your library")
+        case let .partial(p): L("\(p.done) of \(p.total) in your library")
         default: nil
         }
     }
@@ -360,10 +360,10 @@ enum ArchiveWords {
     static func part(_ p: PartRow) -> String {
         let size = QueueWords.bytes(p.sizeBytes)
         switch onEnum(of: p.status) {
-        case .queued: return "\(size) · queued"
-        case let .downloading(d): return "\(size) · downloading, \(Int(d.fraction * 100))%"
-        case let .failed(f): return "\(size) · stopped: \(f.reason ?? "")"
-        case .installed, .updateAvailable: return "\(size) · in your library"
+        case .queued: return L("\(size) · queued")
+        case let .downloading(d): return L("\(size) · downloading, \(Int(d.fraction * 100))%")
+        case let .failed(f): return L("\(size) · stopped: \(f.reason ?? "")")
+        case .installed, .updateAvailable: return L("\(size) · in your library")
         default: return size
         }
     }

@@ -40,9 +40,9 @@ final class CarPlayScene: UIResponder, CPTemplateApplicationSceneDelegate {
 
     private static func tabTitle(_ id: String) -> String {
         switch id {
-        case MediaBrowse.companion.RECENT: return ScreenText.strings["media_auto_recent"] ?? "Recent"
-        case MediaBrowse.companion.MUSIC: return ScreenText.strings["media_auto_music"] ?? "Music"
-        default: return ScreenText.strings["media_auto_audiobooks"] ?? "Audiobooks"
+        case MediaBrowse.companion.RECENT: return ScreenText.strings["media_auto_recent"] ?? L("Recent")
+        case MediaBrowse.companion.MUSIC: return ScreenText.strings["media_auto_music"] ?? L("Music")
+        default: return ScreenText.strings["media_auto_audiobooks"] ?? L("Audiobooks")
         }
     }
 

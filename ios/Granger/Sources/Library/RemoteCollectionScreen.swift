@@ -146,8 +146,8 @@ struct RemoteCollectionScreen: View {
     private func meta(_ row: RemoteBookRow, kept: Bool, saved: Bool) -> String {
         if row.edition != nil { return [BkWords.readingEdition, row.editionBytes > 0 ? QueueWords.bytes(row.editionBytes) : nil].compactMap { $0 }.joined(separator: " · ") }
         let size = QueueWords.bytes(row.bytes)
-        if kept { return "\(size) · On this phone" }
-        if saved { return "\(size) · Saved for now" }
+        if kept { return L("\(size) · On this phone") }
+        if saved { return L("\(size) · Saved for now") }
         return BkWords.online(size)
     }
 
@@ -162,27 +162,27 @@ struct RemoteCollectionScreen: View {
 
 /// Plan BK's words (Android's strings_bookshelf.xml).
 enum BkWords {
-    static let everyCollection = "Every collection"
-    static let everyCollectionSub = "Open any book online. Keep what you want on this phone."
-    static func keepCollection(_ bytes: Int64) -> String { "Keep the whole collection · \(QueueWords.bytes(bytes))" }
-    static let collectionQueued = "Coming to this phone"
-    static let keepBook = "Keep this book"
-    static let keptOnPhone = "Kept on this phone"
-    static func online(_ size: String) -> String { "\(size) · online" }
-    static func opening(_ title: String) -> String { "Opening \(title)…" }
-    static func progress(_ done: Int64, _ total: Int64) -> String { "\(QueueWords.bytes(done)) of \(QueueWords.bytes(total))" }
-    static let cancel = "Cancel"
-    static func bigTitle(_ bytes: Int64) -> String { "This book is \(QueueWords.bytes(bytes))" }
-    static let bigBody = "Reading it online saves it for now; keep it to have it offline for good."
-    static let bigOverCap = "It's bigger than Saved for now, so it goes when you close it unless you keep it."
-    static let readNow = "Read now"
-    static let keep = "Keep"
-    static let filter = "Find in this collection"
-    static let noList = "This collection's list isn't online. Keep the whole collection to read it."
-    static let needsInternet = "Needs internet to open its books."
-    static let readingEdition = "Reading edition"
-    static let originalScan = "Original scan"
-    static let openCollection = "Open the collection"
-    static func kept(_ kept: Int32, of total: Int) -> String { "\(kept) of \(total) kept" }
-    static let couldntOpen = "Couldn't open that book just now."
+    static let everyCollection = L("Every collection")
+    static let everyCollectionSub = L("Open any book online. Keep what you want on this phone.")
+    static func keepCollection(_ bytes: Int64) -> String { L("Keep the whole collection · \(QueueWords.bytes(bytes))") }
+    static let collectionQueued = L("Coming to this phone")
+    static let keepBook = L("Keep this book")
+    static let keptOnPhone = L("Kept on this phone")
+    static func online(_ size: String) -> String { L("\(size) · online") }
+    static func opening(_ title: String) -> String { L("Opening \(title)…") }
+    static func progress(_ done: Int64, _ total: Int64) -> String { L("\(QueueWords.bytes(done)) of \(QueueWords.bytes(total))") }
+    static let cancel = L("Cancel")
+    static func bigTitle(_ bytes: Int64) -> String { L("This book is \(QueueWords.bytes(bytes))") }
+    static let bigBody = L("Reading it online saves it for now; keep it to have it offline for good.")
+    static let bigOverCap = L("It's bigger than Saved for now, so it goes when you close it unless you keep it.")
+    static let readNow = L("Read now")
+    static let keep = L("Keep")
+    static let filter = L("Find in this collection")
+    static let noList = L("This collection's list isn't online. Keep the whole collection to read it.")
+    static let needsInternet = L("Needs internet to open its books.")
+    static let readingEdition = L("Reading edition")
+    static let originalScan = L("Original scan")
+    static let openCollection = L("Open the collection")
+    static func kept(_ kept: Int32, of total: Int) -> String { L("\(kept) of \(total) kept") }
+    static let couldntOpen = L("Couldn't open that book just now.")
 }

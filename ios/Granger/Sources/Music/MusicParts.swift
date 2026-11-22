@@ -52,15 +52,15 @@ enum MusicDialog: Identifiable {
 enum MusicWords {
     static func shown(_ name: String) -> String {
         switch name {
-        case Albums.shared.UNKNOWN_ARTIST: "Unknown artist"
-        case Albums.shared.UNKNOWN_ALBUM: "Unknown album"
-        case MediaNames.shared.UNKNOWN_GENRE: "Unknown genre"
+        case Albums.shared.UNKNOWN_ARTIST: L("Unknown artist")
+        case Albums.shared.UNKNOWN_ALBUM: L("Unknown album")
+        case MediaNames.shared.UNKNOWN_GENRE: L("Unknown genre")
         default: name
         }
     }
 
-    static func songs(_ n: Int) -> String { n == 1 ? "1 song" : "\(n) songs" }
-    static func albums(_ n: Int) -> String { n == 1 ? "1 album" : "\(n) albums" }
+    static func songs(_ n: Int) -> String { L("\(n) songs") }
+    static func albums(_ n: Int) -> String { L("\(n) albums") }
 
     static func trackArtist(_ t: Track) -> String { MusicCatalog.shared.trackArtistsOf(t: t).map(shown).joined(separator: ", ") }
     static func trackAlbum(_ t: Track) -> String { shown(Albums.shared.title(track: t)) }
@@ -170,7 +170,7 @@ struct SongRow<Extra: View>: View {
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text(MusicWords.title(track)).foregroundStyle(playing != nil ? palette.primary : palette.onSurface).lineLimit(1)
-                    Text(playable ? subtitle : "File not found").font(.callout).foregroundStyle(palette.onSurfaceVariant).lineLimit(1)
+                    Text(playable ? subtitle : L("File not found")).font(.callout).foregroundStyle(palette.onSurfaceVariant).lineLimit(1)
                 }
                 Spacer(minLength: 8)
                 Text(formatTime(track.durationMs)).font(.caption.monospacedDigit()).foregroundStyle(palette.onSurfaceVariant)
@@ -335,7 +335,7 @@ struct MusicDialogHost: ViewModifier {
             }
             .sheet(item: movePick) { d in
                 if case let .moveAlbum(album) = d {
-                    MoveSheet(shelves: holder.targets, current: holder.model?.collectionOf(album: album), title: "Move to collection…",
+                    MoveSheet(shelves: holder.targets, current: holder.model?.collectionOf(album: album), title: L("Move to collection…"),
                               allowNewMediaType: false) { pick in
                         dialog = nil
                         switch pick {

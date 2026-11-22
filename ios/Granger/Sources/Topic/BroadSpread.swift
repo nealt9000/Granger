@@ -18,12 +18,12 @@ struct BroadSpreadView: View {
             + broad.figures.prefix(2).enumerated().map { i, f in PlateItem(id: "b\(i + 1)", title: f.caption, picture: f.picture, whole: f.picture.hasSuffix(".w.jpg")) }
         VStack(alignment: .leading, spacing: 0) {
             if let place = broad.place {
-                TrailLine(steps: ["Explore", Words.of(Subject.companion.of(id: place.subject)?.labelKey ?? "")] + (place.room.map { [$0.name(language: lang)] } ?? []), here: header.title)
+                TrailLine(steps: [L("Explore"), Words.of(Subject.companion.of(id: place.subject)?.labelKey ?? "")] + (place.room.map { [$0.name(language: lang)] } ?? []), here: header.title)
                     .padding(.horizontal, 16).padding(.bottom, 8)
             }
             OpeningPlates(plates: plates, numbered: plates.count > 1)
             VStack(alignment: .leading, spacing: 10) {
-                SpreadHead(eyebrow: topic.time.map { YearWords.english.of(m: $0.mark) }, title: header.title, standfirst: header.lead, large: true)
+                SpreadHead(eyebrow: topic.time.map { YearWords.app.of(m: $0.mark) }, title: header.title, standfirst: header.lead, large: true)
                 if plates.count > 1 { Captions(lines: plates.map(\.title)) }
                 HStack(spacing: 8) {
                     NavigationLink(value: Route.reader(lang: lang, path: path, fragment: nil)) {
@@ -32,7 +32,7 @@ struct BroadSpreadView: View {
                     .background(palette.secondary, in: RoundedRectangle(cornerRadius: 2))
                     .foregroundStyle(palette.onSecondary)
                     .accessibilityIdentifier("read-full")
-                    NavigationLink(value: Route.quilt(lang: lang, path: path)) { DoLabel(text: "Connections") }
+                    NavigationLink(value: Route.quilt(lang: lang, path: path)) { DoLabel(text: L("Connections")) }
                         .accessibilityIdentifier("connections")
                 }
                 KeepButton(lang: lang, title: path)
@@ -42,10 +42,10 @@ struct BroadSpreadView: View {
             if let story = broad.story, !story.entries.isEmpty { storyView(story) }
             if !broad.people.isEmpty { people }
             if !broad.chapters.isEmpty { chapters }
-            WaysOn(title: "Ways on", ways: [("Wander from here", "Wander", Route.wander(packId: topic.packId, path: path))]).padding(.top, 30)
+            WaysOn(title: L("Ways on"), ways: [(L("Wander from here"), L("Wander"), Route.wander(packId: topic.packId, path: path))]).padding(.top, 30)
             if let place = broad.place, place.total > 0 {
                 Doors(before: place.before.map { ($0.title, route($0)) }, after: place.after.map { ($0.title, route($0)) },
-                      middle: "\(place.position) of \(place.total)", beforeLabel: "The topic before", afterLabel: "The topic after")
+                      middle: L("\(place.position) of \(place.total)"), beforeLabel: L("The topic before"), afterLabel: L("The topic after"))
                     .padding(.top, 24)
             }
         }
@@ -55,11 +55,11 @@ struct BroadSpreadView: View {
         let families = broad.families.filter { !$0.all.isEmpty }
         if !families.isEmpty {
             let named = families.compactMap(\.name)
-            SpreadHead(eyebrow: "Kinds", title: named.isEmpty ? "\(broad.under) kinds" : "\(broad.groups.count) families: \(named.prefix(3).joined(separator: ", "))")
+            SpreadHead(eyebrow: L("Kinds"), title: named.isEmpty ? L("\(broad.under) kinds") : L("\(broad.groups.count) families: \(named.prefix(3).joined(separator: ", "))"))
                 .padding(.horizontal, 16).padding(.top, 32).padding(.bottom, 10)
             ForEach(Array(families.enumerated()), id: \.offset) { i, family in
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(family.name ?? "Other kinds").font(Spectral.medium(20)).foregroundStyle(palette.onSurface)
+                    Text(family.name ?? L("Other kinds")).font(Spectral.medium(20)).foregroundStyle(palette.onSurface)
                     let shown = opened.contains(i) ? family.all : family.plates
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 3), spacing: 2) {
                         ForEach(shown, id: \.path) { a in
@@ -86,10 +86,10 @@ struct BroadSpreadView: View {
         let years = story.entries.map(\.year)
         let first = years.min() ?? 0, last = years.max() ?? 0
         return VStack(alignment: .leading, spacing: 12) {
-            SpreadHead(eyebrow: "Chapter · \(story.title)", title: first != last ? "From \(YearWords.english.year(y: first)) to \(YearWords.english.year(y: last))" : story.title)
+            SpreadHead(eyebrow: L("Chapter · \(story.title)"), title: first != last ? L("From \(YearWords.app.year(y: first)) to \(YearWords.app.year(y: last))") : story.title)
             ForEach(Array(story.entries.enumerated()), id: \.offset) { _, e in
                 HStack(alignment: .top, spacing: 12) {
-                    Text(YearWords.english.year(y: e.year)).font(Spectral.medium(17)).foregroundStyle(palette.primary).frame(width: 84, alignment: .trailing)
+                    Text(YearWords.app.year(y: e.year)).font(Spectral.medium(17)).foregroundStyle(palette.primary).frame(width: 84, alignment: .trailing)
                     if let p = e.picture {
                         PlateTile(plate: PlateItem(id: p, title: "", picture: p)).frame(width: 110, height: 80)
                     }
@@ -107,11 +107,11 @@ struct BroadSpreadView: View {
 
     private var people: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SpreadHead(eyebrow: "People", title: broad.people.count == 1 ? "1 person stands near it" : "\(broad.people.count) people stand near it")
+            SpreadHead(eyebrow: L("People"), title: L("\(broad.people.count) people stand near it"))
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 3), spacing: 2) {
                 ForEach(broad.people, id: \.article.path) { p in
                     NavigationLink(value: route(p.article)) {
-                        PlateTile(plate: PlateItem(id: p.article.path, title: p.article.title, picture: p.article.picture, sub: p.mark.map { YearWords.english.of(m: $0) }), showTitle: true, titleSize: 13)
+                        PlateTile(plate: PlateItem(id: p.article.path, title: p.article.title, picture: p.article.picture, sub: p.mark.map { YearWords.app.of(m: $0) }), showTitle: true, titleSize: 13)
                             .frame(height: 130)
                     }
                     .buttonStyle(.plain)
@@ -123,7 +123,7 @@ struct BroadSpreadView: View {
 
     private var chapters: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SpreadHead(eyebrow: "Chapters", title: "What its article covers")
+            SpreadHead(eyebrow: L("Chapters"), title: L("What its article covers"))
             ForEach(Array(broad.chapters.enumerated()), id: \.offset) { _, c in
                 VStack(alignment: .leading, spacing: 4) {
                     Text(c.title).font(Spectral.medium(19)).foregroundStyle(palette.onSurface)

@@ -47,15 +47,15 @@ func laneColor(_ lane: Lane, night: Bool) -> Color {
 /// A lane's name (Android's home_lane_*).
 func laneName(_ lane: Lane) -> String {
     switch lane {
-    case .philosophyReligion: "Philosophy & religion"
-    case .civilisations: "Civilisations & empires"
-    case .languages: "Languages"
-    case .filmMusic: "Film & music"
-    case .artLiterature: "Art & literature"
-    case .science: "Science & invention"
-    case .wars: "Wars"
-    case .eventsPolitics: "Events & politics"
-    default: "People"
+    case .philosophyReligion: L("Philosophy & religion")
+    case .civilisations: L("Civilisations & empires")
+    case .languages: L("Languages")
+    case .filmMusic: L("Film & music")
+    case .artLiterature: L("Art & literature")
+    case .science: L("Science & invention")
+    case .wars: L("Wars")
+    case .eventsPolitics: L("Events & politics")
+    default: L("People")
     }
 }
 
@@ -103,7 +103,7 @@ struct RiverView: View {
 
     private var rangeLabel: String {
         let ys = ui.window.years()
-        return YearWords.english.range(from: ys.first!.int32Value, to: ys.second!.int32Value)
+        return YearWords.app.range(from: ys.first!.int32Value, to: ys.second!.int32Value)
     }
 
     private func drag(w: CGFloat) -> some Gesture {
@@ -205,7 +205,7 @@ struct RiverView: View {
         ctx.stroke(base, with: .color(palette.outline), lineWidth: 1)
         var latestLeft = CGFloat.infinity
         if ui.window.end >= ui.bounds.end - 1e-6 {
-            let t = ctx.resolve(Text(YearWords.english.year(y: Int64(ui.latest))).font(.system(size: 10)).foregroundStyle(palette.primary))
+            let t = ctx.resolve(Text(YearWords.app.year(y: Int64(ui.latest))).font(.system(size: 10)).foregroundStyle(palette.primary))
             let s = t.measure(in: CGSize(width: 200, height: 20))
             latestLeft = w - s.width
             ctx.draw(t, at: CGPoint(x: latestLeft, y: bottom + 5), anchor: .topLeading)
@@ -215,7 +215,7 @@ struct RiverView: View {
             let x = CGFloat(ui.window.x(year: Double(y.int64Value), width: Float(w)))
             var tick = Path(); tick.move(to: CGPoint(x: x, y: bottom)); tick.addLine(to: CGPoint(x: x, y: bottom + 4))
             ctx.stroke(tick, with: .color(palette.outline), lineWidth: 1)
-            let t = ctx.resolve(Text(YearWords.english.tick(y: y.int64Value)).font(.system(size: 10)).foregroundStyle(palette.onSurfaceVariant))
+            let t = ctx.resolve(Text(YearWords.app.tick(y: y.int64Value)).font(.system(size: 10)).foregroundStyle(palette.onSurfaceVariant))
             let s = t.measure(in: CGSize(width: 200, height: 20))
             let left = min(max(0, x - s.width / 2), w - s.width)
             if left > lastRight + 4 && left + s.width < latestLeft - 4 {
@@ -263,7 +263,7 @@ struct TimelineCaption: View {
                             .background(palette.surfaceContainerHighest)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(YearWords.english.of(m: s)).font(Spectral.medium(16)).foregroundStyle(palette.primary)
+                            Text(YearWords.app.of(m: s)).font(Spectral.medium(16)).foregroundStyle(palette.primary)
                             Text(s.title).font(Spectral.medium(22)).foregroundStyle(palette.onSurface).lineLimit(2)
                         }
                         Spacer(minLength: 0)
@@ -294,7 +294,7 @@ struct LaneChips: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 if toggles {
-                    chip("All", on: ui.on.isEmpty, color: palette.primary) { model.all() }
+                    chip(L("All"), on: ui.on.isEmpty, color: palette.primary) { model.all() }
                 }
                 ForEach(ui.lanes, id: \.self) { lane in
                     let c = laneColor(lane, night: scheme == .dark)
@@ -385,7 +385,7 @@ struct TimelineScreen: View {
                         ForEach(ui.nearby, id: \.qid) { m in
                             NavigationLink(value: Route.article(packId: m.packId, path: m.path)) {
                                 HStack {
-                                    Text(YearWords.english.of(m: m)).font(.callout).foregroundStyle(palette.primary).frame(width: 120, alignment: .leading)
+                                    Text(YearWords.app.of(m: m)).font(.callout).foregroundStyle(palette.primary).frame(width: 120, alignment: .leading)
                                     Text(m.title).font(Spectral.regular(18)).foregroundStyle(palette.onBackground)
                                     Spacer()
                                 }

@@ -95,15 +95,15 @@ struct ArticleFooterSheet: View {
 
 /// The footer's words (Android's strings_reader.xml) and its summary line.
 enum FooterWords {
-    static let title = "In your library"
-    static let thisWork = "You have this book"
-    static let inBooksHeading = "In your books"
-    static let byAuthorHeading = "By this author in your library"
-    static let read = "Read"
-    static func inBooks(_ n: Int) -> String { "Mentioned in \(n) of your books" }
-    static func byAuthor(_ n: Int) -> String { n == 1 ? "1 book by this author" : "\(n) books by this author" }
-    static func mentions(_ n: Int) -> String { n == 1 ? "1 mention" : "\(n) mentions" }
-    static func moreBooks(_ n: Int) -> String { "and \(n) more of your books" }
+    static let title = L("In your library")
+    static let thisWork = L("You have this book")
+    static let inBooksHeading = L("In your books")
+    static let byAuthorHeading = L("By this author in your library")
+    static let read = L("Read")
+    static func inBooks(_ n: Int) -> String { L("Mentioned in \(n) of your books") }
+    static func byAuthor(_ n: Int) -> String { L("\(n) books by this author") }
+    static func mentions(_ n: Int) -> String { L("\(n) mentions") }
+    static func moreBooks(_ n: Int) -> String { L("and \(n) more of your books") }
 
     /// The card's line: the work on the phone, how many books mention the subject, how many by this author.
     static func parts(_ f: ArticleFooter) -> String {

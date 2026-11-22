@@ -26,40 +26,40 @@ enum ReadiumBooks {
 
 /// The words Android's reader shows (strings_ebook.xml), for the iPhone's reader.
 enum BookWords {
-    static let bookGone = "This book isn't on the phone any more. Check the SD card, or download it again from Granger."
-    static let bookDamaged = "This book couldn't be opened. Try removing it, then download or import it again."
-    static let searchInBook = "Search in book"
-    static let searchInThisBook = "Search in this book"
-    static func nothingFound(_ q: String) -> String { "Nothing found for “\(q)”." }
-    static func pageOf(_ p: Int, _ n: Int) -> String { "p. \(p) of \(n)" }
+    static let bookGone = L("This book isn't on the phone any more. Check the SD card, or download it again from Granger.")
+    static let bookDamaged = L("This book couldn't be opened. Try removing it, then download or import it again.")
+    static let searchInBook = L("Search in book")
+    static let searchInThisBook = L("Search in this book")
+    static func nothingFound(_ q: String) -> String { L("Nothing found for “\(q)”.") }
+    static func pageOf(_ p: Int, _ n: Int) -> String { L("p. \(p) of \(n)") }
     static func percent(_ p: Int) -> String { "\(p)%" }
-    static let noContents = "This book has no contents list."
-    static let noPdfContents = "This PDF has no contents list of its own. If it has a contents page, it's in the pages."
-    static let untitled = "Untitled"
-    static let bookmark = "Bookmark"
-    static let noBookmarks = "No bookmarks yet. Tap the star on the page you want to keep."
-    static let noHighlights = "No highlights yet. Select text in the book to highlight it."
-    static let cantFind = "Can't find this passage in the current edition"
-    static func noWiktionaryEntry(_ w: String) -> String { "No entry for “\(w)” in Wiktionary" }
-    static let noDictionary = "No dictionary app is installed"
-    static func lookupFailed(_ w: String) -> String { "Couldn’t look up “\(w)”" }
+    static let noContents = L("This book has no contents list.")
+    static let noPdfContents = L("This PDF has no contents list of its own. If it has a contents page, it's in the pages.")
+    static let untitled = L("Untitled")
+    static let bookmark = L("Bookmark")
+    static let noBookmarks = L("No bookmarks yet. Tap the star on the page you want to keep.")
+    static let noHighlights = L("No highlights yet. Select text in the book to highlight it.")
+    static let cantFind = L("Can't find this passage in the current edition")
+    static func noWiktionaryEntry(_ w: String) -> String { L("No entry for “\(w)” in Wiktionary") }
+    static let noDictionary = L("No dictionary app is installed")
+    static func lookupFailed(_ w: String) -> String { L("Couldn’t look up “\(w)”") }
 
     static func packProblem(_ p: PackDocumentProblem) -> String {
         switch p {
-        case .unreadablePack: "Couldn't open this PDF: the pack isn't readable."
-        case .notInPack: "Couldn't open this PDF: it isn't in this pack."
-        case .noSpace: "Couldn't open this PDF: not enough space for it."
-        case .copyFailed: "Couldn't open this PDF: copying it out of the pack failed."
-        case .damaged: "Couldn't open this PDF: it is damaged or protected."
+        case .unreadablePack: L("Couldn't open this PDF: the pack isn't readable.")
+        case .notInPack: L("Couldn't open this PDF: it isn't in this pack.")
+        case .noSpace: L("Couldn't open this PDF: not enough space for it.")
+        case .copyFailed: L("Couldn't open this PDF: copying it out of the pack failed.")
+        case .damaged: L("Couldn't open this PDF: it is damaged or protected.")
         }
     }
 
-    static let notInPackList = "Couldn't open this book: it isn't in this pack's list."
-    static let referenceLinks = "Reference links"
-    static let linkOpen = "Open article"
-    static func linkInLibrary(_ title: String) -> String { "In your library: \(title)" }
-    static let linkRead = "Read the book"
-    static let linkGone = "That article isn’t on your phone any more"
+    static let notInPackList = L("Couldn't open this book: it isn't in this pack's list.")
+    static let referenceLinks = L("Reference links")
+    static let linkOpen = L("Open article")
+    static func linkInLibrary(_ title: String) -> String { L("In your library: \(title)") }
+    static let linkRead = L("Read the book")
+    static let linkGone = L("That article isn’t on your phone any more")
 }
 
 /// The system dictionary for Define when no Wiktionary pack is installed (Plan I5 call 8): `UIReferenceLibraryViewController`,
@@ -356,7 +356,7 @@ final class BookReaderModel {
         if let t = l.title, !t.trimmingCharacters(in: .whitespaces).isEmpty { return t }
         guard isPdf, let page = l.locations.position else { return "" }
         if let i = GrangerCore.TocPlaceKt.pdfTocIndex(toc: toc, page: Int32(page))?.intValue, !toc[i].title.isEmpty { return toc[i].title }
-        return "Page \(page)"
+        return L("Page \(page)")
     }
 
     /// "Chapter · p. 120 of 410", or "Chapter · 29%" while the pages are uncounted.
@@ -519,7 +519,7 @@ final class BookReaderModel {
     private func bookmarkText(_ l: Locator) -> String {
         guard isPdf, let page = l.locations.position else { return l.title ?? "" }
         let entry = GrangerCore.TocPlaceKt.pdfTocIndex(toc: toc, page: Int32(page)).flatMap { toc[$0.intValue].title.isEmpty ? nil : toc[$0.intValue].title }
-        return [entry, "p. \(page)"].compactMap { $0 }.joined(separator: " · ")
+        return [entry, L("p. \(page)")].compactMap { $0 }.joined(separator: " · ")
     }
 
     /// The same file and page position; without positions on both, the progression within 0.0005.

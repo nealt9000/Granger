@@ -68,9 +68,7 @@ struct MediaSettingsScreen: View {
             }
             .accessibilityIdentifier("media-access")
             if center.libraryStatus == .authorized && center.leftOut > 0 {
-                Text(center.leftOut == 1
-                     ? "1 song in the Music library can't play here: it's protected or only in the cloud."
-                     : "\(center.leftOut) songs in the Music library can't play here: they're protected or only in the cloud.")
+                Text(L("\(center.leftOut) songs in the Music library can't play here: they're protected or only in the cloud."))
                     .font(.footnote).foregroundStyle(palette.onSurfaceVariant)
             }
         }
@@ -78,9 +76,9 @@ struct MediaSettingsScreen: View {
 
     private func accessLine(_ status: MPMediaLibraryAuthorizationStatus) -> String {
         switch status {
-        case .authorized: "Granger reads them where they are and never changes them."
-        case .notDetermined: "Not allowed. Granger works without it, and folders you add below still work."
-        default: "Not allowed. iOS won't ask again: allow Media & Apple Music in Granger's settings."
+        case .authorized: L("Granger reads them where they are and never changes them.")
+        case .notDetermined: L("Not allowed. Granger works without it, and folders you add below still work.")
+        default: L("Not allowed. iOS won't ask again: allow Media & Apple Music in Granger's settings.")
         }
     }
 
@@ -112,8 +110,8 @@ struct MediaSettingsScreen: View {
             }
             VStack(alignment: .leading, spacing: 8) {
                 Button("Import from Files") { importing = true }.accessibilityIdentifier("media-import")
-                Text(imported.map { $0 == 1 ? "Imported 1 file." : "Imported \($0) files." }
-                     ?? "Copies songs into On My iPhone › Granger › Music, where Files shows them.")
+                Text(imported.map { L("Imported \($0) files.") }
+                     ?? L("Copies songs into On My iPhone › Granger › Music, where Files shows them."))
                     .font(.footnote).foregroundStyle(palette.onSurfaceVariant)
             }
         }
@@ -141,10 +139,10 @@ struct MediaSettingsScreen: View {
 
     private func rescanLine(_ scan: MusicCenter.Rescan) -> String {
         switch scan {
-        case .idle: "Granger rescans on start and when the Music library changes."
-        case .running: "Scanning…"
-        case let .done(songs, books): "Found \(songs == 1 ? "1 song" : "\(songs) songs") and \(books == 1 ? "1 audiobook" : "\(books) audiobooks")."
-        case .failed: "The scan didn't finish. Try again."
+        case .idle: L("Granger rescans on start and when the Music library changes.")
+        case .running: L("Scanning…")
+        case let .done(songs, books): L("Found \(L("\(songs) songs")) and \(L("\(books) audiobooks")).")
+        case .failed: L("The scan didn't finish. Try again.")
         }
     }
 
@@ -166,8 +164,8 @@ struct MediaSettingsScreen: View {
             }
             // Audiobook-only: hidden until there's an audiobook (Plan U2 Decision 7).
             if audiobooks {
-                skipRow("Skip back", value: skipBack) { skipBack = $0; voice?.music.music.setSkipBack(seconds: Int32($0)) }
-                skipRow("Skip forward", value: skipForward) { skipForward = $0; voice?.music.music.setSkipForward(seconds: Int32($0)) }
+                skipRow(L("Skip back"), value: skipBack) { skipBack = $0; voice?.music.music.setSkipBack(seconds: Int32($0)) }
+                skipRow(L("Skip forward"), value: skipForward) { skipForward = $0; voice?.music.music.setSkipForward(seconds: Int32($0)) }
             }
         }
     }

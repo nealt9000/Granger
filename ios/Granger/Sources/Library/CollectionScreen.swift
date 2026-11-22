@@ -88,7 +88,7 @@ struct CollectionScreen: View {
         .onChange(of: find) { _, q in holder.model?.setQuery(text: q) }
         .sheet(item: $moving) { target in
             MoveSheet(shelves: holder.targets, current: holder.row?.collection.id,
-                      title: target.collectionFrom == nil ? "Move to collection…" : "Move collection to…", collectionFrom: target.collectionFrom) { choice in
+                      title: target.collectionFrom == nil ? L("Move to collection…") : L("Move collection to…"), collectionFrom: target.collectionFrom) { choice in
                 moving = nil
                 switch choice {
                 case let .existing(id): target.move(holder.model, id)
@@ -201,7 +201,7 @@ struct CollectionScreen: View {
     private func chips(_ names: [String], chosen: String?, pick: @escaping (String?) -> Void) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                chip("All", on: chosen == nil) { pick(nil) }
+                chip(L("All"), on: chosen == nil) { pick(nil) }
                 ForEach(names, id: \.self) { n in chip(n, on: chosen == n) { pick(chosen == n ? nil : n) } }
             }
             .padding(.horizontal, 12)
@@ -303,7 +303,7 @@ struct CollectionScreen: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(w.title).foregroundStyle(palette.onSurface).lineLimit(2)
                         if !w.author.isEmpty { Text(w.author).font(.callout).foregroundStyle(palette.onSurfaceVariant).lineLimit(1) }
-                        Text(w.parts.count == 1 ? "1 part" : "\(w.parts.count) parts").font(.caption).foregroundStyle(palette.onSurfaceVariant)
+                        Text("\(w.parts.count) parts").font(.caption).foregroundStyle(palette.onSurfaceVariant)
                     }
                     Spacer()
                     Image(systemName: w.expanded ? "chevron.up" : "chevron.down").foregroundStyle(palette.onSurfaceVariant)
@@ -326,7 +326,7 @@ struct CollectionScreen: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(edition?.title ?? book.title).foregroundStyle(palette.onSurface).lineLimit(2)
                 if edition == nil, !book.author.isEmpty { Text(book.author).font(.callout).foregroundStyle(palette.onSurfaceVariant).lineLimit(1) }
-                if let label = edition != nil ? "Reading edition" : BookLabels.format(book) { Text(label).font(.caption).foregroundStyle(palette.onSurfaceVariant) }
+                if let label = edition != nil ? L("Reading edition") : BookLabels.format(book) { Text(label).font(.caption).foregroundStyle(palette.onSurfaceVariant) }
                 if let problem = BookLabels.problem(book) { Text(problem).font(.caption).foregroundStyle(palette.error) }
             }
             Spacer(minLength: 8)
@@ -447,13 +447,13 @@ struct CollectionScreen: View {
 enum BookLabels {
     static func format(_ book: Book) -> String? {
         guard book.format == .pdf else { return nil }
-        return book.searchable ? "PDF" : "PDF · A scan: title only"
+        return book.searchable ? "PDF" : L("PDF · A scan: title only")
     }
 
     static func problem(_ book: Book) -> String? {
         switch book.status {
-        case .missing: "File not found"
-        case .corrupt: "Damaged"
+        case .missing: L("File not found")
+        case .corrupt: L("Damaged")
         default: nil
         }
     }
@@ -497,9 +497,9 @@ enum CollectionDialog: Identifiable {
 
     var title: String {
         switch self {
-        case .removeBook, .removePack: "Remove from phone?"
-        case let .makeSearchable(c, _): c.fits ? "Make all searchable?" : "Not enough space"
-        case .delete: "Delete collection?"
+        case .removeBook, .removePack: L("Remove from phone?")
+        case let .makeSearchable(c, _): c.fits ? L("Make all searchable?") : L("Not enough space")
+        case .delete: L("Delete collection?")
         }
     }
 
@@ -507,24 +507,26 @@ enum CollectionDialog: Identifiable {
         switch self {
         case let .removeBook(b):
             b.origin.isPackBook
-                ? "\(b.title) will be deleted from this phone and taken off this list; Show removed brings it back. Your place, bookmarks and highlights are kept."
-                : "\(b.title) will be deleted from this phone. Your place, bookmarks and highlights are kept."
+                ? L("\(b.title) will be deleted from this phone and taken off this list; Show removed brings it back. Your place, bookmarks and highlights are kept.")
+                : L("\(b.title) will be deleted from this phone. Your place, bookmarks and highlights are kept.")
         case let .removePack(p, documents):
             !p.isBookPack
-                ? "\(p.title) will be deleted from this phone, with the bookmarks and reading places you saved in it. You can download it again later."
-                : "\(p.title) will be deleted from this phone, with its \(documents ? "documents" : "books"). You can download it again later. Your places, bookmarks and highlights are kept."
+                ? L("\(p.title) will be deleted from this phone, with the bookmarks and reading places you saved in it. You can download it again later.")
+                : documents
+                ? L("\(p.title) will be deleted from this phone, with its documents. You can download it again later. Your places, bookmarks and highlights are kept.")
+                : L("\(p.title) will be deleted from this phone, with its books. You can download it again later. Your places, bookmarks and highlights are kept.")
         case let .makeSearchable(c, documents):
             Self.searchable(c, documents: documents)
         case .delete:
-            "Its packs go back to their usual collections. Nothing is removed from the phone."
+            L("Its packs go back to their usual collections. Nothing is removed from the phone.")
         }
     }
 
     var confirm: String {
         switch self {
-        case .removeBook, .removePack: "Remove"
-        case let .makeSearchable(c, _): c.fits ? "Make searchable" : "OK"
-        case .delete: "Delete"
+        case .removeBook, .removePack: L("Remove")
+        case let .makeSearchable(c, _): c.fits ? L("Make searchable") : L("OK")
+        case .delete: L("Delete")
         }
     }
 
@@ -537,15 +539,16 @@ enum CollectionDialog: Identifiable {
 
     private static func searchable(_ c: SearchableCost, documents: Bool) -> String {
         let n = Int(c.books)
-        let noun = documents ? (n == 1 ? "document" : "documents") : (n == 1 ? "book" : "books")
         let size = QueueWords.bytes(c.bytes)
         let free = QueueWords.bytes(c.freeBytes)
         if !c.fits {
-            return n == 1 ? "Making \(n) \(noun) searchable needs about \(size) more, and this phone has \(free) free."
-                : "Making all \(n) \(noun) searchable needs about \(size) more, and this phone has \(free) free."
+            return documents
+                ? L("Making all \(n) documents searchable needs about \(size) more, and this phone has \(free) free.")
+                : L("Making all \(n) books searchable needs about \(size) more, and this phone has \(free) free.")
         }
-        let them = n == 1 ? "it" : "them"
-        return "Copies the \(n) \(noun) not yet opened out of the pack, so Search can read \(them) in full. That takes about \(size) more (\(free) free). It runs in the background; you can leave this screen."
+        return documents
+            ? L("Copies the \(n) documents not yet opened out of the pack, so Search can read them in full. That takes about \(size) more (\(free) free). It runs in the background; you can leave this screen.")
+            : L("Copies the \(n) books not yet opened out of the pack, so Search can read them in full. That takes about \(size) more (\(free) free). It runs in the background; you can leave this screen.")
     }
 }
 

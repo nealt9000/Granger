@@ -25,21 +25,21 @@ struct SubjectScreen: View {
     @ViewBuilder private func content(_ ui: SubjectUi) -> some View {
         let name = Words.subject(ui.subject)
         let cards = ui.facets
-        TrailLine(steps: ["Explore"], here: name).padding(.horizontal, 16).padding(.bottom, 8)
+        TrailLine(steps: [L("Explore")], here: name).padding(.horizontal, 16).padding(.bottom, 8)
         if !ui.opening.isEmpty {
             OpeningPlates(plates: ui.opening.enumerated().map { i, a in PlateItem(id: "o\(i)", title: a.title, picture: a.picture, whole: a.whole) })
         } else if ui.openingPending {
             palette.surfaceContainer.frame(height: 230)
         }
         VStack(alignment: .leading, spacing: 12) {
-            SpreadHead(eyebrow: cards.isEmpty ? "A subject" : "A subject · \(Words.rooms(Int32(cards.count)))", title: name, standfirst: ui.hero?.sentence, large: true)
+            SpreadHead(eyebrow: cards.isEmpty ? L("A subject") : L("A subject · \(Words.rooms(Int32(cards.count)))"), title: name, standfirst: ui.hero?.sentence, large: true)
             HStack(spacing: 8) {
                 if ui.canWander {
-                    NavigationLink(value: Route.wanderIn(subject: ui.subject.id, facet: nil)) { DoLabel(text: "Wander") }
+                    NavigationLink(value: Route.wanderIn(subject: ui.subject.id, facet: nil)) { DoLabel(text: L("Wander")) }
                         .accessibilityIdentifier("subject-wander")
                 }
                 if ui.canQuiz {
-                    NavigationLink(value: Route.quiz(subject: ui.subject.id)) { DoLabel(text: "Quiz") }
+                    NavigationLink(value: Route.quiz(subject: ui.subject.id)) { DoLabel(text: L("Quiz")) }
                         .accessibilityIdentifier("subject-quiz")
                 }
             }
@@ -47,8 +47,8 @@ struct SubjectScreen: View {
         .padding(.horizontal, 16).padding(.top, 16)
         if !cards.isEmpty {
             let rooms = Words.rooms(Int32(cards.count))
-            let said = ui.finding.flatMap { f in f.share.map { "\(Words.dated($0)) are from the \(f.centuryStart!.int64Value)s." } }
-            SpreadHead(eyebrow: "The rooms", title: said.map { "\(rooms). \($0)" } ?? "\(rooms), \(Words.topics(ui.count))")
+            let said = ui.finding.flatMap { f in f.share.map { L("\(Words.dated($0)) are from the \(f.centuryStart!.int64Value)s.") } }
+            SpreadHead(eyebrow: L("The rooms"), title: said.map { "\(rooms). \($0)" } ?? "\(rooms), \(Words.topics(ui.count))")
                 .padding(.horizontal, 16).padding(.top, 30).padding(.bottom, 12)
             let pairs = stride(from: 0, to: cards.count, by: 2).map { Array(cards[$0..<min($0 + 2, cards.count)]) }
             ForEach(Array(pairs.enumerated()), id: \.offset) { _, pair in
@@ -63,19 +63,19 @@ struct SubjectScreen: View {
             }
             .padding(.horizontal, 16)
         } else if !ui.articles.isEmpty {
-            Eyebrow(text: "Articles").padding(.horizontal, 16).padding(.top, 28)
+            Eyebrow(text: L("Articles")).padding(.horizontal, 16).padding(.top, 28)
             ForEach(ui.articles.prefix(12), id: \.path) { a in ArticleLine(article: a) }
         } else if !ui.loading && !ui.roomsPending {
             Text("Nothing on this subject yet").padding(16)
         }
         if let seen = ui.seen, !cards.isEmpty {
-            RoomsSeenLine(seen: Int32(cards.filter { seen.contains($0.facet.key) }.count), total: Int32(cards.count), label: "Rooms seen in \(name)")
+            RoomsSeenLine(seen: Int32(cards.filter { seen.contains($0.facet.key) }.count), total: Int32(cards.count), label: L("Rooms seen in \(name)"))
                 .padding(.top, 18)
         }
         if let doors = ui.doors {
             Doors(before: doors.before.map { (Words.subject($0), Route.subject(id: $0.id)) },
                   after: doors.after.map { (Words.subject($0), Route.subject(id: $0.id)) },
-                  middle: "Subject \(doors.position) of \(doors.total)", beforeLabel: "The subject before", afterLabel: "The subject after")
+                  middle: L("Subject \(doors.position) of \(doors.total)"), beforeLabel: L("The subject before"), afterLabel: L("The subject after"))
                 .padding(.top, 24)
         }
     }
@@ -109,7 +109,7 @@ private struct RoomCard: View {
 
     private var sentence: String? {
         if let f = card.finding, let oldest = f.oldest, let mark = oldest.mark {
-            return "Oldest dated: \(oldest.title) (\(YearWords.english.of(m: mark)))."
+            return L("Oldest dated: \(oldest.title) (\(YearWords.app.of(m: mark))).")
         }
         return card.description_
     }
@@ -140,26 +140,26 @@ struct RoomScreen: View {
 
     private var title: String {
         guard let ui = holder.ui else { return "" }
-        return ui.facet?.name(language: "en") ?? "All of \(Words.subject(ui.subject))"
+        return ui.facet?.name(language: "en") ?? L("All of \(Words.subject(ui.subject))")
     }
 
     @ViewBuilder private func content(_ ui: SubjectUi) -> some View {
         let subjectName = Words.subject(ui.subject)
-        TrailLine(steps: ["Explore", subjectName], here: title).padding(.horizontal, 16).padding(.bottom, 8)
+        TrailLine(steps: [L("Explore"), subjectName], here: title).padding(.horizontal, 16).padding(.bottom, 8)
         VStack(alignment: .leading, spacing: 10) {
-            let eyebrow = ui.facet == nil ? "The whole subject" : (ui.count < 50 ? "A small room in \(subjectName)" : "A room in \(subjectName)")
+            let eyebrow = ui.facet == nil ? L("The whole subject") : (ui.count < 50 ? L("A small room in \(subjectName)") : L("A room in \(subjectName)"))
             SpreadHead(eyebrow: eyebrow, title: title, standfirst: standfirst(ui), large: true)
         }
         .padding(.horizontal, 16)
         if let story = ui.room?.story, !story.isEmpty {
-            Eyebrow(text: story.count == 1 ? "The room in 1 plate" : "The room in \(story.count) plates").padding(.horizontal, 16).padding(.top, 22).padding(.bottom, 8)
+            Eyebrow(text: L("The room in \(story.count) plates")).padding(.horizontal, 16).padding(.top, 22).padding(.bottom, 8)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 8) {
                     ForEach(story, id: \.path) { a in
                         NavigationLink(value: route(a)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 PlateTile(plate: PlateItem(id: a.path, title: a.title, picture: a.picture, whole: a.whole)).frame(width: 170, height: 130)
-                                if let m = a.mark { Text(YearWords.english.of(m: m)).font(.caption).foregroundStyle(palette.tertiary) }
+                                if let m = a.mark { Text(YearWords.app.of(m: m)).font(.caption).foregroundStyle(palette.tertiary) }
                                 Text(a.title).font(Spectral.medium(17)).foregroundStyle(palette.onSurface).lineLimit(2).frame(width: 170, alignment: .leading)
                             }
                         }
@@ -171,9 +171,9 @@ struct RoomScreen: View {
         }
         // Plates / Through time / A–Z.
         HStack(spacing: 20) {
-            tab("Plates", .linked, ui)
-            if !ui.eras.isEmpty { tab("Through time", .oldest, ui) }
-            if ui.count > 0 { tab("A–Z", .az, ui) }
+            tab(L("Plates"), .linked, ui)
+            if !ui.eras.isEmpty { tab(ScreenText.word("explore_view_time"), .oldest, ui) }
+            if ui.count > 0 { tab(L("A–Z"), .az, ui) }
         }
         .padding(.horizontal, 16).padding(.top, 24).padding(.bottom, 8)
         if ui.sort == .az, !ui.letters.isEmpty {
@@ -192,7 +192,7 @@ struct RoomScreen: View {
         if !ui.eras.isEmpty && ui.sort != .az {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    chip("All eras", on: ui.era == nil) { holder.model?.choose(era: nil) }
+                    chip(L("All eras"), on: ui.era == nil) { holder.model?.choose(era: nil) }
                     ForEach(eraChips(ui), id: \.label) { c in
                         chip(c.label, on: ui.era == c.era) { holder.model?.choose(era: c.era) }
                     }
@@ -206,7 +206,7 @@ struct RoomScreen: View {
             HStack(spacing: 2) {
                 ForEach(row, id: \.path) { a in
                     NavigationLink(value: route(a)) {
-                        PlateTile(plate: PlateItem(id: a.path, title: a.title, picture: a.picture, whole: a.whole, sub: a.mark.map { YearWords.english.of(m: $0) }), showTitle: true, titleSize: 15)
+                        PlateTile(plate: PlateItem(id: a.path, title: a.title, picture: a.picture, whole: a.whole, sub: a.mark.map { YearWords.app.of(m: $0) }), showTitle: true, titleSize: 15)
                             .frame(height: 140)
                     }
                     .buttonStyle(.plain)
@@ -226,7 +226,7 @@ struct RoomScreen: View {
         }
         if let overlaps = ui.room?.overlaps, let lead = overlaps.first {
             VStack(alignment: .leading, spacing: 10) {
-                SpreadHead(eyebrow: "The same things, other rooms", title: "\(Words.topics(lead.shared)) also hang in \(lead.facet.name(language: "en"))")
+                SpreadHead(eyebrow: L("The same things, other rooms"), title: L("\(Words.topics(lead.shared)) also hang in \(lead.facet.name(language: "en"))"))
                 ForEach(overlaps, id: \.facet.key) { o in
                     NavigationLink(value: Route.room(subject: o.facet.subject, facet: o.facet.id)) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -240,16 +240,16 @@ struct RoomScreen: View {
             .padding(.horizontal, 16).padding(.top, 28)
         }
         if ui.canWander {
-            WaysOn(title: "Ways on", ways: [
-                (ui.facet == nil ? "Anywhere in this subject" : "Anywhere in this room", "Wander", Route.wanderIn(subject: ui.subject.id, facet: ui.facet?.id)),
-                ("The whole subject", subjectName, Route.subject(id: ui.subject.id)),
+            WaysOn(title: L("Ways on"), ways: [
+                (ui.facet == nil ? L("Anywhere in this subject") : L("Anywhere in this room"), L("Wander"), Route.wanderIn(subject: ui.subject.id, facet: ui.facet?.id)),
+                (L("The whole subject"), subjectName, Route.subject(id: ui.subject.id)),
             ])
             .padding(.top, 28)
         }
         if let room = ui.room, room.total > 0 {
             Doors(before: room.before.map { ($0.name(language: "en"), Route.room(subject: $0.subject, facet: $0.id)) },
                   after: room.after.map { ($0.name(language: "en"), Route.room(subject: $0.subject, facet: $0.id)) },
-                  middle: "Room \(room.position) of \(room.total)", beforeLabel: "The room before", afterLabel: "The room after")
+                  middle: L("Room \(room.position) of \(room.total)"), beforeLabel: L("The room before"), afterLabel: L("The room after"))
                 .padding(.top, 24)
         }
     }
@@ -259,8 +259,8 @@ struct RoomScreen: View {
         if let d = ui.room?.description_ { parts.append(d) }
         if ui.count > 0 { parts.append(Words.topics(ui.count) + ".") }
         if let f = ui.room?.finding ?? ui.finding {
-            if let o = f.oldest, let m = o.mark { parts.append("The oldest dated here is \(o.title) (\(YearWords.english.of(m: m))).") }
-            if let share = f.share, let c = f.centuryStart { parts.append("\(Words.dated(share)) are from the \(c.int64Value)s.") }
+            if let o = f.oldest, let m = o.mark { parts.append(L("The oldest dated here is \(o.title) (\(YearWords.app.of(m: m))).")) }
+            if let share = f.share, let c = f.centuryStart { parts.append(L("\(Words.dated(share)) are from the \(c.int64Value)s.")) }
         }
         return parts.joined(separator: " ")
     }

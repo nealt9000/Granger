@@ -16,9 +16,9 @@ struct GetMoreScreen: View {
         List {
             if !audioOnly { everything }
             Section(header: heading("Audiobooks & music")) {
-                route(.librivox, "LibriVox", "Public-domain audiobooks, read by volunteers", id: "getmore-librivox")
-                route(.archiveAudio(kind: ArchiveKind.spokenWord.name), "Archive.org audiobooks", "Spoken word from the Internet Archive", id: "getmore-archive-audiobooks")
-                route(.archiveAudio(kind: ArchiveKind.music.name), "Archive.org music", "Recordings from the Internet Archive", id: "getmore-archive-music")
+                route(.librivox, "LibriVox", L("Public-domain audiobooks, read by volunteers"), id: "getmore-librivox")
+                route(.archiveAudio(kind: ArchiveKind.spokenWord.name), L("Archive.org audiobooks"), L("Spoken word from the Internet Archive"), id: "getmore-archive-audiobooks")
+                route(.archiveAudio(kind: ArchiveKind.music.name), L("Archive.org music"), L("Recordings from the Internet Archive"), id: "getmore-archive-music")
             }
             if !audioOnly {
                 Section(header: heading("Models & voices")) {
@@ -42,7 +42,7 @@ struct GetMoreScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .fileImporter(isPresented: $importing, allowedContentTypes: [UTType(filenameExtension: "zim") ?? .data]) { result in
             guard case let .success(url) = result, let core else { return }
-            importNote = "Copying \(url.lastPathComponent)…"
+            importNote = L("Copying \(url.lastPathComponent)…")
             Task { importNote = await PackImport.copy(url, core: core) }
         }
     }
@@ -60,7 +60,7 @@ struct GetMoreScreen: View {
 
     @ViewBuilder private var everything: some View {
             Section(header: heading("Knowledge packs")) {
-                link(.kiwix, "Kiwix", "Wikipedia, Stack Exchange, medicine, how-to and more, offline")
+                link(.kiwix, "Kiwix", L("Wikipedia, Stack Exchange, medicine, how-to and more, offline"))
                 Button { importing = true } label: {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Import a pack").font(Spectral.regular(20)).foregroundStyle(palette.onSurface)
@@ -72,7 +72,7 @@ struct GetMoreScreen: View {
                 if let importNote { Text(importNote).font(.callout).foregroundStyle(palette.tertiary) }
             }
             Section(header: heading("Books")) {
-                link(.books, "Books by kind", "Literature, children's books, manuals and learning")
+                link(.books, L("Books by kind"), L("Literature, children's books, manuals and learning"))
                 NavigationLink(value: Route.archive) {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("archive.org").font(Spectral.regular(20)).foregroundStyle(palette.onSurface)
@@ -84,7 +84,7 @@ struct GetMoreScreen: View {
             }
     }
 
-    private func heading(_ s: String) -> some View { Text(s).font(Spectral.medium(16)).foregroundStyle(palette.tertiary) }
+    private func heading(_ s: LocalizedStringKey) -> some View { Text(s).font(Spectral.medium(16)).foregroundStyle(palette.tertiary) }
 
     private func link(_ scope: CatalogScope, _ title: String, _ sub: String) -> some View {
         NavigationLink(value: Route.source(scope: scope.name, domain: nil, family: nil, bookSet: nil)) {
@@ -155,7 +155,7 @@ struct SourceScreen: View {
                     HStack { Spacer(); ProgressView(); Spacer() }
                 }
                 if !ui.presets.isEmpty && ui.tab == .browse {
-                    Section(header: heading("Sets")) {
+                    Section(header: heading(L("Sets"))) {
                         ForEach(ui.presets, id: \.id) { p in preset(p, model) }
                     }
                 }
@@ -189,7 +189,9 @@ struct SourceScreen: View {
             }
         } message: {
             if let check = holder.ui?.sizeCheck {
-                Text("You have \(QueueWords.bytes(check.freeBytes)) free on this iPhone." + (check.sizeBytes >= check.freeBytes ? " That isn't enough room for it." : ""))
+                Text(check.sizeBytes >= check.freeBytes
+                     ? L("You have \(QueueWords.bytes(check.freeBytes)) free on this iPhone. That isn't enough room for it.")
+                     : L("You have \(QueueWords.bytes(check.freeBytes)) free on this iPhone."))
             }
         }
         .alert(BkWords.couldntOpen, isPresented: $readFailed) { Button("OK", role: .cancel) {} }
@@ -216,22 +218,22 @@ struct SourceScreen: View {
     }
 
     private func volumeLine(_ v: VolumeRow, wifiOnly: Bool) -> some View {
-        let free: String = QueueWords.bytes(v.freeBytes) + " free on this iPhone"
-        let line: String = wifiOnly ? free + " · Downloads on Wi-Fi only" : free
+        let free = QueueWords.bytes(v.freeBytes)
+        let line: String = wifiOnly ? L("\(free) free on this iPhone · Downloads on Wi-Fi only") : L("\(free) free on this iPhone")
         return Text(line).font(.callout).foregroundStyle(palette.onSurfaceVariant)
     }
 
     private var title: String {
         switch scope {
-        case .books: "Get books"
+        case .books: L("Get books")
         case .kiwix: "Kiwix"
-        default: "Get more"
+        default: L("Get more")
         }
     }
 
     private var sizeCheckTitle: String {
         guard let c = holder.ui?.sizeCheck else { return "" }
-        return "\(c.title) is \(QueueWords.bytes(c.sizeBytes))"
+        return L("\(c.title) is \(QueueWords.bytes(c.sizeBytes))")
     }
 
     private func heading(_ s: String) -> some View { Text(s).font(Spectral.medium(16)).foregroundStyle(palette.tertiary) }
@@ -334,12 +336,12 @@ struct SourceScreen: View {
 
     private func statusLine(_ s: ItemStatus) -> String? {
         switch onEnum(of: s) {
-        case let .queued(q): q.lastError.map { "Retrying: \($0)" } ?? (q.wifiOnly ? "Waiting for Wi-Fi" : "Waiting")
-        case let .downloading(d): "Downloading · \(Int(d.fraction * 100))%"
-        case let .failed(f): f.reason ?? "Stopped"
-        case .updateAvailable: "Update available"
-        case let .partial(p): "\(p.done) of \(p.total) on this phone"
-        case .needsMoreMemory: "Needs a phone with more memory"
+        case let .queued(q): q.lastError.map { L("Retrying: \($0)") } ?? (q.wifiOnly ? L("Waiting for Wi-Fi") : L("Waiting"))
+        case let .downloading(d): L("Downloading · \(Int(d.fraction * 100))%")
+        case let .failed(f): f.reason ?? L("Stopped")
+        case .updateAvailable: L("Update available")
+        case let .partial(p): L("\(p.done) of \(p.total) on this phone")
+        case .needsMoreMemory: L("Needs a phone with more memory")
         default: nil
         }
     }
@@ -350,7 +352,7 @@ struct SourceScreen: View {
             HStack(spacing: 6) {
                 // Read it now, saved for now, before choosing to keep it (Plan O2 Task 8).
                 if case .notInstalled = onEnum(of: row.status), core?.library.canReadNow(itemId: row.id) == true {
-                    Button(reading == row.id ? "Opening…" : BkWords.readNow) { readNow(row) }
+                    Button(reading == row.id ? L("Opening…") : BkWords.readNow) { readNow(row) }
                         .buttonStyle(.borderless).disabled(reading != nil).accessibilityIdentifier("read-now-\(row.id)")
                 }
                 Button("Keep") { model.get(itemId: row.id) }.buttonStyle(.bordered).accessibilityIdentifier("get-\(row.id)")
@@ -402,23 +404,23 @@ enum PackImport {
         await Task.detached(priority: .userInitiated) { () -> String in
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            guard case let .success(archive) = KiwixArchive.open(url.path) else { return "\(url.lastPathComponent) isn't a pack Granger can read." }
+            guard case let .success(archive) = KiwixArchive.open(url.path) else { return L("\(url.lastPathComponent) isn't a pack Granger can read.") }
             let uuid = archive.uuid
             let title = archive.metadata.title
             archive.close()
             let packs = (try? await core.library.packs.first(where: { _ in true })) ?? []
-            if packs.contains(where: { $0.id.caseInsensitiveCompare(uuid) == .orderedSame && $0.status == .ok }) { return "\(title) is on this iPhone already." }
+            if packs.contains(where: { $0.id.caseInsensitiveCompare(uuid) == .orderedSame && $0.status == .ok }) { return L("\(title) is on this iPhone already.") }
             let to = core.packsFolder.appendingPathComponent(url.lastPathComponent)
             let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
-            if size > core.library.freeBytes() { return "Not enough room: \(title) needs \(QueueWords.bytes(size))." }
+            if size > core.library.freeBytes() { return L("Not enough room: \(title) needs \(QueueWords.bytes(size)).") }
             do {
                 if FileManager.default.fileExists(atPath: to.path) { try FileManager.default.removeItem(at: to) }
                 try FileManager.default.copyItem(at: url, to: to)
             } catch {
-                return "Couldn't copy \(url.lastPathComponent)."
+                return L("Couldn't copy \(url.lastPathComponent).")
             }
             try? await core.library.refreshPacks()
-            return "\(title) is on this iPhone."
+            return L("\(title) is on this iPhone.")
         }.value
     }
 }

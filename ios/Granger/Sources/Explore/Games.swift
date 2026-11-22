@@ -22,22 +22,22 @@ final class GameHolder {
 extension GameKind {
     var title: String {
         switch self {
-        case .order: "Which came first?"
-        case .guess: "Guess the year"
-        case .beforeAfter: "Before or after?"
-        case .overlap: "Alive at the same time?"
-        case .oddOneOut: "Odd one out"
-        default: "Which century?"
+        case .order: L("Which came first?")
+        case .guess: L("Guess the year")
+        case .beforeAfter: L("Before or after?")
+        case .overlap: L("Alive at the same time?")
+        case .oddOneOut: L("Odd one out")
+        default: L("Which century?")
         }
     }
     var about: String {
         switch self {
-        case .order: "Put two or three in order, earliest first."
-        case .guess: "Slide to the year it happened."
-        case .beforeAfter: "Place one against another's year."
-        case .overlap: "Could these two people have met?"
-        case .oddOneOut: "Three are from about the same time. Find the one that isn't."
-        default: "Pick the century from four."
+        case .order: L("Put two or three in order, earliest first.")
+        case .guess: L("Slide to the year it happened.")
+        case .beforeAfter: L("Place one against another's year.")
+        case .overlap: L("Could these two people have met?")
+        case .oddOneOut: L("Three are from about the same time. Find the one that isn't.")
+        default: L("Pick the century from four.")
         }
     }
 }
@@ -78,7 +78,7 @@ struct GamesScreen: View {
             }
         }
         .background(palette.background)
-        .navigationTitle(subject.flatMap { Subject.companion.of(id: $0) }.map { "\(Words.subject($0)) quiz" } ?? "Games")
+        .navigationTitle(subject.flatMap { Subject.companion.of(id: $0) }.map { L("\(Words.subject($0)) quiz") } ?? L("Games"))
         .navigationBarTitleDisplayMode(.inline)
         .task {
             guard let core else { return }
@@ -98,7 +98,7 @@ private struct GameRunView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 if run.finished {
-                    Text(run.newBest ? "A new best!" : run.kind.title).font(Spectral.medium(30)).foregroundStyle(palette.onSurface)
+                    Text(run.newBest ? L("A new best!") : run.kind.title).font(Spectral.medium(30)).foregroundStyle(palette.onSurface)
                     Text("\(run.right) of \(run.size)").font(Spectral.medium(56)).foregroundStyle(palette.primary)
                         .accessibilityIdentifier("game-score")
                     Text("Best: \(run.best) of \(run.size)").foregroundStyle(palette.onSurfaceVariant)
@@ -148,7 +148,7 @@ struct RoundView: View {
         }
     }
 
-    private func years(_ m: TimeMark) -> String { YearWords.english.of(m: m) }
+    private func years(_ m: TimeMark) -> String { YearWords.app.of(m: m) }
 
     private func card(_ m: TimeMark, reveal: Bool, note: String? = nil, tint: Color? = nil, action: (() -> Void)? = nil) -> some View {
         Button { action?() } label: {
@@ -176,7 +176,7 @@ struct RoundView: View {
         Text(r.marks.count == 2 ? "Tap the one that came first." : "Tap them in order, earliest first.").foregroundStyle(palette.onSurfaceVariant)
         ForEach(r.revealed ? r.answer : r.marks, id: \.qid) { m in
             let n = r.picked.firstIndex(of: KotlinLong(value: m.qid)).map { $0 + 1 }
-            card(m, reveal: r.revealed, note: n.map { "Chosen as number \($0)" }, action: r.revealed ? nil : { model.pick(qid: m.qid) })
+            card(m, reveal: r.revealed, note: n.map { L("Chosen as number \($0)") }, action: r.revealed ? nil : { model.pick(qid: m.qid) })
         }
         if r.revealed { verdict(r.right) }
     }
@@ -186,10 +186,10 @@ struct RoundView: View {
         card(r.mark, reveal: r.revealed)
         if r.revealed {
             let c = GameModelKt.closeness(off: r.off, answer: r.mark.year, now: ui.now)
-            Text(c == .spotOn ? "Spot on!" : c == .veryClose ? "Very close" : c == .close ? "Close" : "Further off").font(Spectral.medium(22)).foregroundStyle(palette.primary)
+            Text(c == .spotOn ? L("Spot on!") : c == .veryClose ? L("Very close") : c == .close ? ScreenText.word("game_close") : L("Further off")).font(Spectral.medium(22)).foregroundStyle(palette.primary)
             Text("It was \(years(r.mark))").foregroundStyle(palette.onSurface)
         } else {
-            Text("Your guess, \(YearWords.english.year(y: Int64(r.guess)))").font(Spectral.medium(22)).foregroundStyle(palette.primary)
+            Text("Your guess, \(YearWords.app.year(y: Int64(r.guess)))").font(Spectral.medium(22)).foregroundStyle(palette.primary)
             HStack {
                 Button("−10") { model.nudge(by: -10) }.accessibilityLabel("Ten years earlier")
                 Button("−1") { model.nudge(by: -1) }.accessibilityLabel("One year earlier")
@@ -225,7 +225,7 @@ struct RoundView: View {
     @ViewBuilder private func odd(_ r: RoundOddOneOut) -> some View {
         Text("Three of these are from about the same time. Which one isn't?").foregroundStyle(palette.onSurfaceVariant)
         ForEach(r.marks, id: \.qid) { m in
-            card(m, reveal: r.revealed, note: r.revealed && m.qid == r.odd ? "The odd one out" : nil,
+            card(m, reveal: r.revealed, note: r.revealed && m.qid == r.odd ? L("The odd one out") : nil,
                  tint: r.revealed && m.qid == r.odd ? palette.secondaryContainer : nil,
                  action: r.revealed ? nil : { model.pick(qid: m.qid) })
         }
@@ -248,7 +248,16 @@ struct RoundView: View {
 
     static func centuryName(_ c: Int32) -> String {
         let n = c >= 0 ? Int(c) + 1 : Int(-c)
-        let suffix = (11...13).contains(n % 100) ? "th" : [1: "st", 2: "nd", 3: "rd"][n % 10] ?? "th"
-        return c >= 0 ? "\(n)\(suffix) century" : "\(n)\(suffix) century BC"
+        // As Android's game_century_numerals: English says "21st", Spanish counts centuries in Roman numerals ("XXI").
+        let word = ScreenText.spanish ? roman(n) : "\(n)\((11...13).contains(n % 100) ? "th" : [1: "st", 2: "nd", 3: "rd"][n % 10] ?? "th")"
+        return c >= 0 ? L("\(word) century") : L("\(word) century BC")
+    }
+
+    static func roman(_ number: Int) -> String {
+        var n = number, out = ""
+        for (v, s) in [(1000, "M"), (900, "CM"), (500, "D"), (400, "CD"), (100, "C"), (90, "XC"), (50, "L"), (40, "XL"), (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")] {
+            while n >= v { out += s; n -= v }
+        }
+        return out
     }
 }

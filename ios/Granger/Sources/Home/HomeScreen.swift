@@ -173,8 +173,8 @@ struct ArrangeHomeScreen: View {
 
     static func name(_ token: String) -> String {
         switch token {
-        case "continue": "Continue"
-        case "timeline": "Timeline"
+        case "continue": L("Continue")
+        case "timeline": L("Timeline")
         default: token
         }
     }

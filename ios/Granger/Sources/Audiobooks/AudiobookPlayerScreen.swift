@@ -64,8 +64,8 @@ struct AudiobookPlayerScreen: View {
     }
 
     private var topLabel: String {
-        if case .book = onEnum(of: holder.ui.now) { return "Audiobook" }
-        return holder.saved.book != nil ? "Audiobook · paused" : "Audiobooks"
+        if case .book = onEnum(of: holder.ui.now) { return L("Audiobook") }
+        return holder.saved.book != nil ? L("Audiobook · paused") : L("Audiobooks")
     }
 
     private var nothing: some View {
@@ -116,7 +116,7 @@ struct AudiobookPlayerScreen: View {
                             .accessibilityIdentifier("book-player-previous-chapter")
                         Spacer()
                         Button { control(shown.live) { $0.skipBack() } } label: { Image(systemName: "gobackward.\(back)").font(.largeTitle) }
-                            .accessibilityLabel(back == 1 ? "Back 1 second" : "Back \(back) seconds")
+                            .accessibilityLabel("Back \(back) seconds")
                         Spacer()
                         Button {
                             if shown.live { holder.model?.playPause() } else { holder.model?.activate(mode: .audiobook) { _ in } }
@@ -128,7 +128,7 @@ struct AudiobookPlayerScreen: View {
                         .accessibilityIdentifier("book-player-play-pause")
                         Spacer()
                         Button { control(shown.live) { $0.skipForward() } } label: { Image(systemName: "goforward.\(forward)").font(.largeTitle) }
-                            .accessibilityLabel(forward == 1 ? "Forward 1 second" : "Forward \(forward) seconds")
+                            .accessibilityLabel("Forward \(forward) seconds")
                         Spacer()
                         Button { stepChapter(shown, by: 1) } label: { Image(systemName: "forward.end.fill") }
                             .disabled(book.chapter.ordinal >= book.chapterCount - 1)
@@ -152,16 +152,16 @@ struct AudiobookPlayerScreen: View {
         let book = shown.book
         // At the accessibility sizes the five labels don't fit in a row (they read "C…", "Sl…"), so they stand in a column.
         AdaptiveStack(spacing: dynamicType.isAccessibilitySize ? 12 : nil) {
-            action("list.bullet", "Chapters", "Chapters") { sheet = .chapters }
+            action("list.bullet", L("Chapters"), L("Chapters"), id: "book-player-Chapters") { sheet = .chapters }
             Spacer()
-            action("gauge.with.dots.needle.33percent", speedLabel(book.speed), "Playback speed \(speedLabel(book.speed))") { sheet = .speed }
+            action("gauge.with.dots.needle.33percent", speedLabel(book.speed), L("Playback speed \(speedLabel(book.speed))")) { sheet = .speed }
             Spacer()
             let sleep = shown.ui.sleepRemainingMs?.int64Value
-            action("timer", sleep.map { formatTime($0) } ?? "Sleep", sleep.map { "Sleep timer, \(formatTime($0)) left" } ?? "Sleep timer", active: sleep != nil) { sheet = .sleep }
+            action("timer", sleep.map { formatTime($0) } ?? L("Sleep"), sleep.map { L("Sleep timer, \(formatTime($0)) left") } ?? L("Sleep timer"), active: sleep != nil) { sheet = .sleep }
             Spacer()
-            action("bookmark", "Bookmark", "Add bookmark", id: "book-player-bookmark") { holder.model?.addBookmark { $0.words } }
+            action("bookmark", L("Bookmark"), L("Add bookmark"), id: "book-player-bookmark") { holder.model?.addBookmark { $0.words } }
             Spacer()
-            action("star", "Bookmarks", "Bookmarks", id: "book-player-bookmarks") { sheet = .bookmarks }
+            action("star", L("Bookmarks"), L("Bookmarks"), id: "book-player-bookmarks") { sheet = .bookmarks }
         }
         Toggle("Skip silence", isOn: Binding(get: { book.skipSilence }, set: { holder.model?.setSkipSilence(on: $0) }))
         Toggle("Volume boost", isOn: Binding(get: { book.volumeBoostMb > 0 }, set: { holder.model?.setVolumeBoost(on: $0) }))

@@ -60,7 +60,7 @@ struct QuiltScreen: View {
         }
         let around = try? await core.library.around(packId: p, path: a, plates: [])
         if let last {
-            groups = Quilts.shared.groups(topic: last, around: around, language: lang) { YearWords.english.of(m: $0) }
+            groups = Quilts.shared.groups(topic: last, around: around, language: lang) { YearWords.app.of(m: $0) }
         }
         loading = false
     }
@@ -116,7 +116,7 @@ struct QuiltScreen: View {
     /// All of it, by group: every plate, so nothing is out of reach of the quilt's twelve places.
     private var index: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Eyebrow(text: "All of it, by group").padding(.top, 16)
+            Eyebrow(text: L("All of it, by group")).padding(.top, 16)
             ForEach(Array(groups.enumerated()), id: \.offset) { _, g in
                 VStack(alignment: .leading, spacing: 4) {
                     Text("\(groupName(g)) · \(g.plates.count)").font(Spectral.medium(18)).foregroundStyle(palette.onBackground)
@@ -129,16 +129,16 @@ struct QuiltScreen: View {
     private func groupName(_ g: QuiltGroup) -> String {
         if let n = g.name { return n }
         switch g.kind {
-        case .kinds: return "Kinds"
-        case .people: return "People"
-        case .story: return "Story"
-        case .close: return "Close kin"
-        case .leads: return "Leads to it"
-        case .lives: return "Lives of its time"
-        case .events: return "Events of its time"
-        case .rooms: return "Its rooms"
-        case .books: return "In your books"
-        default: return "Chapter"
+        case .kinds: return L("Kinds")
+        case .people: return L("People")
+        case .story: return L("Story")
+        case .close: return L("Close kin")
+        case .leads: return L("Leads to it")
+        case .lives: return L("Lives of its time")
+        case .events: return L("Events of its time")
+        case .rooms: return L("Its rooms")
+        case .books: return L("In your books")
+        default: return L("Chapter")
         }
     }
 
