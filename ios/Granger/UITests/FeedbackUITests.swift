@@ -20,9 +20,7 @@ final class FeedbackUITests: XCTestCase {
         }
     }
 
-    private func reveal(_ app: XCUIApplication, _ element: XCUIElement) {
-        for _ in 0..<12 where !(element.exists && element.isHittable) { app.swipeUp() }
-    }
+    private func reveal(_ app: XCUIApplication, _ element: XCUIElement) { app.reveal(element) }
 
     private func openSettings(_ app: XCUIApplication) {
         let gear = app.navigationBars.buttons["Settings"]
@@ -35,8 +33,7 @@ final class FeedbackUITests: XCTestCase {
         feedback()
         let write = app.buttons["feedback-write"]
         // At the list's foot: it's made when scrolled to.
-        for _ in 0..<12 where !(write.waitForExistence(timeout: 2) && write.isHittable) { app.swipeUp() }
-        XCTAssertTrue(write.exists, "the feedback sheet's Write email")
+        XCTAssertTrue(app.reveal(write), "the feedback sheet's Write email")
         write.tap()
         let text = app.staticTexts["debug-mail-text"]
         XCTAssertTrue(text.waitForExistence(timeout: 10), "the composed email")
@@ -55,8 +52,8 @@ final class FeedbackUITests: XCTestCase {
         let app = launch()
         let email = composedEmail(app) {
             viaSettings(app)
-            XCTAssertTrue(app.staticTexts["The email includes"].waitForExistence(timeout: 20), "what the email includes")
-            XCTAssertTrue(app.staticTexts["• 0 packs and 0 books (counts only, no titles)"].waitForExistence(timeout: 10), "the counts")
+            XCTAssertTrue(app.reveal(app.staticTexts["The email includes"], timeout: 20), "what the email includes")
+            XCTAssertTrue(app.reveal(app.staticTexts["• 0 packs and 0 books (counts only, no titles)"], timeout: 10), "the counts")
             XCTAssertFalse(app.switches["feedback-attach"].exists, "no crash reports, no switch")
             shot(app, "feedback-sheet")
         }
@@ -81,9 +78,9 @@ final class FeedbackUITests: XCTestCase {
             shot(app, "crash-notice")
             let email = composedEmail(app) {
                 app.buttons["crash-send"].tap()
-                XCTAssertTrue(app.staticTexts["• 1 crash report, attached"].waitForExistence(timeout: 20), "the report counted")
+                XCTAssertTrue(app.reveal(app.staticTexts["• 1 crash report, attached"], timeout: 20), "the report counted")
                 let crash = app.buttons["feedback-crash"]
-                XCTAssertTrue(crash.exists, "the report's row")
+                XCTAssertTrue(app.reveal(crash), "the report's row")
                 XCTAssertTrue(crash.label.hasPrefix("Crash · "), crash.label)
                 crash.tap()
                 let full = app.staticTexts["crash-text"]
@@ -94,10 +91,12 @@ final class FeedbackUITests: XCTestCase {
                 app.buttons["crash-close"].tap()
                 // The switch leaves the reports out, and puts them back.
                 let attach = app.switches["feedback-attach"]
+                XCTAssertTrue(app.reveal(attach), "the attach switch")
                 attach.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
                 XCTAssertFalse(app.staticTexts["• 1 crash report, attached"].waitForExistence(timeout: 3))
+                XCTAssertTrue(app.reveal(attach))
                 attach.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
-                XCTAssertTrue(app.staticTexts["• 1 crash report, attached"].waitForExistence(timeout: 5))
+                XCTAssertTrue(app.reveal(app.staticTexts["• 1 crash report, attached"]))
                 shot(app, "crash-sheet")
             }
             XCTAssertTrue(email.contains("1 crash report, attached"), email)
@@ -119,7 +118,7 @@ final class FeedbackUITests: XCTestCase {
             XCTAssertFalse(notice.waitForExistence(timeout: 3), "Not now")
             viaSettings(app)
             let crash = app.buttons["feedback-crash"]
-            XCTAssertTrue(crash.waitForExistence(timeout: 20), "the report kept for Send feedback")
+            XCTAssertTrue(app.reveal(crash, timeout: 20), "the report kept for Send feedback")
             XCTAssertTrue(crash.label.contains("NSInternalInconsistencyException"), crash.label)
             let clear = app.buttons["feedback-clear"]
             reveal(app, clear)
@@ -141,13 +140,16 @@ final class FeedbackUITests: XCTestCase {
     func testReportSheet() {
         let app = launch(["-debugReportSheet", "YES"])
         XCTAssertTrue(app.descendants(matching: .any)["report-sheet"].waitForExistence(timeout: 20), "the Report sheet")
-        XCTAssertTrue(app.staticTexts["• The titles of its 2 sources"].exists, "the sources counted")
+        XCTAssertTrue(app.reveal(app.staticTexts["• The titles of its 2 sources"]), "the sources counted")
         let write = app.buttons["Write email"]
+        XCTAssertTrue(app.reveal(write))
         XCTAssertFalse(write.isEnabled, "a reason first")
+        XCTAssertTrue(app.reveal(app.buttons["Wrong or made up"]))
         app.buttons["Wrong or made up"].tap()
+        XCTAssertTrue(app.reveal(write))
         XCTAssertTrue(write.isEnabled)
         shot(app, "report-sheet")
-        app.swipeUp(); app.swipeUp()
+        XCTAssertTrue(app.reveal(write))
         write.tap()
         let text = app.staticTexts["debug-mail-text"]
         XCTAssertTrue(text.waitForExistence(timeout: 10), "the composed email")
@@ -163,18 +165,21 @@ final class FeedbackUITests: XCTestCase {
     func testKnowledgeLanguageMovesSearchAndExploreToSpanish() {
         let app = launch(localOnly: false)
         openSettings(app)
+        XCTAssertTrue(app.reveal(app.buttons["settings-language"]))
         app.buttons["settings-language"].tap()
         XCTAssertTrue(app.buttons["app-language"].waitForExistence(timeout: 10), "the App language row")
         XCTAssertTrue(app.buttons["app-language"].label.contains("English"), app.buttons["app-language"].label)
         let en = app.buttons["knowledge-en"], es = app.buttons["knowledge-es"]
-        XCTAssertTrue(es.waitForExistence(timeout: 60), "the library's languages (the catalog has two)")
+        XCTAssertTrue(app.reveal(es, timeout: 60), "the library's languages (the catalog has two)")
         XCTAssertFalse(en.isEnabled, "the only one ticked is locked")
         es.tap()
-        XCTAssertTrue(app.buttons["make-main-es"].waitForExistence(timeout: 5), "Make main on the second")
-        XCTAssertTrue(app.staticTexts["Main language"].exists, "the main one says so")
+        XCTAssertTrue(app.reveal(app.buttons["make-main-es"]), "Make main on the second")
+        XCTAssertTrue(app.reveal(app.staticTexts["Main language"]), "the main one says so")
         XCTAssertTrue(en.isEnabled, "two ticked: neither locked")
+        XCTAssertTrue(app.reveal(app.buttons["make-main-es"]))
         app.buttons["make-main-es"].tap()
-        XCTAssertTrue(app.buttons["make-main-en"].waitForExistence(timeout: 5), "Spanish is main")
+        XCTAssertTrue(app.reveal(app.buttons["make-main-en"]), "Spanish is main")
+        XCTAssertTrue(app.reveal(en))
         en.tap()
         XCTAssertFalse(app.buttons["make-main-en"].waitForExistence(timeout: 3))
         XCTAssertFalse(es.isEnabled, "Spanish alone: locked")
@@ -192,7 +197,7 @@ final class FeedbackUITests: XCTestCase {
         XCTAssertTrue(hit.waitForExistence(timeout: 30), "results")
         shot(app, "search-es")
         hit.tap()
-        XCTAssertTrue(app.buttons["Read in English"].waitForExistence(timeout: 30), "a Spanish article")
+        XCTAssertTrue(app.reveal(app.buttons["Read in English"], timeout: 30), "a Spanish article")
 
         // Explore: today's spread from Spanish Wikipedia's index.
         app.tabBars.buttons["Explore"].tap()
@@ -205,7 +210,9 @@ final class FeedbackUITests: XCTestCase {
         // The spread's article, read: Home's Continue names it Spanish Wikipedia.
         let read = app.buttons["read-full"]
         XCTAssertTrue(read.waitForExistence(timeout: 30), "the spread's topic page")
-        app.swipeUp()
+        // The other language from the spread's topic page too (a broad topic's spread lacked it before Task 6).
+        XCTAssertTrue(app.reveal(app.buttons["read-other-language"], timeout: 30), "Read in English on the spread's topic page")
+        XCTAssertTrue(app.reveal(read))
         read.tap()
         sleep(3)
         app.tabBars.buttons["Home"].tap()

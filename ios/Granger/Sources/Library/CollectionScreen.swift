@@ -57,6 +57,7 @@ struct CollectionScreen: View {
     let collectionId: String
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
+    @Environment(\.dynamicTypeSize) private var textSize
     @Environment(\.openRoute) private var openRoute
     @Environment(\.dismiss) private var dismiss
     @State private var holder = CollectionHolder()
@@ -343,7 +344,9 @@ struct CollectionScreen: View {
     }
 
     private func grid(_ books: [Book]) -> some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 16, alignment: .top)], alignment: .leading, spacing: 16) {
+        // At the accessibility sizes two wider columns, and the captions stop at xxxLarge: under a 104-point cover they
+        // were a syllable a line ("Al-ice'…").
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: textSize.isAccessibilitySize ? 150 : 104), spacing: 16, alignment: .top)], alignment: .leading, spacing: 16) {
             ForEach(books, id: \.id) { book in cell(book) }
         }
         .padding(.horizontal, 16).padding(.vertical, 8)
@@ -363,6 +366,7 @@ struct CollectionScreen: View {
                 ProgressView(value: min(1, max(0, progress))).tint(palette.primary)
             }
         }
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .contentShape(Rectangle()) }
         .buttonStyle(.plain)
         .contextMenu { bookMenu(book, edition: holder.model?.editionOf(book: book)) }

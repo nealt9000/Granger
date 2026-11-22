@@ -160,13 +160,16 @@ struct HintCard: View {
 struct LocalOnlyBanner: View {
     @Environment(AppSettings.self) private var settings
     @Environment(\.palette) private var palette
+    @Environment(\.dynamicTypeSize) private var size
 
     var body: some View {
         if settings.localOnly {
             VStack(alignment: .leading, spacing: 8) {
-                HStack(alignment: .firstTextBaseline) {
+                // At the accessibility sizes Turn off goes under the line: side by side they were a word a line each.
+                let row = size.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline))
+                row {
                     Text("Local only. Showing what this phone holds.").font(Spectral.regular(17)).foregroundStyle(palette.onSurface)
-                    Spacer(minLength: 8)
+                    if !size.isAccessibilitySize { Spacer(minLength: 8) }
                     Button("Turn off") { settings.localOnly = false }.font(Spectral.medium(17)).accessibilityIdentifier("local-only-off")
                 }
                 HintCard(id: "offline", text: L("Greyed things need the internet."))

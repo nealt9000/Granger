@@ -37,6 +37,7 @@ struct SettingsScreen: View {
                     Text("Field (light)").tag(Appearance.field)
                     Text("Night (dark)").tag(Appearance.night)
                 }
+                .pickerForTextSize()
                 VStack(alignment: .leading) {
                     Text("Text size")
                     Slider(value: $settings.textScale, in: 0.8...2.0, step: 0.1)
@@ -60,6 +61,7 @@ struct SettingsScreen: View {
                     Text("Save pictures").tag(true)
                     Text("Text only (smaller)").tag(false)
                 }
+                .pickerForTextSize()
             } footer: {
                 Text("Whether what you keep, and what's saved for now, carries its pictures.")
             }
@@ -67,6 +69,7 @@ struct SettingsScreen: View {
                 Picker("Saved for now", selection: $settings.savedCapMb) {
                     ForEach(AppSettings.capChoices, id: \.self) { Text("\($0) MB").tag($0) }
                 }
+                .pickerForTextSize()
                 .onChange(of: settings.savedCapMb) { core?.library.trimSaved(); refreshSaved() }
                 Button("Clear saved for now", role: .destructive) { confirmClear = true }
                     .disabled(savedBytes == 0)
@@ -166,4 +169,17 @@ struct SettingsScreen: View {
     }
 
     private func refreshSaved() { savedBytes = core?.library.savedBytes() ?? 0 }
+}
+
+/// A menu picker's value is cut in the middle at the accessibility sizes ("Follow…phone"): there the choices open on
+/// a page of their own instead, each on its own line.
+private struct PickerForTextSize: ViewModifier {
+    @Environment(\.dynamicTypeSize) private var size
+    func body(content: Content) -> some View {
+        if size.isAccessibilitySize { content.pickerStyle(.navigationLink) } else { content }
+    }
+}
+
+extension View {
+    func pickerForTextSize() -> some View { modifier(PickerForTextSize()) }
 }

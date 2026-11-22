@@ -71,14 +71,12 @@ final class AudiobookUITests: XCTestCase {
     private func openBook(_ app: XCUIApplication, _ title: String) {
         listen(app)
         let all = app.buttons["listen-all-audiobooks"]
-        for _ in 0..<4 where !all.waitForExistence(timeout: 5) { app.swipeUp() }
-        if !all.exists { shot(app, "listen-no-audiobooks") }
-        XCTAssertTrue(all.waitForExistence(timeout: 30), "All audiobooks on Listen")
+        if !app.reveal(all, timeout: 10) { shot(app, "listen-no-audiobooks") }
+        XCTAssertTrue(app.reveal(all, timeout: 20), "All audiobooks on Listen")
         all.tap()
         let row = app.buttons["audiobook-\(title)"]
-        for _ in 0..<6 where !row.waitForExistence(timeout: 3) { app.swipeUp() }
-        if !row.exists { shot(app, "shelf-no-book") }
-        XCTAssertTrue(row.waitForExistence(timeout: 20), "the book \(title) on the shelf")
+        if !app.reveal(row, timeout: 10) { shot(app, "shelf-no-book") }
+        XCTAssertTrue(app.reveal(row, timeout: 10), "the book \(title) on the shelf")
         row.tap()
         XCTAssertTrue(app.buttons["audiobook-play"].waitForExistence(timeout: 10), "the book's page")
     }
@@ -98,6 +96,7 @@ final class AudiobookUITests: XCTestCase {
         let title = dir.lastPathComponent
         let app = launch(["-debugAudiobookFolder", dir.path])
         openBook(app, title)
+        XCTAssertTrue(app.reveal(app.buttons["audiobook-chapter-2"]), "chapter 2")
         app.buttons["audiobook-chapter-2"].tap()
         openPlayer(app)
         let chapter = app.staticTexts["book-player-chapter"]
@@ -142,6 +141,7 @@ final class AudiobookUITests: XCTestCase {
         let dir = try book("Bookmark Book")
         let app = launch(["-debugAudiobookFolder", dir.path])
         openBook(app, dir.lastPathComponent)
+        XCTAssertTrue(app.reveal(app.buttons["audiobook-chapter-1"]), "chapter 1")
         app.buttons["audiobook-chapter-1"].tap()
         openPlayer(app)
         let chapter = app.staticTexts["book-player-chapter"]
@@ -193,8 +193,8 @@ final class AudiobookUITests: XCTestCase {
         waitForExpectations(timeout: 60)
         shot(app, "librivox-kept")
         openBook(app, "Stub Tones")
-        XCTAssertTrue(app.buttons["audiobook-chapter-2"].waitForExistence(timeout: 10), "both chapters")
-        XCTAssertTrue(app.staticTexts["Tone 1"].exists, "the chapter's title from LibriVox")
+        XCTAssertTrue(app.reveal(app.buttons["audiobook-chapter-2"], timeout: 10), "both chapters")
+        XCTAssertTrue(app.reveal(app.staticTexts["Tone 1"]), "the chapter's title from LibriVox")
     }
 
     /// Music plays under the voice: a song is playing when read aloud starts; Listen shows it under the voice with its

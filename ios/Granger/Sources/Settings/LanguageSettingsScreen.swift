@@ -84,6 +84,7 @@ struct LanguageSettingsScreen: View {
                                 HStack(spacing: 12) {
                                     Image(systemName: row.on ? "checkmark.square.fill" : "square")
                                         .foregroundStyle(row.locked ? palette.outline : palette.primary)
+                                        .accessibilityHidden(true)
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(AppLanguage.name(row.code)).foregroundStyle(palette.onSurface)
                                         if let note = row.note {

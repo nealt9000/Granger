@@ -67,7 +67,7 @@ final class BookReaderTests: XCTestCase {
         // Contents: jump to Chapter IV; the bars slide away for the page.
         openContents(app)
         let chapter = app.buttons["Chapter IV"].firstMatch
-        XCTAssertTrue(chapter.waitForExistence(timeout: 10), "Contents lists the chapters")
+        XCTAssertTrue(app.reveal(chapter, timeout: 10), "Contents lists the chapters")
         chapter.tap()
         XCTAssertTrue(app.staticTexts["book-progress"].waitForNonExistence(timeout: 5), "the bars go for the page")
         showBars(app)
@@ -220,8 +220,16 @@ final class BookReaderTests: XCTestCase {
     }
 
     private func tapMenu(_ app: XCUIApplication, _ title: String) {
-        let item = app.menuItems[title].exists ? app.menuItems[title] : app.buttons[title].firstMatch
-        if !item.waitForExistence(timeout: 5) {
+        var item = app.menuItems[title].exists ? app.menuItems[title] : app.buttons[title].firstMatch
+        // At the larger text sizes the edit menu holds fewer items a page: its forward arrow shows the rest.
+        for _ in 0..<4 where !item.waitForExistence(timeout: 2) {
+            let more = ["Next Page", "Show more items", "Forward"].map { app.buttons[$0].firstMatch }.first { $0.exists }
+                ?? app.menuItems.matching(NSPredicate(format: "label IN %@", ["Next Page", "Show more items", "Forward"])).firstMatch
+            guard more.exists else { break }
+            more.tap()
+            item = app.menuItems[title].exists ? app.menuItems[title] : app.buttons[title].firstMatch
+        }
+        if !item.waitForExistence(timeout: 3) {
             print(app.debugDescription)
             XCTFail("the selection menu's \(title)")
         }

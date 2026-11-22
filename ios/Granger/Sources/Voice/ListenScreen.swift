@@ -11,6 +11,16 @@ struct ListenScreen: View {
     @Environment(\.voice) private var voice
     @Environment(\.palette) private var palette
     @Environment(\.openRoute) private var openRoute
+
+    private func speedPresets(_ shown: Double, _ player: VoicePlayer) -> some View {
+        HStack {
+            ForEach([0.8, 1.0, 1.2, 1.5, 2.0], id: \.self) { preset in
+                Button(String(format: "%.1f×", preset)) { player.setSpeed(value: Float(preset)) }
+                    .buttonStyle(.bordered).tint(abs(shown - preset) < 0.01 ? palette.primary : palette.onSurfaceVariant).font(.footnote)
+                    .lineLimit(1).fixedSize()
+            }
+        }
+    }
     @State private var chapters: ReadChapters?
     @State private var showChapters = false
     @State private var showSleep = false
@@ -114,11 +124,10 @@ struct ListenScreen: View {
             if !editing, let s = speed { player.setSpeed(value: Float(s)); speed = nil }
         }
         .accessibilityLabel("Reading speed")
-        HStack {
-            ForEach([0.8, 1.0, 1.2, 1.5, 2.0], id: \.self) { preset in
-                Button(String(format: "%.1f×", preset)) { player.setSpeed(value: Float(preset)) }
-                    .buttonStyle(.bordered).tint(abs(shown - preset) < 0.01 ? palette.primary : palette.onSurfaceVariant).font(.footnote)
-            }
+        // One line each: at the accessibility sizes the row scrolls sideways rather than stand "0.8×" on end.
+        ViewThatFits(in: .horizontal) {
+            speedPresets(shown, player)
+            ScrollView(.horizontal, showsIndicators: false) { speedPresets(shown, player) }
         }
         if !voices.isEmpty {
             Picker("Voice", selection: Binding(get: { now.voiceId.encode() }, set: { id in

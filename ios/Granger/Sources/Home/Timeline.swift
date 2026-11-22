@@ -247,12 +247,38 @@ struct TimelineCaption: View {
     let ui: TimelineUi
     let model: TimelineModel
     @Environment(\.palette) private var palette
+    @Environment(\.dynamicTypeSize) private var size
 
     var body: some View {
         if let s = ui.selected {
-            HStack(spacing: 10) {
-                Button { model.step(by: -1) } label: { Image(systemName: "chevron.left") }
-                    .accessibilityLabel("Earlier")
+            // At the accessibility sizes the arrows go under the caption: beside it they left the title a few letters a
+            // line ("Cice-rón").
+            if size.isAccessibilitySize {
+                VStack(spacing: 8) {
+                    card(s)
+                    HStack { earlier; Spacer(); later }
+                }
+                .font(.title3)
+                .foregroundStyle(palette.primary)
+            } else {
+                HStack(spacing: 10) { earlier; card(s); later }
+                    .font(.title3)
+                    .foregroundStyle(palette.primary)
+            }
+        }
+    }
+
+    private var earlier: some View {
+        Button { model.step(by: -1) } label: { Image(systemName: "chevron.left").padding(8) }
+            .accessibilityLabel("Earlier")
+    }
+
+    private var later: some View {
+        Button { model.step(by: 1) } label: { Image(systemName: "chevron.right").padding(8) }
+            .accessibilityLabel("Later")
+    }
+
+    private func card(_ s: TimeMark) -> some View {
                 NavigationLink(value: Route.article(packId: s.packId, path: s.path)) {
                     HStack(spacing: 12) {
                         Color.clear.frame(width: 64, height: 64)
@@ -264,7 +290,7 @@ struct TimelineCaption: View {
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                         VStack(alignment: .leading, spacing: 2) {
                             Text(YearWords.app.of(m: s)).font(Spectral.medium(16)).foregroundStyle(palette.primary)
-                            Text(s.title).font(Spectral.medium(22)).foregroundStyle(palette.onSurface).lineLimit(2)
+                            Text(s.title).font(Spectral.medium(22)).foregroundStyle(palette.onSurface).lineLimit(size.isAccessibilitySize ? 4 : 2)
                         }
                         Spacer(minLength: 0)
                     }
@@ -273,12 +299,6 @@ struct TimelineCaption: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("timeline-caption")
-                Button { model.step(by: 1) } label: { Image(systemName: "chevron.right") }
-                    .accessibilityLabel("Later")
-            }
-            .font(.title3)
-            .foregroundStyle(palette.primary)
-        }
     }
 }
 
@@ -330,14 +350,17 @@ struct LaneChips: View {
 struct TimelineCard: View {
     let holder: TimelineHolder
     @Environment(\.palette) private var palette
+    @Environment(\.dynamicTypeSize) private var size
 
     var body: some View {
         if let ui = holder.ui, let model = holder.model, ui.available {
             VStack(alignment: .leading, spacing: 12) {
-                HStack {
+                // Full timeline under the heading at the accessibility sizes: side by side both broke mid-word.
+                let head = size.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6)) : AnyLayout(HStackLayout())
+                head {
                     Text("Timeline").font(Spectral.medium(24, relativeTo: .title2)).foregroundStyle(palette.tertiary)
                         .accessibilityAddTraits(.isHeader)
-                    Spacer()
+                    if !size.isAccessibilitySize { Spacer() }
                     NavigationLink(value: Route.timeline(packId: ui.selected?.packId, path: ui.selected?.path)) {
                         Label("Full timeline", systemImage: "chevron.right").labelStyle(TrailingIcon())
                             .font(Spectral.medium(18)).foregroundStyle(palette.tertiary)

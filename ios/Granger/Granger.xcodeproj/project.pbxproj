@@ -16,6 +16,7 @@
 		06D12B83802F3059A8FCB6BA /* DebugSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188A882EDDE6C2497AAA6486 /* DebugSystem.swift */; };
 		08FF2CF6BCD6E7AEB87BFA59 /* Organize.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF786378D095B314552709FA /* Organize.swift */; };
 		0A2CB1AEC0F8553E87E02339 /* LibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 651B9AE752157C30B90B5208 /* LibraryTests.swift */; };
+		0AF2392D9EEC926FAA6254A8 /* Scrolling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712B856885474F7E51A4C42A /* Scrolling.swift */; };
 		0C01B3F83EA075BB4A4F2D48 /* ReadyOffline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB73E96EABD47541EEBCB973 /* ReadyOffline.swift */; };
 		0C026C93A0C7F9572A9C10FB /* ReadiumNavigator in Frameworks */ = {isa = PBXBuildFile; productRef = D7B2F350B6336E04974D73BD /* ReadiumNavigator */; };
 		0C03167F49F8126445FDD752 /* MusicNativesImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E35847AFB3E364F4A8476C8 /* MusicNativesImpl.swift */; };
@@ -41,6 +42,7 @@
 		3178201C506534DA959D94C0 /* spectral_italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D1EA7F9943A3EBAA55DB8EC /* spectral_italic.ttf */; };
 		31A659E2396F32D1505AB504 /* BookReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020C983E7DB13074CD37FBF1 /* BookReaderTests.swift */; };
 		3268BF9C98C507338AA3AE11 /* GrangerCoreBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ACEC15F49FA3F03A769C7A6 /* GrangerCoreBridge.swift */; };
+		32FB72960315281E45A23AD1 /* AccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8267DB32C89E546803A5C7F7 /* AccessibilityTests.swift */; };
 		36E9134D81F747B5E9804618 /* SherpaOnnxC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 917A8C6C283A2AABAF1560F8 /* SherpaOnnxC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		372D0C7A92F31AC0E4017564 /* KiwixArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 244FA2D697CE5DE736633EAE /* KiwixArchive.swift */; };
 		37CB475CA851E38824A30F9F /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5097D7F74D147D51E78904EE /* Timeline.swift */; };
@@ -276,6 +278,7 @@
 		6EB9E388036E947C9C13B2FB /* UiTextWords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UiTextWords.swift; sourceTree = "<group>"; };
 		6F7EA26827A05868CC275A31 /* RemoteCollectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCollectionScreen.swift; sourceTree = "<group>"; };
 		6F944126FE23E0C4842347AD /* FeedbackUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackUITests.swift; sourceTree = "<group>"; };
+		712B856885474F7E51A4C42A /* Scrolling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scrolling.swift; sourceTree = "<group>"; };
 		7A0C0C1C906AB109E2FCDA1A /* Games.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Games.swift; sourceTree = "<group>"; };
 		7AAD900738FDA8B46FEEBBAB /* SpanishUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpanishUITests.swift; sourceTree = "<group>"; };
 		7ACEC15F49FA3F03A769C7A6 /* GrangerCoreBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrangerCoreBridge.swift; sourceTree = "<group>"; };
@@ -283,6 +286,7 @@
 		7CC01381BEC958CC5134EC02 /* GrangerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrangerApp.swift; sourceTree = "<group>"; };
 		7F0D2C6AA7832F3D9D55E154 /* PlayerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerUITests.swift; sourceTree = "<group>"; };
 		7F52092A31F49258FD75CDE1 /* Navigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Navigation.swift; sourceTree = "<group>"; };
+		8267DB32C89E546803A5C7F7 /* AccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityTests.swift; sourceTree = "<group>"; };
 		85551793AE689984ABF44FAE /* Granger.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Granger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		85AFE4E547EFBC789BC18823 /* EmbedderSpikeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedderSpikeTests.swift; sourceTree = "<group>"; };
 		8EFD9C7522806E354AA2AF02 /* SampleTextPdf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleTextPdf.swift; sourceTree = "<group>"; };
@@ -573,6 +577,7 @@
 		AB4C0ACE382625949B448E6F /* UITests */ = {
 			isa = PBXGroup;
 			children = (
+				8267DB32C89E546803A5C7F7 /* AccessibilityTests.swift */,
 				F9227D21081FB98BFD93211A /* AudiobookUITests.swift */,
 				020C983E7DB13074CD37FBF1 /* BookReaderTests.swift */,
 				A27583559CE695EAA07B0C90 /* ClassicsUITests.swift */,
@@ -582,6 +587,7 @@
 				569C1AFF6DFF658AA105544D /* MusicUITests.swift */,
 				7F0D2C6AA7832F3D9D55E154 /* PlayerUITests.swift */,
 				3B7E566216AD0EE6BE8F1CEB /* ReadAloudUITests.swift */,
+				712B856885474F7E51A4C42A /* Scrolling.swift */,
 				B855DAA2A7DD384374C76E85 /* SettingsModelsUITests.swift */,
 				DD4E0D95A9828108F9ABF60D /* SmokeTests.swift */,
 				7AAD900738FDA8B46FEEBBAB /* SpanishUITests.swift */,
@@ -992,6 +998,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				32FB72960315281E45A23AD1 /* AccessibilityTests.swift in Sources */,
 				04CFA2C87CFCD2BE87CC05AA /* AudiobookUITests.swift in Sources */,
 				31A659E2396F32D1505AB504 /* BookReaderTests.swift in Sources */,
 				1AFA13D56BD199C80C543B2B /* ClassicsUITests.swift in Sources */,
@@ -1001,6 +1008,7 @@
 				C7C07D7256184A6C415A2BB5 /* MusicUITests.swift in Sources */,
 				8929C0B2AE9FAA5B3BDE946D /* PlayerUITests.swift in Sources */,
 				10C36F29A42424401008627F /* ReadAloudUITests.swift in Sources */,
+				0AF2392D9EEC926FAA6254A8 /* Scrolling.swift in Sources */,
 				1BC75D3E19D976DC9FCCB9C0 /* SettingsModelsUITests.swift in Sources */,
 				B9F1FDCE26442AE3F6A3645E /* SmokeTests.swift in Sources */,
 				1444582374C119A34034FA8C /* SpanishUITests.swift in Sources */,

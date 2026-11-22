@@ -356,7 +356,7 @@ struct TextSettingsSheet: View {
                             Button("−") { onChange(change(prefs) { $0.fontScale -= ReadingPrefs.companion.FONT_SCALE_STEP }) }
                                 .buttonStyle(.bordered).disabled(prefs.fontScale <= ReadingPrefs.companion.MIN_FONT_SCALE)
                                 .accessibilityLabel("Smaller text")
-                            Text(BookWords.percent(Int((prefs.fontScale * 100).rounded()))).font(.headline).frame(width: 64)
+                            Text(BookWords.percent(Int((prefs.fontScale * 100).rounded()))).font(.headline).lineLimit(1).fixedSize().frame(minWidth: 64)
                                 .accessibilityIdentifier("text-size")
                             Button("+") { onChange(change(prefs) { $0.fontScale += ReadingPrefs.companion.FONT_SCALE_STEP }) }
                                 .buttonStyle(.bordered).disabled(prefs.fontScale >= ReadingPrefs.companion.MAX_FONT_SCALE)

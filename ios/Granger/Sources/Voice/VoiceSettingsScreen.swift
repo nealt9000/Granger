@@ -86,6 +86,7 @@ struct VoiceSettingsScreen: View {
         return Button { model.choose(id: v.id) } label: {
             HStack {
                 Image(systemName: chosen ? "largecircle.fill.circle" : "circle").foregroundStyle(chosen ? palette.primary : palette.onSurfaceVariant)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(v.title).foregroundStyle(palette.onSurface)
                     Text(granger ? "Granger voice · \(v.language)" : "System voice · \(v.language)").font(.footnote).foregroundStyle(palette.onSurfaceVariant)

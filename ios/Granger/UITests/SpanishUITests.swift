@@ -186,8 +186,7 @@ final class SpanishUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Ajustes"].firstMatch.waitForExistence(timeout: 5), "Home's Settings")
         app.buttons["Ajustes"].firstMatch.tap()
         let voiceRow = app.descendants(matching: .any)["settings-voice"].firstMatch
-        if !voiceRow.waitForExistence(timeout: 3) { app.swipeUp() }
-        XCTAssertTrue(voiceRow.waitForExistence(timeout: 5), "Settings' Voice row")
+        XCTAssertTrue(app.reveal(voiceRow), "Settings' Voice row")
         voiceRow.tap(); sleep(2)
         shot(app, "settings-voice")
     }

@@ -286,7 +286,7 @@ struct ReportSheet: View {
                 ForEach([AskReport.Reason.wrong, .offensive, .unsafe, .other], id: \.self) { r in
                     Button { reason = r } label: {
                         HStack {
-                            Image(systemName: reason == r ? "largecircle.fill.circle" : "circle").foregroundStyle(palette.primary)
+                            Image(systemName: reason == r ? "largecircle.fill.circle" : "circle").foregroundStyle(palette.primary).accessibilityHidden(true)
                             Text(Self.label(r)).foregroundStyle(palette.onSurface)
                         }
                     }

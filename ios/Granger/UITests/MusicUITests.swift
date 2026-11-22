@@ -162,7 +162,7 @@ final class MusicUITests: XCTestCase {
         app.buttons["listen-more"].tap()
         app.buttons["Find music on this phone"].tap()
         let rescan = app.buttons["media-rescan"]
-        XCTAssertTrue(rescan.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.reveal(rescan, timeout: 10))
         rescan.tap()
         let found = NSPredicate { _, _ in app.staticTexts["media-rescan-state"].label.hasPrefix("Found") }
         expectation(for: found, evaluatedWith: nil)

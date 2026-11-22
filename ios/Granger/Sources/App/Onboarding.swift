@@ -137,12 +137,14 @@ struct OnboardingScreen: View {
                     Button { model.chooseStart(id: start.id) } label: {
                         HStack(alignment: .top, spacing: 10) {
                             Image(systemName: ui.startId == start.id ? "largecircle.fill.circle" : "circle").foregroundStyle(palette.primary)
+                                .accessibilityHidden(true)
                             VStack(alignment: .leading, spacing: 3) {
                                 Text("\(start.title) · \(QueueWords.bytes(start.bytes(unticked: ui.unticked)))").font(Spectral.regular(19)).foregroundStyle(palette.onSurface)
                                 Text(start.blurb.words).font(.callout).foregroundStyle(palette.onSurfaceVariant)
                             }
                         }
                     }
+                    .accessibilityAddTraits(ui.startId == start.id ? .isSelected : [])
                     .accessibilityIdentifier("start-\(start.id)")
                 }
                 if let start = ui.start {

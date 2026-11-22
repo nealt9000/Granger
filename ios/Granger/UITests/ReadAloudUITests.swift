@@ -98,20 +98,20 @@ final class ReadAloudUITests: XCTestCase {
         XCTAssertTrue(app.otherElements["mini-player"].waitForExistence(timeout: 30))
         app.tabBars.buttons["Listen"].tap()
         let sleepRow = app.buttons["listen-sleep"]
-        for _ in 0..<4 where !sleepRow.isHittable { app.swipeUp() }
-        XCTAssertTrue(sleepRow.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.reveal(sleepRow, timeout: 10))
         let state = app.staticTexts["listen-sleep-state"]
         XCTAssertEqual(state.label, "Off")
         sleepRow.tap()
-        XCTAssertTrue(app.buttons["sleep-5"].waitForExistence(timeout: 10)); app.buttons["sleep-5"].tap()
+        XCTAssertTrue(app.reveal(app.buttons["sleep-5"], timeout: 10)); app.buttons["sleep-5"].tap()
         waitFor(state, label: "Stops in 4:")
         shot(app, "readaloud-sleep")
-        sleepRow.tap()
-        XCTAssertTrue(app.buttons["sleep-cancel"].waitForExistence(timeout: 10)); app.buttons["sleep-cancel"].tap()
+        XCTAssertTrue(app.reveal(sleepRow)); sleepRow.tap()
+        XCTAssertTrue(app.reveal(app.buttons["sleep-cancel"], timeout: 10)); app.buttons["sleep-cancel"].tap()
         waitFor(state, label: "Off")
-        sleepRow.tap()
-        XCTAssertTrue(app.buttons["sleep-chapter"].waitForExistence(timeout: 10)); app.buttons["sleep-chapter"].tap()
+        XCTAssertTrue(app.reveal(sleepRow)); sleepRow.tap()
+        XCTAssertTrue(app.reveal(app.buttons["sleep-chapter"], timeout: 10)); app.buttons["sleep-chapter"].tap()
         waitFor(state, label: "End of chapter")
+        XCTAssertTrue(app.reveal(app.buttons["listen-stop"]))
         app.buttons["listen-stop"].tap()
     }
 

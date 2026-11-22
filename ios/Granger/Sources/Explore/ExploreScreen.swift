@@ -208,6 +208,7 @@ struct Eyebrow: View {
     @Environment(\.palette) private var palette
     var body: some View {
         Text(text.uppercased()).font(.caption.weight(.semibold)).tracking(1.4).foregroundStyle(palette.onSurfaceVariant)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -292,6 +293,9 @@ struct PlateTile: View {
                     .padding(10)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(LinearGradient(colors: [.clear, .black.opacity(0.7)], startPoint: .top, endPoint: .bottom))
+                    // Over a picture of fixed size the caption stops at xxxLarge, as the Library's under covers do: at the
+                    // accessibility sizes it was a few letters ("Hist…"). VoiceOver reads the whole label.
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 }
             }
             .accessibilityElement(children: .ignore)

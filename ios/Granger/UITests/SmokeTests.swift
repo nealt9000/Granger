@@ -55,8 +55,11 @@ final class SmokeTests: XCTestCase {
         field.tap()
         field.typeText("Mount Everest")
         XCTAssertTrue(app.staticTexts["Titles"].waitForExistence(timeout: 20), "the Titles group")
-        XCTAssertTrue(app.staticTexts["Articles"].exists, "the Articles group")
-        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Mount Everest'")).firstMatch.tap()
+        let everest = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Mount Everest'")).firstMatch
+        XCTAssertTrue(app.reveal(everest), "a title hit")
+        XCTAssertTrue(app.reveal(app.staticTexts["Articles"]), "the Articles group")
+        XCTAssertTrue(app.reveal(everest))
+        everest.tap()
         XCTAssertTrue(app.buttons["read-full"].waitForExistence(timeout: 20), "its topic page")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         field.buttons["Clear text"].firstMatch.tap()
@@ -188,36 +191,36 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(spread.waitForExistence(timeout: 60), "today's spread")
         shot(app, "explore-1")
         let door = app.buttons["door-science"]
-        for _ in 0..<8 where !(door.exists && door.isHittable) { app.swipeUp() }
+        XCTAssertTrue(app.reveal(door), "the Science door")
         shot(app, "explore-2")
         door.tap()
         let room = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'room-'")).firstMatch
-        XCTAssertTrue(room.waitForExistence(timeout: 30), "the subject's rooms")
+        XCTAssertTrue(app.reveal(room, timeout: 30), "the subject's rooms")
         shot(app, "subject-1")
-        for _ in 0..<6 where !room.isHittable { app.swipeUp() }
         room.tap()
-        XCTAssertTrue(app.buttons["view-Plates"].waitForExistence(timeout: 30), "the room")
+        XCTAssertTrue(app.reveal(app.buttons["view-Plates"], timeout: 30), "the room")
         sleep(3)
         shot(app, "room-1")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         app.navigationBars.buttons.element(boundBy: 0).tap()
         // Ways on: Wander, then Games.
         let wander = app.buttons["way-Wander"]
-        for _ in 0..<12 where !(wander.exists && wander.isHittable) { app.swipeUp() }
+        XCTAssertTrue(app.reveal(wander, swipes: 16), "Ways on: Wander")
         shot(app, "explore-3")
         wander.tap()
         XCTAssertTrue(app.buttons["wander-open"].waitForExistence(timeout: 90), "Wander's centre")
         shot(app, "wander-1")
         app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.reveal(app.buttons["way-Games"]))
         app.buttons["way-Games"].tap()
         let game = app.buttons["game-BEFORE_AFTER"]
-        XCTAssertTrue(game.waitForExistence(timeout: 20), "the games")
+        XCTAssertTrue(app.reveal(game, timeout: 20), "the games")
         game.tap()
         let before = app.buttons["Before"]
-        XCTAssertTrue(before.waitForExistence(timeout: 30), "a round")
+        XCTAssertTrue(app.reveal(before, timeout: 30), "a round")
         shot(app, "game-1")
         before.tap()
-        XCTAssertTrue(app.buttons["game-next"].waitForExistence(timeout: 5), "revealed")
+        XCTAssertTrue(app.reveal(app.buttons["game-next"], timeout: 5), "revealed")
         shot(app, "game-2")
     }
 
@@ -291,13 +294,14 @@ final class SmokeTests: XCTestCase {
         let getMore = app.buttons["Get more"].firstMatch
         XCTAssertTrue(getMore.waitForExistence(timeout: 10))
         getMore.tap()
+        XCTAssertTrue(app.reveal(app.buttons["getmore-books"]))
         app.buttons["getmore-books"].tap()
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 10))
         field.tap()
         field.typeText("Draw your African")
         let get = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'get-'")).firstMatch
-        XCTAssertTrue(get.waitForExistence(timeout: 60), "the pack's Keep button (catalog loaded)")
+        XCTAssertTrue(app.reveal(get, timeout: 60), "the pack's Keep button (catalog loaded)")
         shot(app, "getmore-books")
         get.tap()
 
@@ -305,7 +309,7 @@ final class SmokeTests: XCTestCase {
         if app.navigationBars.buttons.element(boundBy: 0).exists && !app.buttons["getmore-books"].exists { app.navigationBars.buttons.element(boundBy: 0).tap() }
         let downloads = app.buttons["Downloads"]
         // Below Get more's sections (Audiobooks & music since Plan I6 Task 7): scrolled to.
-        for _ in 0..<4 where !(downloads.exists && downloads.isHittable) { app.swipeUp() }
+        XCTAssertTrue(app.reveal(downloads, swipes: 20))
         XCTAssertTrue(downloads.waitForExistence(timeout: 10))
         downloads.tap()
         sleep(3)
@@ -323,9 +327,8 @@ final class SmokeTests: XCTestCase {
         shot(app, "downloads-done")
 
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        _ = app.buttons["getmore-books"].waitForExistence(timeout: 5)
         sleep(1)
-        for _ in 0..<4 where !(app.buttons["getmore-books"].exists && app.buttons["getmore-books"].isHittable) { app.swipeDown(); sleep(1) }
+        XCTAssertTrue(app.reveal(app.buttons["getmore-books"]))
         // The row by its words: after the list has scrolled back, the link's own element can miss the tap.
         app.staticTexts["Books by kind"].firstMatch.tap()
         let field2 = app.searchFields.firstMatch
@@ -334,7 +337,7 @@ final class SmokeTests: XCTestCase {
         field2.tap()
         field2.typeText("Draw your African")
         let more = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'More for'")).firstMatch
-        XCTAssertTrue(more.waitForExistence(timeout: 30), "the installed row")
+        XCTAssertTrue(app.reveal(more, timeout: 30), "the installed row")
         more.tap()
         app.buttons["Remove"].firstMatch.tap()
         let confirm = app.alerts.buttons["Remove"]
@@ -390,12 +393,12 @@ final class SmokeTests: XCTestCase {
         app.navigationBars.buttons.element(boundBy: 0).tap()
         app.navigationBars.buttons.element(boundBy: 0).tap()
         let headline = app.staticTexts["ready-headline"]
-        XCTAssertTrue(headline.waitForExistence(timeout: 30), "Ready offline on Home")
+        XCTAssertTrue(app.reveal(headline, timeout: 30), "Ready offline on Home")
         shot(app, "ready-offline")
         let all = app.buttons["ready-see-all"]
-        for _ in 0..<8 where !all.isHittable { app.swipeUp() }
+        XCTAssertTrue(app.reveal(all))
         all.tap()
-        XCTAssertTrue(app.staticTexts["Ready for anything"].waitForExistence(timeout: 30), "Outfitting's domains")
+        XCTAssertTrue(app.reveal(app.staticTexts["Ready for anything"], timeout: 30), "Outfitting's domains")
         shot(app, "outfitting")
     }
 
@@ -435,11 +438,12 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(app.buttons["start-starter"].waitForExistence(timeout: 60), "Pick a start, from the catalog")
         shot(app, "onboarding-start")
         let next = app.buttons["onboarding-next"]
-        for _ in 0..<15 where !(next.exists && next.isHittable) { app.swipeUp() }
+        XCTAssertTrue(app.reveal(next, swipes: 20))
         next.tap()
         let start = app.buttons["onboarding-start"]
-        XCTAssertTrue(start.waitForExistence(timeout: 10), "Review")
+        XCTAssertTrue(app.reveal(start, timeout: 10), "Review")
         shot(app, "onboarding-review")
+        XCTAssertTrue(app.reveal(app.buttons["onboarding-skip"]))
         app.buttons["onboarding-skip"].tap()
         XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 10), "skipped to the app")
     }
@@ -470,13 +474,14 @@ final class SmokeTests: XCTestCase {
         app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en", "-wifiOnly", "NO"]
         app.launch()
         app.buttons["Get more"].firstMatch.tap()
+        XCTAssertTrue(app.reveal(app.buttons["getmore-books"]))
         app.buttons["getmore-books"].tap()
         let field = app.searchFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 10))
         field.tap()
         field.typeText("Draw your African")
         let get = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'get-'")).firstMatch
-        XCTAssertTrue(get.waitForExistence(timeout: 60), "the pack's Keep button")
+        XCTAssertTrue(app.reveal(get, timeout: 60), "the pack's Keep button")
         get.tap()
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'cancel-'")).firstMatch.waitForExistence(timeout: 30), "downloading")
         sleep(3)
@@ -484,16 +489,15 @@ final class SmokeTests: XCTestCase {
 
         app.launch()
         app.buttons["Get more"].firstMatch.tap()
-        XCTAssertTrue(app.buttons["getmore-books"].waitForExistence(timeout: 10))
-        for _ in 0..<4 where !(app.buttons["Downloads"].exists && app.buttons["Downloads"].isHittable) { app.swipeUp() }
+        XCTAssertTrue(app.navigationBars["Get more"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.reveal(app.buttons["Downloads"], swipes: 20))
         app.buttons["Downloads"].tap()
         XCTAssertTrue(app.staticTexts["Done today"].waitForExistence(timeout: 300), "installed after the restart")
         shot(app, "downloads-after-kill")
 
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        _ = app.buttons["getmore-books"].waitForExistence(timeout: 5)
         sleep(1)
-        for _ in 0..<4 where !(app.buttons["getmore-books"].exists && app.buttons["getmore-books"].isHittable) { app.swipeDown(); sleep(1) }
+        XCTAssertTrue(app.reveal(app.buttons["getmore-books"]))
         // The row by its words: after the list has scrolled back, the link's own element can miss the tap.
         app.staticTexts["Books by kind"].firstMatch.tap()
         let field2 = app.searchFields.firstMatch
@@ -502,7 +506,7 @@ final class SmokeTests: XCTestCase {
         field2.tap()
         field2.typeText("Draw your African")
         let more = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'More for'")).firstMatch
-        XCTAssertTrue(more.waitForExistence(timeout: 30))
+        XCTAssertTrue(app.reveal(more, timeout: 30))
         more.tap()
         app.buttons["Remove"].firstMatch.tap()
         app.alerts.buttons["Remove"].tap()
