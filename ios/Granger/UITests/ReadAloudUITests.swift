@@ -103,14 +103,14 @@ final class ReadAloudUITests: XCTestCase {
         let state = app.staticTexts["listen-sleep-state"]
         XCTAssertEqual(state.label, "Off")
         sleepRow.tap()
-        app.buttons["sleep-5"].tap()
+        XCTAssertTrue(app.buttons["sleep-5"].waitForExistence(timeout: 10)); app.buttons["sleep-5"].tap()
         waitFor(state, label: "Stops in 4:")
         shot(app, "readaloud-sleep")
         sleepRow.tap()
-        app.buttons["sleep-cancel"].tap()
+        XCTAssertTrue(app.buttons["sleep-cancel"].waitForExistence(timeout: 10)); app.buttons["sleep-cancel"].tap()
         waitFor(state, label: "Off")
         sleepRow.tap()
-        app.buttons["sleep-chapter"].tap()
+        XCTAssertTrue(app.buttons["sleep-chapter"].waitForExistence(timeout: 10)); app.buttons["sleep-chapter"].tap()
         waitFor(state, label: "End of chapter")
         app.buttons["listen-stop"].tap()
     }
