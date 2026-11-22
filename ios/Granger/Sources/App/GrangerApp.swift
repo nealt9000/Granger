@@ -246,6 +246,11 @@ struct RootView: View {
             }
             return
         }
+        // `-debugSource GRANGER` opens that Get more source screen (Granger's own is reached from the Library's shelves).
+        if homePath.isEmpty, let scope = UserDefaults.standard.string(forKey: "debugSource") {
+            homePath = [.source(scope: scope, domain: nil, family: nil, bookSet: nil)]
+            return
+        }
         guard homePath.isEmpty, let spec = UserDefaults.standard.string(forKey: "debugOpen") else { return }
         let parts = spec.split(separator: ":", maxSplits: 1).map(String.init)
         guard parts.count == 2 else { return }

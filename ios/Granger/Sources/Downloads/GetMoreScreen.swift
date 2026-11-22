@@ -223,13 +223,8 @@ struct SourceScreen: View {
         return Text(line).font(.callout).foregroundStyle(palette.onSurfaceVariant)
     }
 
-    private var title: String {
-        switch scope {
-        case .books: L("Get books")
-        case .kiwix: "Kiwix"
-        default: L("Get more")
-        }
-    }
+    /// Android's title: the scope's own name (Models, Kiwix, Granger, Get books…), as its NavHost passes `source.title`.
+    private var title: String { ScreenText.word(scope.titleKey) }
 
     private var sizeCheckTitle: String {
         guard let c = holder.ui?.sizeCheck else { return "" }
@@ -248,6 +243,10 @@ struct SourceScreen: View {
             Spacer()
             if p.remainingCount > 0 { Button("Get") { model.getPreset(presetId: p.id) }.buttonStyle(.bordered) }
         }
+        // A collection's volume (classics volumes, Android's PresetItem) sits indented under it.
+        .padding(.leading, p.setOf.isEmpty ? 0 : 24)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("preset-\(p.id)")
     }
 
     @ViewBuilder private func itemRow(_ row: ItemRow, _ model: SourceViewModel) -> some View {
@@ -308,6 +307,7 @@ struct SourceScreen: View {
         Button { model.chooseSlice(setId: setId, zimName: slice.zimName) } label: {
             HStack(alignment: .top, spacing: 10) {
                 Image(systemName: slice.chosen ? "largecircle.fill.circle" : "circle").foregroundStyle(palette.primary)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(slice.label) · \(QueueWords.bytes(slice.sizeBytes))").foregroundStyle(palette.onSurface)
                     if slice.installed { Text("On this phone").font(.caption).foregroundStyle(palette.tertiary) }

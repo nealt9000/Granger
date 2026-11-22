@@ -9,6 +9,8 @@ struct BroadSpreadView: View {
     let broad: BroadTopic
     let lang: String
     let path: String
+    /// The article in the other knowledge language, when Wikipedia links one (Android's `topic.other`).
+    var other: (lang: String, path: String)? = nil
     @Environment(\.palette) private var palette
     @State private var opened: Set<Int> = []
 
@@ -34,6 +36,13 @@ struct BroadSpreadView: View {
                     .accessibilityIdentifier("read-full")
                     NavigationLink(value: Route.quilt(lang: lang, path: path)) { DoLabel(text: L("Connections")) }
                         .accessibilityIdentifier("connections")
+                }
+                if let other {
+                    // Beside Connections on Android's spread; its own line here, as the name in its own words runs long.
+                    NavigationLink(value: Route.topic(lang: other.lang, path: other.path)) {
+                        DoLabel(text: other.lang == "es" ? L("Leer en español") : L("Read in English"))
+                    }
+                    .accessibilityIdentifier("read-other-language")
                 }
                 KeepButton(lang: lang, title: path)
             }

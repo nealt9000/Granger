@@ -4507,16 +4507,6 @@
         }
       }
     },
-    "Get books" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conseguir libros"
-          }
-        }
-      }
-    },
     "Get it" : {
       "localizations" : {
         "es" : {

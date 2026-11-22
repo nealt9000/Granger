@@ -63,11 +63,30 @@ final class ClassicsUITests: XCTestCase {
 
         app.buttons["Get more"].tap()
         let archive = app.buttons["getmore-archive"]
-        XCTAssertTrue(archive.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.reveal(archive, timeout: 10))
         archive.tap()
         XCTAssertTrue(app.staticTexts["Showing public-domain texts only: published 1930 or earlier."].waitForExistence(timeout: 15),
                       "the App Store's 1930 rule (call 9)")
         XCTAssertFalse(app.buttons["Show everything"].exists, "no waiver on the App Store")
         shot(app, "archive-screen")
+    }
+
+    /// Classics volumes (Android since 2026-11-21): Granger's own screen lists each collection's volumes under it,
+    /// indented, each with its own Get; the screen is titled by its scope's name. Needs the catalog (online).
+    func testClassicsVolumesSitUnderTheirCollection() {
+        let app = XCUIApplication()
+        // Granger's screen, as the Library's Every collection opens it.
+        app.launchArguments = CleanData.args + ["-onboarding.done", "YES", "-privacySeen", "YES", "-localOnly", "NO", "-wikiLanguage", "en",
+                                                "-debugSource", "GRANGER"]
+        app.launch()
+        XCTAssertTrue(app.navigationBars["Granger"].waitForExistence(timeout: 20), "titled by its scope, as on Android")
+        let whole = app.descendants(matching: .any)["preset-granger-classics"]
+        let drama = app.descendants(matching: .any)["preset-granger-classics-drama"]
+        XCTAssertTrue(app.reveal(whole, timeout: 60), "the collection's set")
+        XCTAssertTrue(app.reveal(drama), "a volume")
+        XCTAssertTrue(drama.staticTexts["Drama"].exists, "the volume named without its collection's name")
+        XCTAssertTrue(app.reveal(whole))
+        shot(app, "classics-volumes")
+        XCTAssertGreaterThan(drama.frame.minX, whole.frame.minX + 10, "indented under its collection")
     }
 }

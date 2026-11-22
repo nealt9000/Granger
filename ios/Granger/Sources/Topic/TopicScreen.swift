@@ -23,7 +23,7 @@ struct TopicScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 if let topic = model.topic, topic.header != nil, let broad = topic.broad {
-                    BroadSpreadView(topic: topic, broad: broad, lang: lang, path: path).padding(.horizontal, -16)
+                    BroadSpreadView(topic: topic, broad: broad, lang: lang, path: path, other: model.other).padding(.horizontal, -16)
                 } else if let topic = model.topic, topic.header != nil, !topic.broadPending || topic.done {
                     content(topic)
                 } else if model.failed {
