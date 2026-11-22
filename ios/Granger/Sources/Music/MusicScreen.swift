@@ -31,14 +31,23 @@ struct MusicScreen: View {
     @State private var tab: MusicTab = .albums
     @State private var dialog: MusicDialog?
 
+    private var tabs: some View {
+        Picker("Tab", selection: $tab) {
+            ForEach(MusicTab.allCases) { Text($0.label).tag($0) }
+        }
+        .pickerStyle(.segmented)
+        .accessibilityIdentifier("music-tabs")
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            Picker("Tab", selection: $tab) {
-                ForEach(MusicTab.allCases) { Text($0.label).tag($0) }
+            // Six tabs across the width; when their words run longer than it (Spanish's Canciones, Carpetas), at their
+            // own widths, scrolling sideways.
+            ViewThatFits(in: .horizontal) {
+                tabs.padding(.horizontal, 12)
+                ScrollView(.horizontal, showsIndicators: false) { tabs.fixedSize().padding(.horizontal, 12) }
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 12).padding(.vertical, 6)
-            .accessibilityIdentifier("music-tabs")
+            .padding(.vertical, 6)
             if let ui = holder.ui {
                 if ui.songs.isEmpty && tab != .playlists {
                     empty

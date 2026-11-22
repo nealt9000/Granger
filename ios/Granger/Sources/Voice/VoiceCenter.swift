@@ -38,7 +38,8 @@ final class VoiceCenter {
         voice = IosVoice(library: core.library, natives: PiperNativesImpl(), audioSession: { on in
             let wanted = on.boolValue
             Task { @MainActor in VoiceCenter.audioSession(wanted, spoken: true) }
-        })
+        }, titles: VoiceTitles(granger: ScreenText.word("speech_granger_voice"), system: ScreenText.word("speech_system_voice"),
+                               systemDefault: ScreenText.word("speech_system_voice_default")))
         music = MusicCenter(library: core.library, voice: voice)
         let system = IosSystem(library: core.library, voice: voice, music: music.music)
         self.system = system

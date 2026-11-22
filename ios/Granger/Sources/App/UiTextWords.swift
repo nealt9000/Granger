@@ -57,3 +57,15 @@ enum UiTextWords {
         return "\(a)"
     }
 }
+
+extension KindRow {
+    /// The kind's name: the seeded Music and Audiobooks kinds in the app's language (the database keeps the English
+    /// name it was seeded with), a kind the person named as they named it.
+    var shownTitle: String {
+        switch mediaTypeId {
+        case MusicTypesKt.MUSIC_TYPE_ID: L("Music")
+        case AudiobookTypesKt.AUDIOBOOKS_TYPE_ID: L("Audiobooks")
+        default: title.words
+        }
+    }
+}

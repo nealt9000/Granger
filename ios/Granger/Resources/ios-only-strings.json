@@ -151,7 +151,8 @@
     "© AETHERBOUND LLC": null,
     "1900 to 1945": "@explore_era_wars_from",
     "Off": "@local_only_off",
-    "Back": "@common_back"
+    "Back": "@common_back",
+    "History": "@shell_history"
   },
   "infoPlist": {
     "NSAppleMusicUsageDescription": "Granger muestra las canciones de tu biblioteca de Música que puede reproducir, junto a la música que agregas desde Archivos. Nunca las modifica."

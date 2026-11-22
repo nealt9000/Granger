@@ -378,10 +378,11 @@ class IosVoice(
     private val library: IosLibrary,
     natives: PiperNatives,
     audioSession: (Boolean) -> Unit,
+    /** How voices are named, in the app's language: Swift passes core/speech's strings (speech_*) from ScreenText. */
+    private val titles: VoiceTitles,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val prefs = DefaultsVoicePrefs()
-    private val titles = VoiceTitles("Granger voice (%1\$s)", "System voice %1\$s (%2\$s)", "System voice default (%1\$s)")
 
     /** The folder the queue unpacks voices into: Documents/.granger/voices. */
     val voicesDir: String get() = VoiceDownloads.voicesDir(library.downloadRoot)

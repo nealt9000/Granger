@@ -22,6 +22,7 @@
 		11077F3DC9C2DAE4E8A56D1B /* ArchiveScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E609C72E4ED1AE5019BF79 /* ArchiveScreen.swift */; };
 		12FBE9482E301BD1EF1E9949 /* Words.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA124AA3611495ADEC17C237 /* Words.swift */; };
 		1424EFEE57F6296E47E2BB70 /* NetworkPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D30AA717E22E6D144A61AB /* NetworkPath.swift */; };
+		1444582374C119A34034FA8C /* SpanishUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AAD900738FDA8B46FEEBBAB /* SpanishUITests.swift */; };
 		1686027DD9EB27E19DDF74D4 /* spectral_regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63249671AC1CC4288F670ABF /* spectral_regular.ttf */; };
 		18B435D393B120839C35035D /* SystemUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0EA1AB8E9D642E8055237C /* SystemUITests.swift */; };
 		1AFA13D56BD199C80C543B2B /* ClassicsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27583559CE695EAA07B0C90 /* ClassicsUITests.swift */; };
@@ -253,6 +254,7 @@
 		6EB9E388036E947C9C13B2FB /* UiTextWords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UiTextWords.swift; sourceTree = "<group>"; };
 		6F7EA26827A05868CC275A31 /* RemoteCollectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCollectionScreen.swift; sourceTree = "<group>"; };
 		7A0C0C1C906AB109E2FCDA1A /* Games.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Games.swift; sourceTree = "<group>"; };
+		7AAD900738FDA8B46FEEBBAB /* SpanishUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpanishUITests.swift; sourceTree = "<group>"; };
 		7ACEC15F49FA3F03A769C7A6 /* GrangerCoreBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrangerCoreBridge.swift; sourceTree = "<group>"; };
 		7AFB750A6E9FB9C55AE3800C /* ExploreScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreScreen.swift; sourceTree = "<group>"; };
 		7CC01381BEC958CC5134EC02 /* GrangerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrangerApp.swift; sourceTree = "<group>"; };
@@ -521,6 +523,7 @@
 				7F0D2C6AA7832F3D9D55E154 /* PlayerUITests.swift */,
 				3B7E566216AD0EE6BE8F1CEB /* ReadAloudUITests.swift */,
 				DD4E0D95A9828108F9ABF60D /* SmokeTests.swift */,
+				7AAD900738FDA8B46FEEBBAB /* SpanishUITests.swift */,
 				FB0EA1AB8E9D642E8055237C /* SystemUITests.swift */,
 			);
 			path = UITests;
@@ -902,6 +905,7 @@
 				8929C0B2AE9FAA5B3BDE946D /* PlayerUITests.swift in Sources */,
 				10C36F29A42424401008627F /* ReadAloudUITests.swift in Sources */,
 				B9F1FDCE26442AE3F6A3645E /* SmokeTests.swift in Sources */,
+				1444582374C119A34034FA8C /* SpanishUITests.swift in Sources */,
 				18B435D393B120839C35035D /* SystemUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

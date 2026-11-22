@@ -41,8 +41,11 @@ CATALOG = IOS / "Resources/Localizable.xcstrings"
 IOS_ONLY = IOS / "Resources/ios-only-strings.json"
 INFOPLIST = IOS / "Resources/InfoPlist.xcstrings"
 NOT_ON_SCREEN = ROOT / "tools/ios/not-on-screen.txt"
-VALUES = ROOT / "app/src/main/res/values"
-VALUES_ES = ROOT / "app/src/main/res/values-es"
+# Android's words: the app's, and the modules' the iPhone shows too (core/speech's voice names...).
+RES_DIRS = [ROOT / "app/src/main/res", ROOT / "core/speech/src/androidMain/res", ROOT / "core/downloads/src/main/res",
+            ROOT / "core/player/src/main/res"]
+VALUES = [d / "values" for d in RES_DIRS]
+VALUES_ES = [d / "values-es" for d in RES_DIRS]
 TARGETS = ["Granger", "GrangerWidgets"]
 LITERAL = re.compile(r'"([a-z][a-z0-9]*_[a-z0-9_]+)"')
 RES = re.compile(r'UiText\.Res\(\s*"([a-z0-9_]+)"')
@@ -109,10 +112,10 @@ def android_text(e):
     return t if raw.strip().startswith('"') else t.strip()
 
 
-def resources(folder):
+def resources(folders):
     """Android's strings and plurals by name, and the names marked translatable="false"."""
     strings, plurals, fixed = {}, {}, set()
-    for f in sorted(folder.glob("*.xml")):
+    for f in [f for folder in folders for f in sorted(folder.glob("*.xml"))]:
         try:
             root = ET.parse(f).getroot()
         except ET.ParseError:
@@ -383,6 +386,8 @@ def catalog(extracted):
             continue
         skel = skeleton(key, SWIFT_ARG)
         names, plural_names = by_skel.get(skel, []), plural_by_skel.get(skel, [])
+        if plural_names and any(a[3] in INT_SPECS for a in args(key, SWIFT_ARG)):
+            names = []  # a count the code interpolates as is: Android's plural, not a string that reads the same
         if names:
             name, ambiguous = pick(names, files)
             if ambiguous:

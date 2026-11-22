@@ -141,7 +141,7 @@ struct ListenMedia: View {
             if open { closed.insert(kind.id) } else { closed.remove(kind.id) }
         } label: {
             HStack {
-                Text(kind.title.words).font(Spectral.medium(18)).foregroundStyle(palette.onSurface)
+                Text(kind.shownTitle).font(Spectral.medium(18)).foregroundStyle(palette.onSurface)
                 Spacer()
                 Image(systemName: open ? "chevron.up" : "chevron.down").foregroundStyle(palette.onSurfaceVariant)
             }
