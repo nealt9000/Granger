@@ -142,6 +142,20 @@ When I6 merges, every parity row marked I6 is ticked or carries an agreed reason
 - [ ] JVM suite, `bundleRelease` with R8, and the iPhone suite (53 tests) still green.
 - [ ] The Pixel 6 walkthrough (see Global constraints).
 - [ ] Publish a GrangerCore release and pin it. Merge and push. Tell the peer sessions what moved.
+  - Done 2026-11-21, after rebasing onto main 4038b4f8 (Classics volumes; no conflicts, text ids unchanged on regeneration).
+    - JVM: 3917 tests, 0 failures, run as `./gradlew test testAndroidHostTest jvmTest --continue`. Plain `./gradlew test` skips the Android-target KMP modules (store, media, playback, books, speech, archive…), which have no `test` task; earlier totals taken that way undercounted. `bundleRelease` builds with R8.
+    - iPhone: 52/53 on the first full run. The read-aloud book test timed out once waiting for Pause, and the sleep timer test tapped its sheet before it appeared (fixed: it waits for each button). The read-aloud tests then passed twice in a row. The app builds against release ios-core-2026-11-21-5, which also carries Preset.setOf from the Classics volumes work.
+    - Pixel 6 on debug 1738 over the phone's data (DB 18/4):
+      - TagLib's JNI library loads after the move (Rescan now).
+      - Music: albums, the sort label, an artist page's Albums group, a song, the queue.
+      - Audiobook: the page (Resume, 56%, chapters), resume in its chapter, pause.
+      - LibriVox: The Raven searched, kept (4.6 MB), on the Audiobooks shelf, removed with its files.
+      - archive.org spoken word: list and item sheet.
+      - Music under the voice: The Wall under read aloud, the row and its slider. Stopping the voice leaves the music playing alone, as `PlayerEngine` intends.
+      - Mic: Speak, then "Didn't catch that".
+      - No crashes.
+      - Not walked: the widget (none placed on the phone's home screen; `WidgetCacheTest` covers the fixed case) and the tile (unchanged).
+      - Side effect: The Gift of Fire audiobook was started by a mis-tap for about 15 s and stepped back into "24. Kin".
 
 ## I6b: the iPhone
 
