@@ -34,6 +34,10 @@ extension XCUIApplication {
     }
 
     private func clearOfMiniPlayer(_ element: XCUIElement) -> Bool {
+        // Nor under the status and navigation bars at the top, which XCTest also calls hittable through.
+        if element.frame.minY < 100 { return false }
+        // Nor in the home indicator's strip at the foot, where a tap can miss.
+        if element.frame.maxY > windows.firstMatch.frame.maxY - 34 { return false }
         let mini = descendants(matching: .any)["mini-player"].firstMatch
         // Under a sheet the mini player isn't on top of anything.
         guard mini.exists, mini.isHittable else { return true }

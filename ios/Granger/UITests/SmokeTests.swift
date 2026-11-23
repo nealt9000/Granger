@@ -274,7 +274,9 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(articles.waitForExistence(timeout: 10), "pack full text")
         for _ in 0..<12 where !app.staticTexts["Best matches"].isHittable { app.swipeDown() }
         shot(app, "pack-search")
-        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Bread'")).firstMatch.tap()
+        let bread = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Bread'")).firstMatch
+        XCTAssertTrue(app.reveal(bread), "the Bread hit")
+        bread.tap()
         let read = app.buttons["read-full"]
         XCTAssertTrue(read.waitForExistence(timeout: 20), "the pack article's topic page")
         XCTAssertFalse(app.buttons["keep"].exists, "no Keep for a pack article")

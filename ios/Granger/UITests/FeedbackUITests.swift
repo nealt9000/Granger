@@ -144,9 +144,13 @@ final class FeedbackUITests: XCTestCase {
         let write = app.buttons["Write email"]
         XCTAssertTrue(app.reveal(write))
         XCTAssertFalse(write.isEnabled, "a reason first")
-        XCTAssertTrue(app.reveal(app.buttons["Wrong or made up"]))
-        app.buttons["Wrong or made up"].tap()
-        XCTAssertTrue(app.reveal(write))
+        // The reason chosen (tried again if the tap landed while the list was still settling), then Write email is on.
+        for _ in 0..<3 {
+            XCTAssertTrue(app.reveal(app.buttons["Wrong or made up"]))
+            app.buttons["Wrong or made up"].tap()
+            XCTAssertTrue(app.reveal(write))
+            if write.isEnabled { break }
+        }
         XCTAssertTrue(write.isEnabled)
         shot(app, "report-sheet")
         XCTAssertTrue(app.reveal(write))
