@@ -138,6 +138,12 @@ struct SettingsScreen: View {
                     Text("Knowledge is for all who seek it.").font(.footnote).foregroundStyle(.secondary)
                 }
                 LabeledContent("Version", value: Core.version)
+                #if FRIENDS
+                // The testers' extras (Plan I8 call 7): which build this is, by its version.
+                Text(BuildExtras.kind == .debug ? L("Debug build \(ThisPhone.facts.versionName)") : L("Friends build \(ThisPhone.facts.versionName)"))
+                    .font(.footnote).foregroundStyle(palette.onSurfaceVariant)
+                    .accessibilityIdentifier("settings-friends-build")
+                #endif
                 Link("GPLv3 · source on GitHub", destination: URL(string: "https://github.com/nealt9000/Granger")!)
                 // The libraries and assets the app bundles, with their licences (Plan I7 call 8).
                 NavigationLink {
@@ -149,6 +155,18 @@ struct SettingsScreen: View {
                     }
                 }
                 .accessibilityIdentifier("settings-licences")
+                #if FRIENDS
+                // The Device check (Plan I8 call 5): what a tester's iPhone can measure by itself, for Send feedback.
+                NavigationLink {
+                    DeviceCheckScreen()
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Device check")
+                        Text("Measures this iPhone for a tester's report").font(.footnote).foregroundStyle(palette.onSurfaceVariant)
+                    }
+                }
+                .accessibilityIdentifier("settings-device-check")
+                #endif
                 Text("© AETHERBOUND LLC").font(.footnote).foregroundStyle(.secondary)
             }
             Section {

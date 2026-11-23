@@ -27,6 +27,7 @@
 		1424EFEE57F6296E47E2BB70 /* NetworkPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D30AA717E22E6D144A61AB /* NetworkPath.swift */; };
 		1444582374C119A34034FA8C /* SpanishUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AAD900738FDA8B46FEEBBAB /* SpanishUITests.swift */; };
 		1686027DD9EB27E19DDF74D4 /* spectral_regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63249671AC1CC4288F670ABF /* spectral_regular.ttf */; };
+		1728AF4425B7FA02DE328526 /* BuildExtras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC87E96FD16DB136C66CF9E /* BuildExtras.swift */; };
 		18B435D393B120839C35035D /* SystemUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0EA1AB8E9D642E8055237C /* SystemUITests.swift */; };
 		1AFA13D56BD199C80C543B2B /* ClassicsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27583559CE695EAA07B0C90 /* ClassicsUITests.swift */; };
 		1BC75D3E19D976DC9FCCB9C0 /* SettingsModelsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B855DAA2A7DD384374C76E85 /* SettingsModelsUITests.swift */; };
@@ -46,6 +47,7 @@
 		32FB72960315281E45A23AD1 /* AccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8267DB32C89E546803A5C7F7 /* AccessibilityTests.swift */; };
 		36E9134D81F747B5E9804618 /* SherpaOnnxC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 917A8C6C283A2AABAF1560F8 /* SherpaOnnxC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		372D0C7A92F31AC0E4017564 /* KiwixArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 244FA2D697CE5DE736633EAE /* KiwixArchive.swift */; };
+		372D98385F03364EE6043E37 /* BuildExtrasTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F398A1FBE8863F63D006D5D /* BuildExtrasTests.swift */; };
 		37CB475CA851E38824A30F9F /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5097D7F74D147D51E78904EE /* Timeline.swift */; };
 		3A14C67A4ADC44BAECECC538 /* Core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EDFCCCB9DFC1E76B1696659 /* Core.swift */; };
 		3AF61DFC5F13ECA0F72BE3A4 /* AudioEngineSpikeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2074B6081B4EFCA8AE995A0D /* AudioEngineSpikeTests.swift */; };
@@ -95,8 +97,10 @@
 		8929C0B2AE9FAA5B3BDE946D /* PlayerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0D2C6AA7832F3D9D55E154 /* PlayerUITests.swift */; };
 		898853DEC429D1C6F2F5D106 /* Marks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CFEBB439F6DD4F3AB823245 /* Marks.swift */; };
 		8AAA3DA79B8DF0DB20F065BB /* MusicPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1801DDBA6C0C6E397A58AAD7 /* MusicPages.swift */; };
+		8C847E97A27A81D4C4A122B5 /* DeviceCheckScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C0426DCF7876BA0BD01FF12 /* DeviceCheckScreen.swift */; };
 		8F34AEA14CC1CF72DD11A89D /* SampleTextPdf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFD9C7522806E354AA2AF02 /* SampleTextPdf.swift */; };
 		91E689FA10F3169BDE84A361 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0F811570BD81C00797673E30 /* Localizable.xcstrings */; };
+		929A39C09886F4103A97CA8E /* DeviceCheckRun.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504E68FF190ADC4F67BB451A /* DeviceCheckRun.swift */; };
 		986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B58EB0526BF3953E06E97BB /* SearchScreen.swift */; };
 		987C489CFD106CD2AD5E4C03 /* HalfSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B993A32B3D6E66AEA148A8 /* HalfSheet.swift */; };
 		99DEEDF8C1F82AAA34D22BC6 /* FeedbackUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F944126FE23E0C4842347AD /* FeedbackUITests.swift */; };
@@ -110,6 +114,7 @@
 		A192EE5FFD72D641CBF7D3DA /* HalfSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B993A32B3D6E66AEA148A8 /* HalfSheet.swift */; };
 		A278C80F8670B2C5A60557E6 /* MiniPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 252ECAD634842C713EB73C31 /* MiniPlayer.swift */; };
 		A43B194A4C42B8FF1721640F /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121EB01691142EB7DA202FBB /* SettingsScreen.swift */; };
+		A4DAC4956A3AFA6CA247EFA7 /* DeviceCheckUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E71569AA6290121A1332B822 /* DeviceCheckUITests.swift */; };
 		A6570A3E5D1D452C8684AA55 /* KiwixArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A9A6B4F16D83F391D47CB26 /* KiwixArchiveTests.swift */; };
 		A8CDFA46C5579FA470A0A0F9 /* BookShelfTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6286D5EB2243205D9C2FDDA /* BookShelfTests.swift */; };
 		AC659432CF69DE054C5C50CD /* LanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246C0C74263D65E1D52B8D65 /* LanguageTests.swift */; };
@@ -125,6 +130,7 @@
 		BE470A0D6EB34BD5D96BF8D6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6654812DC545BDF69A9B7931 /* Assets.xcassets */; };
 		BEF413C3A1C0FF922369F254 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A6A503B5D655BB52449F2EA8 /* libz.tbd */; };
 		BEFEC6C675C34F8076E81BBF /* DebugPlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D903785B6244825C4AE414 /* DebugPlay.swift */; };
+		C3FDB0E6C8E39FB3FDC995C5 /* SpeechCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1409479EB57BF564B36EC2E /* SpeechCheck.swift */; };
 		C58825C9A4EB3A96EEC0B6D9 /* spectral_semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5E3500F27AA34AA7774ECA00 /* spectral_semibold.ttf */; };
 		C5E62EF00E1E8B5DB09ECE54 /* SherpaOnnxC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 917A8C6C283A2AABAF1560F8 /* SherpaOnnxC.xcframework */; };
 		C7373E9A829C9D7A028BE977 /* taglib.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9BA842E88FE86BBDF260216 /* taglib.xcframework */; };
@@ -237,6 +243,7 @@
 		2C63087F66C615BD7A386EFD /* ClassicsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassicsTests.swift; sourceTree = "<group>"; };
 		2CF1F83534B602BD903DEF86 /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
 		2E15CF9125F2CB79C5BA79D3 /* ArticleFooterViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleFooterViews.swift; sourceTree = "<group>"; };
+		2F398A1FBE8863F63D006D5D /* BuildExtrasTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExtrasTests.swift; sourceTree = "<group>"; };
 		34056A8B030140CADDF12514 /* ListenMusic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenMusic.swift; sourceTree = "<group>"; };
 		374439053E88930CFAD57BC3 /* MusicPlayerScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicPlayerScreen.swift; sourceTree = "<group>"; };
 		378B021B6347CE0641E27487 /* MusicParts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicParts.swift; sourceTree = "<group>"; };
@@ -257,6 +264,8 @@
 		46D66C3FE2FAC95BCFDB9655 /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
 		47606CCEFB5363760F5EA2B4 /* VoiceSettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSettingsScreen.swift; sourceTree = "<group>"; };
 		498C58126A3A1626D62E5A67 /* Granger-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Granger-Bridging-Header.h"; sourceTree = "<group>"; };
+		4FC87E96FD16DB136C66CF9E /* BuildExtras.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildExtras.swift; sourceTree = "<group>"; };
+		504E68FF190ADC4F67BB451A /* DeviceCheckRun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCheckRun.swift; sourceTree = "<group>"; };
 		5097D7F74D147D51E78904EE /* Timeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timeline.swift; sourceTree = "<group>"; };
 		5356CEAB0AF1051AA8ED9AE7 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		569C1AFF6DFF658AA105544D /* MusicUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicUITests.swift; sourceTree = "<group>"; };
@@ -282,6 +291,7 @@
 		67895B44E9AF350568B27D49 /* CrashLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashLog.swift; sourceTree = "<group>"; };
 		684FBF5DA7849CC0C574C0F8 /* GTagLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GTagLib.h; sourceTree = "<group>"; };
 		6B58EB0526BF3953E06E97BB /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
+		6C0426DCF7876BA0BD01FF12 /* DeviceCheckScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCheckScreen.swift; sourceTree = "<group>"; };
 		6EB9E388036E947C9C13B2FB /* UiTextWords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UiTextWords.swift; sourceTree = "<group>"; };
 		6F7EA26827A05868CC275A31 /* RemoteCollectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCollectionScreen.swift; sourceTree = "<group>"; };
 		6F944126FE23E0C4842347AD /* FeedbackUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackUITests.swift; sourceTree = "<group>"; };
@@ -321,6 +331,7 @@
 		B9EB45BA510225F88E9D5435 /* GrangerWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = GrangerWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA87BA62F9DEF78F691A9371 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C03090F336FA65931D0A18DE /* GetMoreScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMoreScreen.swift; sourceTree = "<group>"; };
+		C1409479EB57BF564B36EC2E /* SpeechCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechCheck.swift; sourceTree = "<group>"; };
 		C4D2722559AB140D5CDEAF7A /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
 		C4D37AB85E00A4C58044DFD5 /* CollectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionScreen.swift; sourceTree = "<group>"; };
 		C540D9D295239E5AA86597DF /* EveryCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveryCollection.swift; sourceTree = "<group>"; };
@@ -349,6 +360,7 @@
 		E292BFB40CBDEA8F0A9C1151 /* GrangerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GrangerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3B8BCA170A7DD61E455BF4A /* Wander.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wander.swift; sourceTree = "<group>"; };
 		E6CA5BDD8B58FF8DB6015440 /* BroadSpread.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadSpread.swift; sourceTree = "<group>"; };
+		E71569AA6290121A1332B822 /* DeviceCheckUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCheckUITests.swift; sourceTree = "<group>"; };
 		EA24311D10F72A1723B76AD3 /* AudiobookScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiobookScreens.swift; sourceTree = "<group>"; };
 		EBEB1254E440116905F8D681 /* LibriVoxScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibriVoxScreen.swift; sourceTree = "<group>"; };
 		EC46457CA3D262762A1F6DB4 /* ReaderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderScreen.swift; sourceTree = "<group>"; };
@@ -386,6 +398,7 @@
 			children = (
 				2074B6081B4EFCA8AE995A0D /* AudioEngineSpikeTests.swift */,
 				C6286D5EB2243205D9C2FDDA /* BookShelfTests.swift */,
+				2F398A1FBE8863F63D006D5D /* BuildExtrasTests.swift */,
 				B89759FAA9D0361D13A7FB45 /* CarPlayTests.swift */,
 				2C63087F66C615BD7A386EFD /* ClassicsTests.swift */,
 				85AFE4E547EFBC789BC18823 /* EmbedderSpikeTests.swift */,
@@ -486,6 +499,7 @@
 			isa = PBXGroup;
 			children = (
 				2B47F986BFCA85901970F72F /* AppSettings.swift */,
+				4FC87E96FD16DB136C66CF9E /* BuildExtras.swift */,
 				1EDFCCCB9DFC1E76B1696659 /* Core.swift */,
 				38D903785B6244825C4AE414 /* DebugPlay.swift */,
 				66E8E6A313A843D40AA49ADC /* DebugReset.swift */,
@@ -546,6 +560,16 @@
 			path = Feedback;
 			sourceTree = "<group>";
 		};
+		82F150455334ACC790EE0B81 /* DeviceCheck */ = {
+			isa = PBXGroup;
+			children = (
+				504E68FF190ADC4F67BB451A /* DeviceCheckRun.swift */,
+				6C0426DCF7876BA0BD01FF12 /* DeviceCheckScreen.swift */,
+				C1409479EB57BF564B36EC2E /* SpeechCheck.swift */,
+			);
+			path = DeviceCheck;
+			sourceTree = "<group>";
+		};
 		9C9D69453334EE2623FA1C1A /* Reader */ = {
 			isa = PBXGroup;
 			children = (
@@ -591,6 +615,7 @@
 				020C983E7DB13074CD37FBF1 /* BookReaderTests.swift */,
 				A27583559CE695EAA07B0C90 /* ClassicsUITests.swift */,
 				40FE1B5BF154C00C901FCE92 /* CleanData.swift */,
+				E71569AA6290121A1332B822 /* DeviceCheckUITests.swift */,
 				6F944126FE23E0C4842347AD /* FeedbackUITests.swift */,
 				3F836DFBA7941E1A0041B382 /* LibraryUITests.swift */,
 				569C1AFF6DFF658AA105544D /* MusicUITests.swift */,
@@ -626,6 +651,7 @@
 				C5C07ED3BAE7C9EF6A421E4D /* Audiobooks */,
 				BD4EB7074635D05600C287E5 /* Books */,
 				676A4B2EB1CC6E190DA40DC7 /* Comics */,
+				82F150455334ACC790EE0B81 /* DeviceCheck */,
 				2CD75013E15EE0FD99F55660 /* Downloads */,
 				B2E55728375B739BB317E91C /* Explore */,
 				7A2AC0FA563C3786E278C2C2 /* Feedback */,
@@ -1014,6 +1040,7 @@
 				31A659E2396F32D1505AB504 /* BookReaderTests.swift in Sources */,
 				1AFA13D56BD199C80C543B2B /* ClassicsUITests.swift in Sources */,
 				BD10DFD88E381B8582102FB0 /* CleanData.swift in Sources */,
+				A4DAC4956A3AFA6CA247EFA7 /* DeviceCheckUITests.swift in Sources */,
 				99DEEDF8C1F82AAA34D22BC6 /* FeedbackUITests.swift in Sources */,
 				50A4399B70427222E9FA11D0 /* LibraryUITests.swift in Sources */,
 				C7C07D7256184A6C415A2BB5 /* MusicUITests.swift in Sources */,
@@ -1034,6 +1061,7 @@
 			files = (
 				3AF61DFC5F13ECA0F72BE3A4 /* AudioEngineSpikeTests.swift in Sources */,
 				A8CDFA46C5579FA470A0A0F9 /* BookShelfTests.swift in Sources */,
+				372D98385F03364EE6043E37 /* BuildExtrasTests.swift in Sources */,
 				9B93C43F9AB45C2273EE5A29 /* CarPlayTests.swift in Sources */,
 				50C369F7955C73C5CA887E7D /* ClassicsTests.swift in Sources */,
 				FE6505718D1B7EA96CE5D1CB /* EmbedderSpikeTests.swift in Sources */,
@@ -1071,6 +1099,7 @@
 				748BD1AA8D9BC67C6B3904A2 /* BookReaderModel.swift in Sources */,
 				F6BB2E6CF6F7A5E10176BCE2 /* BookReaderScreen.swift in Sources */,
 				E983FA07FA4DEF2A29F2DC1F /* BroadSpread.swift in Sources */,
+				1728AF4425B7FA02DE328526 /* BuildExtras.swift in Sources */,
 				5C569C238F942BA03E4ADF4E /* CarPlayScene.swift in Sources */,
 				ADAE6AA039C5BD487398DE16 /* CollectionScreen.swift in Sources */,
 				47AE67A55A3B03EA5A5C8B8C /* ComicNatives.swift in Sources */,
@@ -1080,6 +1109,8 @@
 				BEFEC6C675C34F8076E81BBF /* DebugPlay.swift in Sources */,
 				766212E434A588FFA5296F75 /* DebugReset.swift in Sources */,
 				06D12B83802F3059A8FCB6BA /* DebugSystem.swift in Sources */,
+				929A39C09886F4103A97CA8E /* DeviceCheckRun.swift in Sources */,
+				8C847E97A27A81D4C4A122B5 /* DeviceCheckScreen.swift in Sources */,
 				29E1C8E3A75EB297D1C74CEB /* DownloadsScreen.swift in Sources */,
 				85BC2D700DB5328930D91075 /* EveryCollection.swift in Sources */,
 				9F5563886606372B9762E838 /* ExploreScreen.swift in Sources */,
@@ -1128,6 +1159,7 @@
 				5F34AE2BC40DB71B6A082A54 /* ScreenText.swift in Sources */,
 				986CD1464DCB7DD384D06C83 /* SearchScreen.swift in Sources */,
 				A43B194A4C42B8FF1721640F /* SettingsScreen.swift in Sources */,
+				C3FDB0E6C8E39FB3FDC995C5 /* SpeechCheck.swift in Sources */,
 				9B854D4F0FCC32CB799053DF /* SubjectScreen.swift in Sources */,
 				83E90F2F900D9DF69287B976 /* Theme.swift in Sources */,
 				37CB475CA851E38824A30F9F /* Timeline.swift in Sources */,
@@ -1164,6 +1196,23 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		034D4AED774FBDB9EF7055F9 /* Friends */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).uitests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Granger;
+			};
+			name = Friends;
+		};
 		043171BE5C410D176945C90D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1215,6 +1264,26 @@
 				TEST_TARGET_NAME = Granger;
 			};
 			name = Release;
+		};
+		55E799A82D3A12D9BD5DD110 /* Friends */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/GrangerWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).widgets";
+				PRODUCT_NAME = GrangerWidgets;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Friends;
 		};
 		56B3209C57C479EF8C2FB605 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1287,12 +1356,74 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
+		};
+		7DDC2FD6C4829850A4B52885 /* Friends */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1BA2587DFAACB90883863228 /* Config.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = FRIENDS;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Friends;
 		};
 		89BC728D5AACBE8D5974DB8D /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1354,7 +1485,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG FRIENDS";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -1369,7 +1500,6 @@
 				CODE_SIGN_ENTITLEMENTS = Granger.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Granger-Simulator.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"../Vendor\"",
@@ -1377,7 +1507,10 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Granger lists the songs in your Music library that it can play, beside the music you add from Files. It never changes them.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "The Device check listens for a few seconds while you say a title, to see whether this iPhone can recognise speech. Nothing is recorded or sent.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "The Device check uses this iPhone's own speech recognition, on the phone, to test the mic. Nothing is sent.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -1385,7 +1518,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX)";
 				PRODUCT_NAME = Granger;
 				SDKROOT = iphoneos;
@@ -1402,7 +1534,6 @@
 				CODE_SIGN_ENTITLEMENTS = Granger.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Granger-Simulator.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"../Vendor\"",
@@ -1410,6 +1541,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Granger lists the songs in your Music library that it can play, beside the music you add from Files. It never changes them.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1418,7 +1550,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX)";
 				PRODUCT_NAME = Granger;
 				SDKROOT = iphoneos;
@@ -1431,16 +1562,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widgets/GrangerWidgets.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).widgets";
 				PRODUCT_NAME = GrangerWidgets;
 				SDKROOT = iphoneos;
@@ -1448,20 +1578,71 @@
 			};
 			name = Release;
 		};
+		CCE1429AF0D42B55E8954177 /* Friends */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CODE_SIGN_ENTITLEMENTS = Granger.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Granger-Simulator.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../Vendor\"",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "Granger lists the songs in your Music library that it can play, beside the music you add from Files. It never changes them.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "The Device check listens for a few seconds while you say a title, to see whether this iPhone can recognise speech. Nothing is recorded or sent.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "The Device check uses this iPhone's own speech recognition, on the phone, to test the mic. Nothing is sent.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX)";
+				PRODUCT_NAME = Granger;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Sources/Kiwix/Granger-Bridging-Header.h";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Friends;
+		};
+		DC3ACFF70AF0E646E5218200 /* Friends */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Granger.app/Granger";
+			};
+			name = Friends;
+		};
 		FC781BD940F75BE3E2721C3E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widgets/GrangerWidgets.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Granger;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(GRANGER_BUNDLE_PREFIX).widgets";
 				PRODUCT_NAME = GrangerWidgets;
 				SDKROOT = iphoneos;
@@ -1476,6 +1657,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				56B3209C57C479EF8C2FB605 /* Debug */,
+				DC3ACFF70AF0E646E5218200 /* Friends */,
 				043171BE5C410D176945C90D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1485,6 +1667,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				30A921F40CD764A37C27B65C /* Debug */,
+				034D4AED774FBDB9EF7055F9 /* Friends */,
 				48ACE14C169AF93EE7D3491E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1494,6 +1677,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				89BC728D5AACBE8D5974DB8D /* Debug */,
+				7DDC2FD6C4829850A4B52885 /* Friends */,
 				736F9968D7FC96C5F3E48ED6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1503,6 +1687,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FC781BD940F75BE3E2721C3E /* Debug */,
+				55E799A82D3A12D9BD5DD110 /* Friends */,
 				C97260007EE4B8A3A0C7ACE2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1512,6 +1697,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				97404B303ED126708EF0DC21 /* Debug */,
+				CCE1429AF0D42B55E8954177 /* Friends */,
 				9921C9848A50EB9B38DE0801 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;

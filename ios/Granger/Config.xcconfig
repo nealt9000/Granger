@@ -1,4 +1,8 @@
 // Defaults; ios/Local.xcconfig (git-ignored, see ios/Local.xcconfig.example) sets your team and bundle prefix.
 GRANGER_BUNDLE_PREFIX = app.granger
 CODE_SIGN_STYLE = Automatic
+// The version (Plan I8 call 6). tools/ios/archive.sh sets 0.1.<commits> and the commit count as the build, as Android's
+// versionName and versionCode, through an xcconfig of its own; these plain defaults stay for everything else.
+MARKETING_VERSION = 0.1
+CURRENT_PROJECT_VERSION = 1
 #include? "../Local.xcconfig"

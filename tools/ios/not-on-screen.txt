@@ -62,3 +62,7 @@ Sources/Feedback/CrashLog.swift: iPhone SE (2nd generation)
 Sources/Feedback/CrashLog.swift: iPhone SE (3rd generation)
 Sources/Feedback/CrashLog.swift: Writes of \(w.totalWritesCaused.formatted())
 Sources/Feedback/FeedbackSheet.swift: To: \(FeedbackAddress.email)\nSubject: \(subject)\n\n\(body)
+# The build's kind (Plan I8 call 7): the Device check's report says it, in English
+Sources/App/BuildExtras.swift: Debug
+Sources/App/BuildExtras.swift: Friends
+Sources/App/BuildExtras.swift: Release

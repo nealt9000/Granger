@@ -453,7 +453,8 @@ SKIP_LINE = re.compile(
     r"NSLog|print\(|os_log|Logger\(|fatalError|precondition|assert|accessibilityIdentifier|forKey|UserDefaults|"
     r"systemImage:|systemName:|Image\(\"|named:|URL\(|metadata\(|\.tag\(|Notification\.Name|appendingPathComponent|"
     r"Text\(verbatim:|debugNotice|#\"|^\s*//")
-SKIP_FILES = re.compile(r"(^|/)(Debug[A-Za-z]*|SampleTextPdf|ScreenText|Words)\.swift$")
+# The Device check's measurements and report (Plan I8 call 5) are English data for the developers, as the crash files are.
+SKIP_FILES = re.compile(r"(^|/)(Debug[A-Za-z]*|SampleTextPdf|ScreenText|Words|SpeechCheck|DeviceCheckRun)\.swift$")
 SWIFT_LIT = re.compile(r'"((?:[^"\\]|\\.)*)"')
 
 

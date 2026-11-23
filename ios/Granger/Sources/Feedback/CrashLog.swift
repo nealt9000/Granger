@@ -134,7 +134,17 @@ final class CrashLog {
 
 /// MetricKit's subscriber: payloads are delivered on a background queue at a later start, or a day after.
 final class MetricKitReports: NSObject, MXMetricManagerSubscriber {
-    func didReceive(_ payloads: [MXDiagnosticPayload]) { CrashLog.shared?.keep(payloads) }
+    func didReceive(_ payloads: [MXDiagnosticPayload]) {
+        #if FRIENDS
+        MetricKitCounts.delivered(diagnostics: payloads.count)
+        #endif
+        CrashLog.shared?.keep(payloads)
+    }
+
+    #if FRIENDS
+    /// The daily metrics aren't kept; the friends' build counts them so the Device check can say MetricKit delivers.
+    func didReceive(_ payloads: [MXMetricPayload]) { MetricKitCounts.delivered(metrics: payloads.count) }
+    #endif
 
     /// One diagnostic as the log needs it.
     struct Item: Equatable {

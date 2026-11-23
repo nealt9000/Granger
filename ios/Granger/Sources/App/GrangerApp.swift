@@ -119,7 +119,9 @@ struct RootView: View {
     @State private var debugImported = false
     @State private var debugNotice: String?
     /// `-debugReportSheet YES`: the Report sheet over a made-up Ask reply (Ask is off on the iPhone, as in Android's release).
+    #if DEBUG
     @State private var debugReport = UserDefaults.standard.bool(forKey: "debugReportSheet")
+    #endif
     @State private var onboarding = !UserDefaults.standard.bool(forKey: "onboarding.done") && !UserDefaults.standard.bool(forKey: "privacySeen")
 
     var body: some View {

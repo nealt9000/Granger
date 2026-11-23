@@ -122,6 +122,9 @@ private struct ShareEmail: UIViewControllerRepresentable {
 /// a switch that leaves the crash reports out, each report with View, Clear crash reports and Write email.
 struct FeedbackSheet: View {
     let log: CrashLog
+    /// The friends' build (Plan I8 call 5): the Device check's report, in the email's text beside the usual facts. Send
+    /// report gives a fresh one; elsewhere it's the last one run, if any.
+    var deviceCheck: String? = FeedbackSheet.lastDeviceCheck
     @Environment(\.core) private var core
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
@@ -141,6 +144,9 @@ struct FeedbackSheet: View {
                 Section {
                     ForEach(FeedbackReport.shared.included(facts: facts, withCrashes: withCrashes), id: \.self) { line in
                         Text("• \(line)").accessibilityIdentifier("feedback-line")
+                    }
+                    if deviceCheck != nil {
+                        Text("• \(L("The Device check report (no titles or searches)"))").accessibilityIdentifier("feedback-device-check")
                     }
                 } header: {
                     Text("The email includes")
@@ -211,9 +217,19 @@ struct FeedbackSheet: View {
         let records = log.records
         email = FeedbackEmail(
             subject: report.subject(build: facts.build),
-            body: report.body(facts: facts, withCrashes: withCrashes),
+            body: report.body(facts: facts, withCrashes: withCrashes) + (deviceCheck.map { "\n\n\($0)\n" } ?? ""),
             attachment: report.attachment(facts: facts, withCrashes: withCrashes) { records.read(report: $0) ?? "" }
         )
+    }
+}
+
+extension FeedbackSheet {
+    static var lastDeviceCheck: String? {
+        #if FRIENDS
+        DeviceCheckRun.saved
+        #else
+        nil
+        #endif
     }
 }
 

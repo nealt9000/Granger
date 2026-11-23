@@ -56,12 +56,15 @@
     "Couldn't copy %@.": "No se pudo copiar %@.",
     "Couldn't get the list of packs.": "No se pudo obtener la lista de paquetes.",
     "Damaged: it can't be read": "Dañado: no se puede leer",
+    "Debug build %@": "Versión de depuración %@",
+    "Device check": "Revisión del dispositivo",
     "Downloading · %lld%%": "Descargando · %lld %%",
     "Downloads waiting": "Descargas en espera",
     "Downloads, %lld": "Descargas, %lld",
     "Explore needs Wikipedia's index. It comes when you're online.": "Explorar necesita el índice de Wikipedia. Llega cuando tienes conexión.",
     "Find music and audiobooks in the Music library": "Buscar música y audiolibros en la biblioteca de Música",
     "For music in Files, on this iPhone or elsewhere. Granger only reads them.": "Para música en Archivos, en este iPhone o en otro lugar. Granger solo la lee.",
+    "Friends build %@": "Versión para amigos %@",
     "GRANGER": null,
     "Get": "Descargar",
     "Get %@": "Descargar %@",
@@ -70,6 +73,17 @@
     "Get the Granger voice below, or add a voice in the iPhone's Settings › Accessibility › Spoken Content.": "Descarga la voz de Granger abajo o agrega una voz en Ajustes del iPhone › Accesibilidad › Contenido leído.",
     "Granger rescans on start and when the Music library changes.": "Granger vuelve a buscar al iniciarse y cuando cambia la biblioteca de Música.",
     "Greyed things need the internet.": "Lo gris necesita internet.",
+    "In English, for Granger's developers.": "En inglés, para quienes desarrollan Granger.",
+    "Listening… say “%@” now.": "Escuchando… di “%@” ahora.",
+    "Measures this iPhone for a tester's report": "Mide este iPhone para el informe de quien lo prueba",
+    "Run again": "Revisar otra vez",
+    "Run check": "Iniciar revisión",
+    "Say a title": "Di un título",
+    "Send report": "Enviar informe",
+    "Tap, then say “%@” within four seconds.": "Toca y luego di “%@” en menos de cuatro segundos.",
+    "The Device check report (no titles or searches)": "El informe de la revisión del dispositivo (sin títulos ni búsquedas)",
+    "The report": "El informe",
+    "This checks what Granger can measure on this iPhone by itself: speech recognition, search by meaning, memory, a few songs from your Music library (counts only, never their names), the widget's shared folder and the system's reports. It takes a minute or two. Nothing leaves this phone until you send the report.": "Esto revisa lo que Granger puede medir por sí solo en este iPhone: el reconocimiento de voz, la búsqueda por significado, la memoria, algunas canciones de tu biblioteca de Música (solo cuántas, nunca sus nombres), la carpeta compartida del widget y los informes del sistema. Tarda uno o dos minutos. Nada sale de este teléfono hasta que envíes el informe.",
     "iOS keeps the app's language: Settings › Granger › Language.": "iOS guarda el idioma de la app: Ajustes › Granger › Idioma.",
     "Import a pack": "Importar un paquete",
     "Import from Files": "Importar de Archivos",
@@ -151,6 +165,8 @@
     "History": "@shell_history"
   },
   "infoPlist": {
-    "NSAppleMusicUsageDescription": "Granger muestra las canciones de tu biblioteca de Música que puede reproducir, junto a la música que agregas desde Archivos. Nunca las modifica."
+    "NSAppleMusicUsageDescription": "Granger muestra las canciones de tu biblioteca de Música que puede reproducir, junto a la música que agregas desde Archivos. Nunca las modifica.",
+    "NSMicrophoneUsageDescription": "La revisión del dispositivo escucha unos segundos mientras dices un título, para ver si este iPhone puede reconocer la voz. No se graba ni se envía nada.",
+    "NSSpeechRecognitionUsageDescription": "La revisión del dispositivo usa el reconocimiento de voz de este iPhone, en el propio teléfono, para probar el micrófono. No se envía nada."
   }
 }

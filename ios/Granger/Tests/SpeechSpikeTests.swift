@@ -33,7 +33,7 @@ final class SpeechSpikeTests: XCTestCase {
         } catch {
             throw XCTSkip("no on-device speech model here (the Simulator has none): \(error.localizedDescription)")
         }
-        let phrase = try converted(SpokenPhrase.write("Open Pride and Prejudice", to: tmp("phrase.caf")), to: format)
+        let phrase = try converted(try await SpokenPhrase.write("Open Pride and Prejudice", to: tmp("phrase.caf")), to: format)
         let collect = Task { () -> String in
             var text = ""
             if let t = module as? SpeechTranscriber {
@@ -56,7 +56,7 @@ final class SpeechSpikeTests: XCTestCase {
     func testOnDeviceSFSpeechRecognizerHearsAPhrase() async throws {
         let recognizer = try XCTUnwrap(SFSpeechRecognizer(locale: Locale(identifier: "en-US")))
         guard recognizer.supportsOnDeviceRecognition else { throw XCTSkip("no on-device recognition") }
-        let request = SFSpeechURLRecognitionRequest(url: try SpokenPhrase.write("Open Pride and Prejudice", to: tmp("phrase-sf.caf")))
+        let request = SFSpeechURLRecognitionRequest(url: try await SpokenPhrase.write("Open Pride and Prejudice", to: tmp("phrase-sf.caf")))
         request.requiresOnDeviceRecognition = true
         let heard: String
         do {
@@ -72,6 +72,28 @@ final class SpeechSpikeTests: XCTestCase {
             throw XCTSkip("no on-device speech model here (the Simulator has none): \(error.localizedDescription)")
         }
         XCTAssertEqual(SpokenTitleMatcher.shared.best(heard: heard, names: names)?.name, "Pride and Prejudice", heard)
+    }
+
+    /// The Device check's own speech check (Plan I8 call 4), English and Spanish, on a spoken file: it passes on a phone
+    /// with a recognizer, and on the Simulator says there's none (and never asks for the mic).
+    func testDeviceCheckSpeechOnASpokenFile() async throws {
+        for phrase in [SpeechCheck.english, SpeechCheck.spanish] {
+            let outcome = await SpeechCheck.onSpokenFile(phrase)
+            if let problem = outcome.problem, problem.hasPrefix("no recognizer on this phone") {
+                print("DEVICE CHECK SPEECH \(phrase.language): \(problem); \(outcome.steps.joined(separator: ", ")) (\(outcome.seconds) s)")
+                continue
+            }
+            XCTAssertTrue(outcome.passed, "\(phrase.language): heard \(outcome.heard ?? "-"), \(outcome.problem ?? "")")
+        }
+    }
+
+    /// The system voice speaks into a file in both languages (the half of the check the Simulator can run).
+    func testTheSystemVoiceSpeaksIntoAFile() async throws {
+        for (text, voice) in [("Open Pride and Prejudice", "en-US"), ("Abrir Orgullo y prejuicio", "es-MX")] {
+            let url = try await SpokenPhrase.write(text, voice: voice, to: tmp("voice-\(voice).caf"))
+            let file = try AVAudioFile(forReading: url)
+            XCTAssertGreaterThan(Double(file.length) / file.processingFormat.sampleRate, 0.5, "\(voice): some speech")
+        }
     }
 
     private func tmp(_ name: String) -> URL { FileManager.default.temporaryDirectory.appendingPathComponent(name) }
@@ -93,31 +115,5 @@ final class SpeechSpikeTests: XCTestCase {
         }
         if let failure { throw failure }
         return out
-    }
-}
-
-/// A phrase spoken by the system voice into a file, for the mic's tests.
-enum SpokenPhrase {
-    static func write(_ text: String, to url: URL) throws -> URL {
-        try? FileManager.default.removeItem(at: url)
-        let synth = AVSpeechSynthesizer()
-        let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-        var out: AVAudioFile?
-        var failure: Error?
-        let done = DispatchSemaphore(value: 0)
-        synth.write(utterance) { buffer in
-            guard let pcm = buffer as? AVAudioPCMBuffer else { return }
-            if pcm.frameLength == 0 { done.signal(); return }
-            do {
-                if out == nil { out = try AVAudioFile(forWriting: url, settings: pcm.format.settings, commonFormat: pcm.format.commonFormat, interleaved: pcm.format.isInterleaved) }
-                try out?.write(from: pcm)
-            } catch { failure = error }
-        }
-        _ = done.wait(timeout: .now() + 30)
-        if let failure { throw failure }
-        out = nil
-        guard FileManager.default.fileExists(atPath: url.path) else { throw NSError(domain: "SpokenPhrase", code: 1) }
-        return url
     }
 }

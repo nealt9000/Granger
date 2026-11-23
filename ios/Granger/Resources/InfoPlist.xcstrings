@@ -10,6 +10,26 @@
           }
         }
       }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La revisión del dispositivo escucha unos segundos mientras dices un título, para ver si este iPhone puede reconocer la voz. No se graba ni se envía nada."
+          }
+        }
+      }
+    },
+    "NSSpeechRecognitionUsageDescription" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La revisión del dispositivo usa el reconocimiento de voz de este iPhone, en el propio teléfono, para probar el micrófono. No se envía nada."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

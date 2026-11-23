@@ -3602,6 +3602,16 @@
         }
       }
     },
+    "Debug build %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versión de depuración %@"
+          }
+        }
+      }
+    },
     "Define" : {
       "localizations" : {
         "es" : {
@@ -3658,6 +3668,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "¿Eliminar la lista?"
+          }
+        }
+      }
+    },
+    "Device check" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisión del dispositivo"
           }
         }
       }
@@ -4314,6 +4334,16 @@
         }
       }
     },
+    "Friends build %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versión para amigos %@"
+          }
+        }
+      }
+    },
     "From" : {
       "localizations" : {
         "es" : {
@@ -4816,6 +4846,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "In English, for Granger's developers." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En inglés, para quienes desarrollan Granger."
           }
         }
       }
@@ -5333,6 +5373,16 @@
         }
       }
     },
+    "Listening… say “%@” now." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escuchando… di “%@” ahora."
+          }
+        }
+      }
+    },
     "Literature, children's books, manuals and learning" : {
       "localizations" : {
         "es" : {
@@ -5631,6 +5681,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Como la app"
+          }
+        }
+      }
+    },
+    "Measures this iPhone for a tester's report" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mide este iPhone para el informe de quien lo prueba"
           }
         }
       }
@@ -8183,6 +8243,26 @@
     "Run Local only intent" : {
       "shouldTranslate" : false
     },
+    "Run again" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisar otra vez"
+          }
+        }
+      }
+    },
+    "Run check" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar revisión"
+          }
+        }
+      }
+    },
     "Run play/pause intent" : {
       "shouldTranslate" : false
     },
@@ -8232,6 +8312,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guardado por ahora · %1$@ de %2$@"
+          }
+        }
+      }
+    },
+    "Say a title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Di un título"
           }
         }
       }
@@ -8432,6 +8522,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enviar comentarios"
+          }
+        }
+      }
+    },
+    "Send report" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar informe"
           }
         }
       }
@@ -8926,6 +9026,16 @@
         }
       }
     },
+    "Tap, then say “%@” within four seconds." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca y luego di “%@” en menos de cuatro segundos."
+          }
+        }
+      }
+    },
     "Ten years earlier" : {
       "localizations" : {
         "es" : {
@@ -8982,6 +9092,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ese artículo ya no está en tu teléfono"
+          }
+        }
+      }
+    },
+    "The Device check report (no titles or searches)" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El informe de la revisión del dispositivo (sin títulos ni búsquedas)"
           }
         }
       }
@@ -9072,6 +9192,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lo más antiguo con fecha aquí es %1$@ (%2$@)."
+          }
+        }
+      }
+    },
+    "The report" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El informe"
           }
         }
       }
@@ -9424,6 +9554,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No todos los archivos de este libro están en archive.org."
+          }
+        }
+      }
+    },
+    "This checks what Granger can measure on this iPhone by itself: speech recognition, search by meaning, memory, a few songs from your Music library (counts only, never their names), the widget's shared folder and the system's reports. It takes a minute or two. Nothing leaves this phone until you send the report." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto revisa lo que Granger puede medir por sí solo en este iPhone: el reconocimiento de voz, la búsqueda por significado, la memoria, algunas canciones de tu biblioteca de Música (solo cuántas, nunca sus nombres), la carpeta compartida del widget y los informes del sistema. Tarda uno o dos minutos. Nada sale de este teléfono hasta que envíes el informe."
           }
         }
       }

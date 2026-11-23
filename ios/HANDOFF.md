@@ -125,6 +125,21 @@ Run before every test build by the `GrangerTests` target, so a test run fails wh
 By hand: `python3 tools/ios/make_palette.py --check` (the colours match Android's theme), and
 `tools/ios/make_appicon.py` / `make_appicon_variants.py` when the brand mark changes.
 
+## The three builds and the archive (Plan I8)
+
+- **Debug**: the Simulator's and the UI tests'. Every launch hook (`-debug…`, `-resetData`) and the testers' extras.
+- **Friends**: the friends' build on TestFlight. Release's optimisation plus the testers' extras: Settings › About ›
+  Device check (its report goes into Send feedback), and a "Friends build 0.1.N" line in About. No launch hooks.
+- **Release**: the App Store's, later. Neither.
+
+The hooks sit behind `#if DEBUG`, the extras behind `#if FRIENDS` (`BuildExtras.swift`); `BuildExtrasTests` checks
+which build has what. `ios/DEVICE-CHECKS.md` is the testers' checklist, in English and Spanish.
+
+`sh tools/ios/archive.sh --config Friends|Release [--upload]` archives for App Store Connect: it needs your team in
+`ios/Local.xcconfig` and the released core pinned (no Kotlin moved since the pin), sets the version to
+`0.1.<commit count>` with the count as the build (Android's numbers), and with `--upload` sends it with an App Store
+Connect API key from `~/.config/granger/` (the script's header says which files), or prints Xcode Organizer's steps.
+
 ## Releasing the core
 
 `sh tools/ios/release-core.sh` builds the Release core, zips it and prints what it would publish (a dry run).
