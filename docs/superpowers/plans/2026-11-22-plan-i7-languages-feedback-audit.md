@@ -284,10 +284,10 @@ When I7 merges, the parity list has no open row except the ones that need a devi
   - Lead's check 2026-11-22: 9 commits 79fe69ec to eda914cc, all noreply. Core rebuilt from the tip; full Simulator suite at the default size from an uninstalled app: 97 tests, 94 passed, 3 skipped, 0 failed. JVM 3931, 0 failures. One new Granger crash report (17:37:58, SIGSEGV in `DefaultsPlayerPrefs.changed` from `IosPlayerHub.startMusic`) is the race 7d06463c fixed (committed 19:25); none since. Neal 2026-11-22: books join the iPhone's Best matches in Task 7 before the merge; the two other Readiness phrases (`player_notice_book_failed`, `research_model_failed`) become Outfitting on both phones; full-height sheets at the accessibility sizes stay.
 
 ### Task 7: I7b check, merge and hand-off
-- [ ] The whole Simulator suite from an uninstalled app, in English and in Spanish; the JVM suite if shared code changed.
-- [ ] Walk it in Night and at the largest text size once more.
-- [ ] Release GrangerCore, pin it, merge and push. Tell the peer sessions.
-- [ ] Hand off to Neal: the note's link and the list of what needs a device.
+- [x] The whole Simulator suite from an uninstalled app, in English and in Spanish; the JVM suite if shared code changed.
+- [x] Walk it in Night and at the largest text size once more.
+- [x] Release GrangerCore, pin it, merge and push. Tell the peer sessions.
+- [x] Hand off to Neal: the note's link and the list of what needs a device.
 
 - **Task 7a: books in the iPhone's Best matches, and the last Readiness phrases** (Neal's two calls, 2026-11-22).
   - Done 2026-11-23 (commits 9786ec69, e414302c, and a test fix after). What it is:
@@ -319,6 +319,8 @@ When I7 merges, the parity list has no open row except the ones that need a devi
     - **Test hooks (debug builds only)**: `-debugPack` takes several `|`-separated packs; `-debugCatalog <json>` uses a test's unsigned catalog; `-debugBestDelay <ms>` holds Best matches back so "Looking…" can be seen.
     - **Tests.** UI: `BookReaderTests.testBooksGroupOpensTheBookAtItsHit`, `testTypedSearchThatFindsNothingOffersDidYouMean`; `SearchExtrasUITests.testMusicAndAudiobookGroupsWithByKind`, `testMediaCardHasTheHeadphones`, `testMedicalBannerAndLookingLine`, `testTidyOfferKeepBothIsRemembered`, `testTidyOfferRemovesTheSmallerSlice`; screenshots looked at. Android: `SearchBestMatchesTest` (media cards' icon and words, English and Spanish), `DownloadsViewModelTest` (the offer's text is named by key now). Full Simulator suite from an uninstalled app (core-local, every fixture and the embedder): 111 tests (104 + 7), 108 passed, 3 skipped, 0 failed; no new Granger crash reports. JVM suite 3940 (3934 + 6), 0 failures.
     - **Left.** The spoken "Did you mean" and the mic wait for a device (I8). A hit's mark for a Wikipedia pack's article is worked out from the pack (dot, or the shorter dot for a pack without full articles), not from Android's article copies, which the iPhone's availability doesn't list packs into.
+
+  - Done 2026-11-23 (lead). Full Simulator suite from an uninstalled app, core-local, every fixture: 111 tests, 108 passed, 3 skipped (long M4B, the two speech spikes), 0 failed. JVM 3940, 0 failures. Spanish: the whole suite under `-testLanguage es` isn't meaningful (the tests find controls by their English words and `LanguageTests` asserts the run is English: 46 passed, 62 failed that way); Spanish is covered by `SpanishUITests` (Home, Settings, reader, Listen, and a walk of every screen), `LanguageTests` and the knowledge-language test, all passing in the English run. Night + XXXL: the Spanish all-screens walk and `AccessibilityTests` passed in dark appearance at accessibility-XXXL; contact sheet looked at (no clipping found beyond the system controls Task 6 noted). Android: the Pixel 6 wasn't connected, so Search (moved to `core:screens` in 7c) was checked on a throwaway Pixel 6 emulator (android-36): online Titles/Articles, a hit opens its topic page, the recent search is recorded, Back keeps the results, no crash; emulator deleted after. GrangerCore ios-core-2026-11-23 published from 5a00c854 and pinned (36e3bb22); unit tests (50) and 9 UI tests (Smoke launch, SearchExtras, Books group) pass against the release. No new Granger crash reports since the 2026-11-22 race fixed in 7d06463c.
 
 ## Order and size
 
