@@ -116,3 +116,18 @@ checks every O plan skipped.**
 ## Order
 
 Tasks 1–5 are independent and small; then the walkthroughs, which test them too.
+
+## Results (2026-11-23)
+
+- **Tasks 1–5:** done, with tests. Merged to main by fast-forward onto `fbc68437`; full JVM suite (`test testAndroidHostTest jvmTest`) green.
+- **Task 6, Pixel 6 (debug):** the tile and Clear Saved for now passed; phone restored (online, tile removed).
+- **Task 6, Pixel 7 (release):** not yet; done after the merge (Neal's call). Check no `-journal` files appear by the sidecars after installing over 1625.
+- **TalkBack by ear:** Neal's checklist, `docs/friend-testing/talkback-by-ear-o7.md`.
+
+### Findings, not fixed
+
+1. The tile under Never go online looks dimmed rather than "on and locked"; a lit tile with a "Locked" subtitle is an option.
+2. Leaving Never go online returns to Online, not to Local only if that was on before.
+3. Clear Saved for now has no confirm step (left: it's a cache).
+4. History doesn't grey online-only pages under Local only; opening one shows "Needs internet".
+5. A leftover "last thing you were reading isn't available" toast seen once from the I3 build.
