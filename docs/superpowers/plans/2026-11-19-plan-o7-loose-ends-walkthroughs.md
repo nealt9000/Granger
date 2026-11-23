@@ -121,7 +121,12 @@ Tasks 1–5 are independent and small; then the walkthroughs, which test them to
 
 - **Tasks 1–5:** done, with tests. Merged to main by fast-forward onto `fbc68437`; full JVM suite (`test testAndroidHostTest jvmTest`) green.
 - **Task 6, Pixel 6 (debug):** the tile and Clear Saved for now passed; phone restored (online, tile removed).
-- **Task 6, Pixel 7 (release):** not yet; done after the merge (Neal's call). Check no `-journal` files appear by the sidecars after installing over 1625.
+- **Task 6, Pixel 7 (release 1807, installed over 1625 with its data, 2026-11-23):** passed. No sidecar or time index
+  changed after launch and no `-journal` files. Spanish (app language only): Home, Search, the topic
+  page, "Más en …", "Temas cercanos", the Local only banner, all Spanish; "Wikipedia (inglés)" / "Wikipedia (Spanish)"
+  labels right in both languages. Local only on Lake Chad: nothing greyed wrongly (all neighbours are on the phone).
+  Field: Home, Search, the topic page fine. TalkBack by tree: every tappable item labelled. Phone restored (theme
+  Follow the phone, app language default, Local only off).
 - **TalkBack by ear:** Neal's checklist, `docs/friend-testing/talkback-by-ear-o7.md`.
 
 ### Findings, not fixed
@@ -131,3 +136,8 @@ Tasks 1–5 are independent and small; then the walkthroughs, which test them to
 3. Clear Saved for now has no confirm step (left: it's a cache).
 4. History doesn't grey online-only pages under Local only; opening one shows "Needs internet".
 5. A leftover "last thing you were reading isn't available" toast seen once from the I3 build.
+6. Search results shift under the finger as slower sections load (tapped "Lago Turkana", opened "Parques nacionales del lago Turkana").
+7. With the app in Spanish, Search under Local only says "Nada en tu biblioteca" for a title the English pack on the phone has (knowledge languages follow the app language); a hint naming the other-language pack would help.
+8. The whole rail is one tappable node carrying every rail label as well as its own items: listen for a double read in the by-ear check.
+9. A title search row reads "Best of Wikipedia · Also in Best of Wikipedia" (Lake Mega Chad).
+10. Ready offline counted a Spanish online article as working offline (Saved for now) but showed no subject bar for it.
