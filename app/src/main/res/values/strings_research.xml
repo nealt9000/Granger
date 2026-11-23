@@ -43,7 +43,7 @@
     <string name="research_declined">Not in your library.</string>
     <string name="research_unverified">Couldn\'t answer from these passages.</string>
     <string name="research_best_guess_label">I couldn\'t find this in your library. Here\'s my best guess, so take it with a grain of salt.</string>
-    <string name="research_model_failed">The model needs repair. Check it in Readiness.</string>
+    <string name="research_model_failed">The model needs repair. Check it in Outfitting.</string>
     <string name="research_search_failed">Couldn\'t search your library. Try again.</string>
     <string name="research_interrupted">Stopped before an answer.</string>
     <string name="research_source_gone">That source is no longer in your library.</string>

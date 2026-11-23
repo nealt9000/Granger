@@ -31,7 +31,7 @@
     <string name="research_declined">No está en tu biblioteca.</string>
     <string name="research_unverified">No se pudo responder con estos pasajes.</string>
     <string name="research_best_guess_label">No encontré esto en tu biblioteca. Esta es mi mejor suposición, así que tómala con cautela.</string>
-    <string name="research_model_failed">El modelo necesita reparación. Revísalo en Preparación.</string>
+    <string name="research_model_failed">El modelo necesita reparación. Revísalo en Equipamiento.</string>
     <string name="research_search_failed">No se pudo buscar en tu biblioteca. Inténtalo de nuevo.</string>
     <string name="research_interrupted">Se detuvo antes de responder.</string>
     <string name="research_source_gone">Esa fuente ya no está en tu biblioteca.</string>
