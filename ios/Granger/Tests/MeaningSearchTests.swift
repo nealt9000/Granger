@@ -37,7 +37,8 @@ final class MeaningSearchTests: XCTestCase {
         let found = try XCTUnwrap(result, "Best matches answered")
         XCTAssertTrue(found.byMeaning, "the dense half ran")
         XCTAssertGreaterThan(found.embedMs, 0, "the query was embedded")
-        let dense = found.matches.filter { $0.passage.cosine != nil }
+        // Articles: books on the shelf with vectors of their own (Plan I7 Task 7a) can join the dense half too.
+        let dense = found.matches.filter { $0.passage.cosine != nil && $0.passage.kind == .article }
         XCTAssertFalse(dense.isEmpty, "passages found by meaning, rebuilt from the pack")
         XCTAssertTrue(dense.allSatisfy { $0.passage.sourceId == pack.id }, "from the test pack")
         print("MEANING SEARCH \(rows.intValue) rows; embed \(found.embedMs) ms, dense \(found.denseMs) ms, keywords \(found.keywordMs) ms; top: "
@@ -60,17 +61,21 @@ final class MeaningSearchTests: XCTestCase {
         let r = try await core.library.importBook(path: epub, displayName: (epub as NSString).lastPathComponent)
         let bookId = try XCTUnwrap((r as? ImportResultImported)?.bookId ?? (r as? ImportResultAlreadyThere)?.bookId)
         let saved = LibraryGate.shared.languages
+        var made: [String] = []
         defer {
             LibraryGate.shared.languages = saved
             meaning.debugModelPath = nil
             meaning.release()
-            if let f = core.library.bookVectors.fileFor(bookId: bookId) { try? FileManager.default.removeItem(atPath: f) }
+            // Every book prepareBooks embedded with the test model, not only this one.
+            for f in made { try? FileManager.default.removeItem(atPath: f) }
         }
         LibraryGate.shared.languages = ["en"]
         meaning.debugModelPath = model
 
         let started = Date()
         try await core.library.prepareBooks()
+        let books = try await core.library.books.first(where: { _ in true }) ?? []
+        made = books.compactMap { core.library.bookVectors.fileFor(bookId: $0.id) }
         let file = try XCTUnwrap(core.library.bookVectors.fileFor(bookId: bookId))
         XCTAssertTrue(FileManager.default.fileExists(atPath: file), "the book's vectors were made")
         print("BOOK VECTORS made in \(Int(Date().timeIntervalSince(started))) s")
