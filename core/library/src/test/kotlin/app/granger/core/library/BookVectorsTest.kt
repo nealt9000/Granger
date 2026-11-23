@@ -97,7 +97,7 @@ class BookVectorsTest {
         val id = importWalden()
         val vectors = vectors(available = false)
         assertThat(vectors.embedPending()).isEqualTo(0)
-        assertThat(vectors.fileFor(id)!!.exists()).isFalse()
+        assertThat(File(vectors.fileFor(id)!!).exists()).isFalse()
         assertThat(vectors(embedder = { null }).embedPending()).isEqualTo(0)
     }
 

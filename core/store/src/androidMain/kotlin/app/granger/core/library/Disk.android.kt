@@ -18,6 +18,7 @@ internal actual object Disk {
     actual fun exists(path: String): Boolean = File(path).exists()
     actual fun isFile(path: String): Boolean = File(path).isFile
     actual fun length(path: String): Long = File(path).length()
+    actual fun lastModified(path: String): Long = File(path).lastModified()
     actual fun delete(path: String): Boolean = File(path).delete()
     actual fun mkdirs(path: String) {
         File(path).mkdirs()

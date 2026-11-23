@@ -182,9 +182,14 @@ final class BookReaderModel {
         let saved = try? await core.library.position(bookId: id)
         initial = await StartPlace.choose(opened, savedJson: saved?.locatorJson)
         // A passage from an article's footer opens there (Android's StartLocator with a mention).
-        if let passage, let url = AnyURL(string: passage.href),
+        // A Best match's PDF passage is a page (`page/12`), opened at that page.
+        if let passage, pdf, let page = GrangerCore.TocPlaceKt.pdfPageOf(href: passage.href)?.intValue,
+           let positions = try? await opened.positions().get(), !positions.isEmpty {
+            initial = positions[min(max(page, 1), positions.count) - 1]
+        } else if let passage, let url = AnyURL(string: passage.href),
            let link = opened.readingOrder.first(where: { $0.url().removingFragment().isEquivalentTo(url.removingFragment()) }) {
             initial = Locator(href: link.url(), mediaType: link.mediaType ?? .xhtml,
+                              locations: Locator.Locations(progression: passage.progression),
                               text: Locator.Text(before: LinkMentions.shared.contextOf(before: passage.before), highlight: passage.quote))
         }
         isPdf = pdf

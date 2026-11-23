@@ -166,6 +166,45 @@ final class BookReaderTests: XCTestCase {
         waitForProgress(again, containing: place)
     }
 
+    /// Plan I7 Task 7a: Search's Best matches list a book's passage (Android's: the books' index too), as a book row
+    /// with the sentence and its collection; tapped, the book opens at that passage, not at its saved place.
+    func testBestMatchOpensTheBookAtItsPassage() throws {
+        let epub = try env("GRANGER_TEST_EPUB")
+        let app = launch(epub)
+        XCTAssertTrue(app.staticTexts["book-progress"].waitForExistence(timeout: 30), "the book opens (imported and indexed)")
+        waitForProgress(app, containing: "p. ")
+        XCTAssertFalse(progress(app).contains("Chapter XXXIV"), "it opens at its start")
+        openBestMatch(app, query: "In vain have I struggled", expecting: "Pride")
+        XCTAssertTrue(app.staticTexts["book-progress"].waitForExistence(timeout: 30), "the book opens")
+        showBars(app)
+        waitForProgress(app, containing: "Chapter XXXIV", timeout: 20)
+        shot(app, "best-match-book-passage")
+    }
+
+    /// From the open book: Search, [query], and the first book row in Best matches (titled with [expecting]) tapped.
+    /// The book's words are indexed just after its import, so the search is tried again until they are.
+    private func openBestMatch(_ app: XCUIApplication, query: String, expecting title: String) {
+        let tab = app.tabBars.buttons["Search"]
+        if !tab.isHittable { showBars(app) }
+        if !tab.isHittable { app.navigationBars.buttons.firstMatch.tap() }
+        XCTAssertTrue(tab.waitForExistence(timeout: 5))
+        tab.tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        let row = app.buttons.matching(identifier: "search-book-hit").firstMatch
+        for attempt in 0..<4 {
+            field.tap()
+            if attempt > 0, let typed = field.value as? String { field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: typed.count)) }
+            field.typeText(query)
+            if row.waitForExistence(timeout: 20) { break }
+        }
+        XCTAssertTrue(row.exists, "a book's passage in Best matches")
+        XCTAssertTrue(row.label.contains(title), row.label)
+        shot(app, "best-match-book-row")
+        XCTAssertTrue(app.reveal(row))
+        row.tap()
+    }
+
     /// A PDF opens with its outline in Contents, jumps to a chapter's page, and reopens at that page.
     func testPdfReaderReopensAtItsPage() throws {
         let pdf = try env("GRANGER_TEST_PDF")

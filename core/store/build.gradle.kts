@@ -24,6 +24,8 @@ kotlin {
             api(project(":core:records"))
             // Plan I5 Task 1: the shelf reads books with the shared book rules.
             api(project(":core:books"))
+            // Plan I7 Task 7a: the search by meaning (DensePassageFinder, BookVectors) is shared with the iPhone.
+            api(project(":core:vectors"))
             api(libs.androidx.room.runtime)
             api(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)

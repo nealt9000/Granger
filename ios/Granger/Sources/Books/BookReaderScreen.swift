@@ -508,6 +508,8 @@ struct BookPassage: Hashable {
     let href: String
     let quote: String
     let before: String
+    /// Where in the chapter it is (Search's Best matches), if the words can't be found; nil for none.
+    var progression: Double? = nil
 }
 
 struct PeekItem: Identifiable {

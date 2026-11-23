@@ -35,7 +35,7 @@ class LibraryPassageFinder(
     slices: PackSlices? = null,
 ) : PackPassageFinder(
     library = library,
-    bookSearch = IndexSearch(bookIndex),
+    bookSearch = BookIndexPassageSearch(bookIndex),
     books = { bookshelf.books.first() },
     collections = { shelves.collectionNames() },
     io = io,
@@ -48,13 +48,7 @@ class LibraryPassageFinder(
     clock = clock,
     slices = slices,
     dictionary = { archive, word -> DictionaryEntry.find(archive, word)?.let { DictionaryHit(it.path, it.title, it.text) } },
-) {
-    private class IndexSearch(private val index: BookIndex) : BookPassageSearch {
-        override suspend fun passages(keywords: List<String>, limit: Int) = index.passages(keywords, limit = limit)
-        override suspend fun passagesIn(bookId: String, keywords: List<String>) = index.passagesIn(bookId, keywords)
-        override suspend fun quoted(query: String) = index.quoted(query)
-    }
-}
+)
 
 /** Works asked of the media index for each keyword, before the best [mediaCardPassages] are picked. */
 private const val MEDIA_PER_KEYWORD = 6
@@ -84,18 +78,4 @@ private suspend fun mediaCardPassages(index: MediaIndex, mediaCards: Int, words:
     } catch (_: Exception) {
         emptyList()
     }
-}
-
-/** Each pack's and book's collection name, by id; empty when the shelves can't be read. */
-internal suspend fun Shelves.collectionNames(): Map<String, String> = try {
-    buildMap {
-        for (row in shelves.first().flatMap { it.allCollections }) {
-            row.packs.forEach { put(it.id, row.collection.name) }
-            row.books.forEach { put(it.id, row.collection.name) }
-        }
-    }
-} catch (e: CancellationException) {
-    throw e
-} catch (_: Exception) {
-    emptyMap()
 }

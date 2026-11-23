@@ -38,6 +38,9 @@ internal actual object Disk {
     actual fun exists(path: String): Boolean = meta(path) != null
     actual fun isFile(path: String): Boolean = meta(path)?.isRegularFile == true
     actual fun length(path: String): Long = meta(path)?.takeIf { it.isRegularFile }?.size ?: 0L
+    actual fun lastModified(path: String): Long =
+        ((NSFileManager.defaultManager.attributesOfItemAtPath(path, null)?.get(platform.Foundation.NSFileModificationDate) as? NSDate)
+            ?.timeIntervalSince1970 ?: 0.0).times(1000).toLong()
 
     actual fun delete(path: String): Boolean {
         if (meta(path) == null) return false

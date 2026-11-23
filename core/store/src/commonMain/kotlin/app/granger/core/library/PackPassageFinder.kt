@@ -52,7 +52,7 @@ interface BookPassageSearch {
 data class DictionaryHit(val path: String, val title: String, val text: String)
 
 /** Milliseconds on a monotonic clock, from when it was made. */
-private fun monotonicMillis(): () -> Long {
+internal fun monotonicMillis(): () -> Long {
     val start = TimeSource.Monotonic.markNow()
     return { start.elapsedNow().inWholeMilliseconds }
 }
@@ -72,8 +72,8 @@ private fun pdfPageOf(href: String): Int? = href.removePrefix("page/").takeIf { 
  * A question that names a work ("does the bible say ...") also searches inside the named books, for the other keywords.
  *
  * Shared by both phones (Plan I4b Task 9): Android's `LibraryPassageFinder` builds it over its book index, shelf,
- * shelves, media index and Wiktionary reader; the iPhone over its packs alone (no [bookSearch], [media] or [dictionary]
- * yet), which is Best matches' keyword side there.
+ * shelves, media index and Wiktionary reader; the iPhone over its packs and its book index ([BookIndexPassageSearch],
+ * Plan I7 Task 7a; no [media] or [dictionary] yet), which is Best matches' keyword side there.
  *
  * @param books the shelf's books (Android: `Bookshelf.books`), for named works, catalogue cards and Classics twins;
  * @param collections each pack's and book's collection name by id (Android: `Shelves.collectionNames`);
@@ -469,4 +469,25 @@ open class PackPassageFinder(
             "novelas",
         )
     }
+}
+
+/** The book index as [PackPassageFinder]'s book search (Android's `LibraryPassageFinder` until Plan I7 Task 7a). */
+class BookIndexPassageSearch(private val index: BookIndex) : BookPassageSearch {
+    override suspend fun passages(keywords: List<String>, limit: Int) = index.passages(keywords, limit = limit)
+    override suspend fun passagesIn(bookId: String, keywords: List<String>) = index.passagesIn(bookId, keywords)
+    override suspend fun quoted(query: String) = index.quoted(query)
+}
+
+/** Each pack's and book's collection name, by id; empty when the shelves can't be read. */
+suspend fun Shelves.collectionNames(): Map<String, String> = try {
+    buildMap {
+        for (row in shelves.first().flatMap { it.allCollections }) {
+            row.packs.forEach { put(it.id, row.collection.name) }
+            row.books.forEach { put(it.id, row.collection.name) }
+        }
+    }
+} catch (e: CancellationException) {
+    throw e
+} catch (_: Exception) {
+    emptyMap()
 }

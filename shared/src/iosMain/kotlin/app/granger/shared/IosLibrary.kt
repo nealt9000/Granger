@@ -3,6 +3,7 @@ package app.granger.shared
 import app.granger.core.catalog.Catalog
 import app.granger.core.catalog.timeIndex
 import app.granger.core.library.KeptArticle
+import app.granger.core.library.collectionNames
 import app.granger.core.library.LibraryDatabase
 import app.granger.core.library.QidIndex
 import app.granger.core.library.QidIndexes
@@ -263,7 +264,6 @@ class IosLibrary(
         records = { downloads.records.first() },
         catalogEmbedders = { catalog?.models.orEmpty().filter { it.role == app.granger.core.catalog.ModelRole.EMBEDDER }.mapTo(HashSet()) { it.id } },
         packs = { packLibrary.packs.first() },
-        archive = packLibrary::archive,
         cacheDir = "$cacheDir/embedder",
         io = app.granger.screens.ioDispatcher,
     )
@@ -373,33 +373,96 @@ class IosLibrary(
         kotlinx.coroutines.runBlocking { packLibrary.packs.first() }.filter { it.isBookPack && it.status == app.granger.core.library.PackStatus.OK }.sortedBy { it.title.lowercase() }
 
     /**
-     * Search's Best matches over the packs (Plan SQ, I4 Task 9): Ask's keyword retrieval ranked as Android ranks it, one
-     * row per article (a pack family's copies are one row). With search by meaning (Plan I7 call 6) the query's vector
-     * through the packs' vector files too, merged as Android merges them.
+     * The keyword side of Best matches, as Android's `LibraryPassageFinder` (Plan I7 Task 7a): the packs' full text, and
+     * the books' passages from the book index with the shelf's books and their collections.
+     */
+    private val passageFinder by lazy {
+        app.granger.core.library.PackPassageFinder(
+            library = packLibrary,
+            bookSearch = app.granger.core.library.BookIndexPassageSearch(bookIndex),
+            books = { bookshelf.books.first() },
+            collections = { shelves.collectionNames() },
+        )
+    }
+
+    /** Vectors for the books you add, made here in the background while search by meaning is on (Android's Plan R2 Task 9). */
+    val bookVectors by lazy {
+        app.granger.core.library.BookVectors(
+            bookshelf, "$dir/vectors-own",
+            embed = { docs -> meaning.embedDocuments(docs) },
+            embedderSha = { meaning.bookVectorsSha() },
+            io = app.granger.screens.ioDispatcher,
+            log = ::logLine,
+        )
+    }
+
+    /** The dense half of Best matches: the packs' and books' vector files, Android's shared finder. */
+    private val denseFinder by lazy {
+        app.granger.core.library.DensePassageFinder(
+            packLibrary, bookshelf, shelves,
+            app.granger.core.library.CombinedVectorSources(meaning.sources, bookVectors.sources),
+            unescape = { app.granger.librivox.decodeEntities(it) },
+            io = app.granger.screens.ioDispatcher,
+        )
+    }
+
+    /** A new or found book: its words are indexed first, so the keyword search has it at once; its vectors follow (Android's). */
+    suspend fun prepareBooks() {
+        bookIndex.indexPending()
+        if (meaning.on) bookVectors.embedPending()
+    }
+
+    /** The book ids of the Granger Classics the catalog files under literature (Android's `literatureBooks`, R0's fiction list). */
+    private fun literatureBooks(): Set<String> = catalog?.books.orEmpty()
+        .filter { it.domain == "literature" }.mapTo(HashSet()) { app.granger.core.library.BookIds.of(app.granger.core.library.BookOrigin.GRANGER, it.id) }
+
+    /**
+     * Search's Best matches (Plan SQ, I4 Task 9; books since Plan I7 Task 7a): Ask's keyword retrieval over the packs and
+     * the books ranked as Android ranks it, one row per article or chapter (a pack family's copies are one row), fiction
+     * weighed down unless the question is literary, a quote's book first. With search by meaning (Plan I7 call 6) the
+     * query's vector through the packs' and books' vector files too, merged as Android merges them.
      */
     private val bestMatches by lazy {
         app.granger.core.research.BestMatches(
-            finder = app.granger.core.library.PackPassageFinder(library = packLibrary),
-            dense = meaning.finder, embed = { q -> meaning.embed(q) },
+            finder = passageFinder,
+            dense = denseFinder, embed = { q -> meaning.embed(q) },
+            sourceWeight = app.granger.core.research.FictionWeight(::literatureBooks),
             articleKey = {
                 val families = packLibrary.packs.first().filter { it.name.isNotBlank() }.associate { it.id to app.granger.core.library.TitleMatch.family(it.name) }
                 ({ p: app.granger.core.research.Passage ->
                     (if (p.kind == app.granger.core.research.SourceKind.ARTICLE) families[p.sourceId] ?: p.sourceId else p.sourceId) to p.location
                 })
             },
+            quoted = passageFinder::quoted,
         )
     }
 
-    /** The Best matches for [query] over the packs; empty with no pack. */
+    /** The Best matches for [query] over the packs and books; empty with neither. */
     suspend fun best(query: String): List<app.granger.core.research.BestMatches.Match> = bestResult(query)?.matches.orEmpty()
 
-    /** Best matches for [query] with how they were found (by meaning, its times); null with no pack or on a failure. */
+    /**
+     * Best matches for [query] with how they were found (by meaning, its times); null with no pack or book, or on a
+     * failure. Only the library's languages, as Android's (Neal, 2026-11-16): a pack's or book's of another language is
+     * left out.
+     */
     suspend fun bestResult(query: String): app.granger.core.research.BestMatches.Result? {
-        if (packLibrary.packs.first().none { it.status == app.granger.core.library.PackStatus.OK }) return null
+        val packs = packLibrary.packs.first()
+        if (packs.none { it.status == app.granger.core.library.PackStatus.OK } &&
+            bookshelf.books.first().none { it.status == app.granger.core.library.PackStatus.OK }) return null
         val result = runCatching { bestMatches.find(query) }.getOrNull() ?: return null
         // Each query's meaning step timed, so a slow phone drops to keywords alone (Android's EmbedSpeed).
         if (result.byMeaning && result.embedMs + result.denseMs > 0) meaning.speed.record(result.embedMs + result.denseMs)
-        return result
+        val allowed = languages().toSet()
+        val packLanguages = packs.associate { it.id to it.language }
+        val bookLanguages = HashMap<String, String?>()
+        suspend fun allowedSource(p: app.granger.core.research.Passage): Boolean = when (p.kind) {
+            app.granger.core.research.SourceKind.ARTICLE ->
+                packLanguages[p.sourceId]?.let { l -> allowed.any { app.granger.core.library.TitleMatch.inLanguage(l, it) } } ?: true
+            app.granger.core.research.SourceKind.BOOK ->
+                bookLanguages.getOrPut(p.sourceId) { bookshelf.book(p.sourceId)?.language?.let(::twoLetterLanguage) }?.let { it in allowed } ?: true
+            else -> true
+        }
+        return result.copy(matches = result.matches.filter { allowedSource(it.passage) })
     }
 
     /** Loads the embedder ahead of the first query (Search opened); nothing without search by meaning. */
@@ -500,7 +563,7 @@ class IosLibrary(
         scope.launch {
             runCatching { rebaseMovedBooks() }
             runCatching { bookshelf.refresh() }
-            runCatching { bookIndex.indexPending() }
+            runCatching { prepareBooks() }
         }
         scope.launch {
             packLibrary.packs.map { packs -> packs.map { Triple(it.id, it.status, it.bookManifest) } }.distinctUntilChanged().collect {
@@ -517,7 +580,7 @@ class IosLibrary(
      */
     suspend fun importBook(path: String, displayName: String): app.granger.core.library.ImportResult {
         val result = bookshelf.importFrom(displayName) { SystemFileSystem.source(kotlinx.io.files.Path(path)).buffered() }
-        if (result is app.granger.core.library.ImportResult.Imported) scope.launch { runCatching { bookIndex.indexPending() } }
+        if (result is app.granger.core.library.ImportResult.Imported) scope.launch { runCatching { prepareBooks() } }
         return result
     }
 
@@ -948,7 +1011,7 @@ class IosLibrary(
 
     /** Imports picked files; a batch that added a book has its words indexed straight after. */
     private val fileImports by lazy {
-        app.granger.library.FileImports(bookshelf) { scope.launch { runCatching { bookIndex.indexPending() } } }
+        app.granger.library.FileImports(bookshelf) { scope.launch { runCatching { prepareBooks() } } }
     }
 
     /** "Make all searchable…" for a book pack's collection: every book copied out of its pack and indexed. */
@@ -1730,3 +1793,13 @@ private const val EMBEDDER_FOLLOWED = "embedder.followed"
 
 /** A vector file's embedder or source sha256 when there is none to name (a test's file). */
 private val NO_SHA = "0".repeat(64)
+
+/** A book's language as two letters, as Android's `twoLetter`: `en` from `en`, `eng` or `en-GB`; `es` from `spa`. */
+internal fun twoLetterLanguage(language: String): String? {
+    val l = language.lowercase().substringBefore('-').substringBefore('_')
+    return when {
+        l.isBlank() -> null
+        l.length == 2 -> l
+        else -> app.granger.core.text.iso639Alpha2(l)?.takeIf { it.length == 2 } ?: mapOf("eng" to "en", "spa" to "es")[l]
+    }
+}

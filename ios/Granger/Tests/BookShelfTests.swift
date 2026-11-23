@@ -94,4 +94,48 @@ final class BookShelfTests: XCTestCase {
         XCTAssertEqual(p?.locatorJson, json)
         XCTAssertEqual(p?.chapterTitle, "The Bowline")
     }
+
+    /// Plan I7 Task 7a: Best matches search the books too, as Android's: an imported e-book's passage is found from the
+    /// book index (a quote's book first), Search's row for it is a book row that opens at the passage, and a book
+    /// outside the library's languages is left out.
+    func testBestMatchesFindABookPassageInTheLibrarysLanguages() async throws {
+        let epub = try env("GRANGER_TEST_EPUB")
+        let core = try XCTUnwrap(Core.shared, "the host app's core")
+        let r = try await core.library.importBook(path: epub, displayName: (epub as NSString).lastPathComponent)
+        let bookId = try XCTUnwrap((r as? ImportResultImported)?.bookId ?? (r as? ImportResultAlreadyThere)?.bookId)
+        try await core.library.prepareBooks()
+        let saved = LibraryGate.shared.languages
+        defer { LibraryGate.shared.languages = saved }
+        LibraryGate.shared.languages = ["en"]
+
+        let query = "In vain have I struggled"
+        let result = try await core.library.bestResult(query: query)
+        let found = try XCTUnwrap(result, "Best matches answered")
+        let hit = try XCTUnwrap(found.matches.first { $0.passage.kind == .book && $0.passage.sourceId == bookId }, "the book's passage")
+        XCTAssertEqual(found.matches.first?.passage.sourceId, bookId, "a quote's book comes first")
+        XCTAssertTrue(hit.passage.text.contains(query), hit.passage.text)
+        XCTAssertFalse(hit.passage.location.isEmpty, "the passage's chapter")
+        XCTAssertTrue(hit.quote()?.contains(query) ?? false, "the sentence the row quotes")
+
+        let row = SearchModel.bestRow(hit)
+        XCTAssertTrue(row.title.contains("Pride"), row.title)
+        XCTAssertEqual(row.icon, "book.closed")
+        XCTAssertEqual(row.book?.href, hit.passage.location)
+        XCTAssertEqual(row.book?.quote, hit.quote())
+
+        // A PDF's passage is a page (the test PDF's pages each hold the same body line, so any page).
+        if let pdf = ProcessInfo.processInfo.environment["GRANGER_TEST_PDF"], !pdf.isEmpty {
+            let pr = try await core.library.importBook(path: pdf, displayName: "field-notes.pdf")
+            let pdfId = try XCTUnwrap((pr as? ImportResultImported)?.bookId ?? (pr as? ImportResultAlreadyThere)?.bookId)
+            try await core.library.prepareBooks()
+            let knots = try await core.library.bestResult(query: "a good knot holds when it must")
+            let page = try XCTUnwrap(knots?.matches.first { $0.passage.sourceId == pdfId }, "the PDF's page")
+            XCTAssertTrue(page.passage.location.hasPrefix("page/"), page.passage.location)
+            XCTAssertEqual(SearchModel.bestRow(page).book?.href, page.passage.location)
+        }
+
+        LibraryGate.shared.languages = ["es"]
+        let spanish = try await core.library.bestResult(query: query)
+        XCTAssertFalse(spanish?.matches.contains { $0.passage.sourceId == bookId } ?? false, "an English book is left out of a Spanish library")
+    }
 }

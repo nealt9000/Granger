@@ -18,6 +18,9 @@ internal expect object Disk {
     /** `File(path).length()`: 0 when it isn't there. */
     fun length(path: String): Long
 
+    /** `File(path).lastModified()`, in milliseconds: 0 when it isn't there. */
+    fun lastModified(path: String): Long
+
     /** `File(path).delete()`: false when it isn't there or can't be deleted. Not recursive. */
     fun delete(path: String): Boolean
 

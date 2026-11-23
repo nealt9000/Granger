@@ -74,21 +74,28 @@ struct SearchScreen: View {
             ForEach(shown) { hit in
                 Button {
                     model.remember(query)
-                    openRoute(.article(packId: hit.packId, path: hit.path))
+                    // A book's Best match opens the book at its passage (Android's CitationOpener); anything else its page.
+                    if let book = hit.book { openRoute(.bookAt(id: hit.packId, passage: book)) }
+                    else { openRoute(.article(packId: hit.packId, path: hit.path)) }
                 } label: {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 8) {
-                            Text(hit.title).font(Spectral.regular(19)).foregroundStyle(palette.onBackground)
-                            if let lang = hit.onlineLang { MarkView(lang: lang, title: hit.path) }
+                    HStack(alignment: .firstTextBaseline, spacing: 12) {
+                        if let icon = hit.icon {
+                            Image(systemName: icon).foregroundStyle(palette.onSurfaceVariant).accessibilityHidden(true)
                         }
-                        if let d = hit.detail {
-                            Text(d).font(.subheadline).foregroundStyle(palette.onSurfaceVariant).lineLimit(3)
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 8) {
+                                Text(hit.title).font(Spectral.regular(19)).foregroundStyle(palette.onBackground)
+                                if let lang = hit.onlineLang { MarkView(lang: lang, title: hit.path) }
+                            }
+                            if let d = hit.detail {
+                                Text(d).font(.subheadline).foregroundStyle(palette.onSurfaceVariant).lineLimit(3)
+                            }
+                            if !hit.source.isEmpty { Text(hit.source).font(.caption).foregroundStyle(palette.outline) }
                         }
-                        Text(hit.source).font(.caption).foregroundStyle(palette.outline)
                     }
                     .padding(.vertical, 2)
                 }
-                .accessibilityIdentifier("search-hit")
+                .accessibilityIdentifier(hit.book != nil ? "search-book-hit" : "search-hit")
             }
             if hits.count > SearchModel.preview {
                 Button(all.wrappedValue ? fewer : showAll(hits.count)) { all.wrappedValue.toggle() }
@@ -110,6 +117,10 @@ struct SearchRow: Identifiable, Hashable {
     let source: String
     /// Wikipedia online's language, for its mark; nil for a pack's article (on this phone already).
     let onlineLang: String?
+    /// A book's Best match: where in the book it opens; nil for an article.
+    var book: BookPassage? = nil
+    /// The kind's icon (Best matches, as Android's): an article or a book; nil for none.
+    var icon: String? = nil
     var id: String { "\(packId)|\(path)" }
 
     /// A snippet's words without its `<b>` highlights.
@@ -160,10 +171,7 @@ final class SearchModel {
         async let pt: [SearchRow] = (try? await packs.titles(query: q))?.hits.map(Self.row) ?? []
         async let pp: [SearchRow] = (try? await packs.fullText(query: q))?.map(Self.row) ?? []
         let library = core.library
-        async let bm: [SearchRow] = ((try? await library.best(query: q)) ?? []).map { m in
-            SearchRow(packId: m.passage.sourceId, path: m.passage.location, title: PageTitles.shared.clean(title: m.passage.sourceTitle, packTitle: m.passage.packTitle, mainPage: false), detail: m.quote(),
-                      source: m.passage.packTitle, onlineLang: nil)
-        }
+        async let bm: [SearchRow] = ((try? await library.best(query: q)) ?? []).map(Self.bestRow)
         async let ot: [SearchRow] = online ? background { client.titles(lang: lang, query: q, limit: Int32(Self.limit)) }
             .map { SearchRow(packId: onlinePack, path: $0.key, title: $0.title, detail: $0.description_, source: "Wikipedia", onlineLang: lang) } : []
         async let op: [SearchRow] = online ? background { client.pages(lang: lang, query: q, limit: Int32(Self.limit)) }
@@ -178,6 +186,18 @@ final class SearchModel {
         let bestRows = await bm
         if Task.isCancelled { return }
         best = bestRows
+    }
+
+    /// A Best match: an article, or a book's chapter that opens at its passage (Android's row: the kind's icon, the title,
+    /// the sentence, then the pack or the book's collection).
+    static func bestRow(_ m: BestMatches.Match) -> SearchRow {
+        let p = m.passage
+        let book = p.kind == .book
+        return SearchRow(packId: p.sourceId, path: p.location,
+                         title: book ? p.sourceTitle : PageTitles.shared.clean(title: p.sourceTitle, packTitle: p.packTitle, mainPage: false),
+                         detail: m.quote(), source: p.packTitle.isEmpty ? p.meta.collection : p.packTitle, onlineLang: nil,
+                         book: book ? BookPassage(href: p.location, quote: m.quote() ?? "", before: "", progression: p.progression) : nil,
+                         icon: book ? "book.closed" : "doc.text")
     }
 
     private static func row(_ h: SearchHit) -> SearchRow {
