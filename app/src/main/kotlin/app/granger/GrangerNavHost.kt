@@ -1556,6 +1556,7 @@ fun GrangerNavHost(container: AppContainer, start: StartScreen, openPlayerReques
                             },
                             online = if (Features.ONLINE) app.granger.search.OnlineSearch(container::searchOnline) else null,
                             reachOnline = container.reach.state.map { it.online },
+                            fieldText = app.granger.search.ComposeSearchFieldText(),
                         )
                     },
                     onOpenMatch = { match ->

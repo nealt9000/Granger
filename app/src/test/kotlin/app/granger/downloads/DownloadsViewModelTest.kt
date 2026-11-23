@@ -123,8 +123,9 @@ class DownloadsViewModelTest {
         backgroundScope.launch { vm.tidy.collect {} }
         testScheduler.advanceUntilIdle()
         val offer = vm.tidy.value.single()
+        // The offer's words are shared since Plan I7 Task 7c, so they name their string by key.
         assertThat(offer.text)
-            .isEqualTo(app.granger.UiText.Res(app.granger.R.string.sources_tidy_text, "Best 50,000", "100 essential", app.granger.formatBytes(333_000_000)))
+            .isEqualTo(app.granger.UiText.Res("sources_tidy_text", "Best 50,000", "100 essential", app.granger.formatBytes(333_000_000)))
         vm.removeSmaller(offer)
         testScheduler.advanceUntilIdle()
         assertThat(library.supersededAcross).containsExactly(top.zimUuid to best.zimUuid)

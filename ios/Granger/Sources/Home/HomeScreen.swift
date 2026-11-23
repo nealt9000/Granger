@@ -33,6 +33,7 @@ struct HomeScreen: View {
                 if !settings.privacySeen { PrivacyCard(onSettings: { showSettings = true }) }
                 if library.index == .coming { IndexCard() }
                 if let s = downloads.summary, s.isActive { DownloadsCard(summary: s) }
+                ForEach(downloads.tidy, id: \.key) { offer in TidyOfferCard(offer: offer) }
                 ForEach(arrangement.shown(feedIds: (feeds.ui?.feeds ?? []).map(\.feed.id)), id: \.self) { token in
                     switch token {
                     case "continue": if !recent.entries.isEmpty { continueSection }

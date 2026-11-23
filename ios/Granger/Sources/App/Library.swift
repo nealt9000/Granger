@@ -91,6 +91,14 @@ final class LibraryModel {
     /// good one from the cache, verified again; nil when there's neither.
     func loadCatalog() async -> Catalog? {
         if let catalog { return catalog }
+        #if DEBUG
+        // `-debugCatalog <json on the Mac>`: a test's own catalog, unsigned (two slices of a set, Plan I7 Task 7c).
+        if let path = UserDefaults.standard.string(forKey: "debugCatalog"), let json = try? String(contentsOfFile: path, encoding: .utf8),
+           let parsed = Core.shared?.library.debugCatalog(json: json) {
+            catalog = parsed
+            return parsed
+        }
+        #endif
         guard let key = Data(base64Encoded: Self.publicKey) else { return nil }
         if NetworkGate.shared.open,
            let json = try? await URLSession.shared.data(from: Self.catalogURL).0,

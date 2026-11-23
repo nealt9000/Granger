@@ -56,7 +56,7 @@ final class SearchExtrasTests: XCTestCase {
         XCTAssertFalse(entry.text.contains("King James"), "the quotations nested in a sense are dropped")
         XCTAssertFalse(entry.text.contains("de bonne heure"), "the translations are left out")
         XCTAssertFalse(entry.text.contains("at an early hour"), "only the first language")
-        let line = SearchModel.defineLine(entry)
+        let line = SearchRows.defineLine(entry)
         XCTAssertFalse(line.contains("Etymology"), "the card leaves the etymology out: \(line)")
         XCTAssertTrue(line.contains("early, especially in the morning"), line)
 

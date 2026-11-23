@@ -135,6 +135,10 @@
     <!-- TalkBack: the kind icon on a Best match. -->
     <string name="search_kind_article">Artículo</string>
     <string name="search_kind_book">Libro</string>
+    <string name="search_kind_music">Música</string>
+    <string name="search_kind_audiobook">Audiolibro</string>
+    <string name="search_your_music">Tu música</string>
+    <string name="search_your_audiobooks">Tus audiolibros</string>
     <!-- Plan SQ Task 5.4: the small card with a single word's dictionary entry. %1$s is the dictionary (Wiktionary). -->
     <string name="search_define">Definición</string>
     <string name="search_define_source">Entrada de diccionario de %1$s</string>

@@ -50,11 +50,13 @@ object ScreenTextIds {
         "audiobooks_sort_author" -> R.string.audiobooks_sort_author
         "audiobooks_sort_recent" -> R.string.audiobooks_sort_recent
         "audiobooks_sort_title" -> R.string.audiobooks_sort_title
+        "audiobooks_unknown_author" -> R.string.audiobooks_unknown_author
         "bk_couldnt_keep" -> R.string.bk_couldnt_keep
         "bk_couldnt_open" -> R.string.bk_couldnt_open
         "bk_kept_notice" -> R.string.bk_kept_notice
         "common_pause" -> R.string.common_pause
         "common_play" -> R.string.common_play
+        "common_remove" -> R.string.common_remove
         "ebook_defined_in" -> R.string.ebook_defined_in
         "ebook_your_highlight" -> R.string.ebook_your_highlight
         "ebook_your_highlight_in" -> R.string.ebook_your_highlight_in
@@ -165,6 +167,7 @@ object ScreenTextIds {
         "music_tab_playlists" -> R.string.music_tab_playlists
         "music_unknown_album" -> R.string.music_unknown_album
         "music_unknown_artist" -> R.string.music_unknown_artist
+        "music_unknown_genre" -> R.string.music_unknown_genre
         "onboarding_ask_line" -> R.string.onboarding_ask_line
         "onboarding_blurb_comprehensive" -> R.string.onboarding_blurb_comprehensive
         "onboarding_blurb_efficient" -> R.string.onboarding_blurb_efficient
@@ -223,8 +226,29 @@ object ScreenTextIds {
         "readiness_source_my_books" -> R.string.readiness_source_my_books
         "readiness_source_phone_media" -> R.string.readiness_source_phone_media
         "readiness_source_voices" -> R.string.readiness_source_voices
+        "research_medical" -> R.string.research_medical
+        "search_album_line" -> R.string.search_album_line
+        "search_audiobook_read_by" -> R.string.search_audiobook_read_by
+        "search_best_fewer" -> R.string.search_best_fewer
+        "search_best_more" -> R.string.search_best_more
         "search_define" -> R.string.search_define
         "search_define_source" -> R.string.search_define_source
+        "search_did_you_mean" -> R.string.search_did_you_mean
+        "search_kind_article" -> R.string.search_kind_article
+        "search_kind_audiobook" -> R.string.search_kind_audiobook
+        "search_kind_book" -> R.string.search_kind_book
+        "search_kind_music" -> R.string.search_kind_music
+        "search_page" -> R.string.search_page
+        "search_show_fewer_albums" -> R.string.search_show_fewer_albums
+        "search_show_fewer_articles" -> R.string.search_show_fewer_articles
+        "search_show_fewer_artists" -> R.string.search_show_fewer_artists
+        "search_show_fewer_audiobooks" -> R.string.search_show_fewer_audiobooks
+        "search_show_fewer_books" -> R.string.search_show_fewer_books
+        "search_show_fewer_songs" -> R.string.search_show_fewer_songs
+        "search_show_fewer_titles" -> R.string.search_show_fewer_titles
+        "search_song_line" -> R.string.search_song_line
+        "search_your_audiobooks" -> R.string.search_your_audiobooks
+        "search_your_music" -> R.string.search_your_music
         "settings_language_library" -> R.string.settings_language_library
         "settings_language_library_blurb" -> R.string.settings_language_library_blurb
         "settings_language_main" -> R.string.settings_language_main
@@ -330,6 +354,9 @@ object ScreenTextIds {
         "sources_tab_installed" -> R.string.sources_tab_installed
         "sources_tab_updates" -> R.string.sources_tab_updates
         "sources_three_kinds" -> R.string.sources_three_kinds
+        "sources_tidy_keep_both" -> R.string.sources_tidy_keep_both
+        "sources_tidy_remove" -> R.string.sources_tidy_remove
+        "sources_tidy_text" -> R.string.sources_tidy_text
         "sources_two_kinds" -> R.string.sources_two_kinds
         "sources_updated" -> R.string.sources_updated
         "sources_voice" -> R.string.sources_voice
@@ -348,6 +375,25 @@ object ScreenTextIds {
         "library_imported" -> R.plurals.library_imported
         "library_scans_titles_only" -> R.plurals.library_scans_titles_only
         "library_titles_only_until_opened" -> R.plurals.library_titles_only_until_opened
+        "search_artist_line" -> R.plurals.search_artist_line
+        "search_book_matches" -> R.plurals.search_book_matches
+        "search_book_matches_by" -> R.plurals.search_book_matches_by
+        "search_show_all_albums" -> R.plurals.search_show_all_albums
+        "search_show_all_articles" -> R.plurals.search_show_all_articles
+        "search_show_all_artists" -> R.plurals.search_show_all_artists
+        "search_show_all_audiobooks" -> R.plurals.search_show_all_audiobooks
+        "search_show_all_books" -> R.plurals.search_show_all_books
+        "search_show_all_songs" -> R.plurals.search_show_all_songs
+        "search_show_all_titles" -> R.plurals.search_show_all_titles
+        "search_show_first_albums" -> R.plurals.search_show_first_albums
+        "search_show_first_articles" -> R.plurals.search_show_first_articles
+        "search_show_first_artists" -> R.plurals.search_show_first_artists
+        "search_show_first_audiobooks" -> R.plurals.search_show_first_audiobooks
+        "search_show_first_books" -> R.plurals.search_show_first_books
+        "search_show_first_songs" -> R.plurals.search_show_first_songs
+        "search_show_first_titles" -> R.plurals.search_show_first_titles
+        "search_title_only" -> R.plurals.search_title_only
+        "search_title_only_more" -> R.plurals.search_title_only_more
         "sources_adds_about" -> R.plurals.sources_adds_about
         "sources_adds_about_your" -> R.plurals.sources_adds_about_your
         "sources_languages_more" -> R.plurals.sources_languages_more

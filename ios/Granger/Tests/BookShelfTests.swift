@@ -117,11 +117,12 @@ final class BookShelfTests: XCTestCase {
         XCTAssertFalse(hit.passage.location.isEmpty, "the passage's chapter")
         XCTAssertTrue(hit.quote()?.contains(query) ?? false, "the sentence the row quotes")
 
-        let row = SearchModel.bestRow(hit)
-        XCTAssertTrue(row.title.contains("Pride"), row.title)
-        XCTAssertEqual(row.icon, "book.closed")
-        XCTAssertEqual(row.book?.href, hit.passage.location)
-        XCTAssertEqual(row.book?.quote, hit.quote())
+        XCTAssertTrue(SearchRows.title(hit.passage).contains("Pride"), hit.passage.sourceTitle)
+        XCTAssertEqual(SearchRows.icon(SearchLines.shared.matchKind(p: hit.passage)), "book.closed")
+        guard case let .bookAt(id, passage) = SearchRows.bestRoute(hit) else { return XCTFail("a book row opens the book at its passage") }
+        XCTAssertEqual(id, bookId)
+        XCTAssertEqual(passage.href, hit.passage.location)
+        XCTAssertEqual(passage.quote, hit.quote())
 
         // A PDF's passage is a page (the test PDF's pages each hold the same body line, so any page).
         if let pdf = ProcessInfo.processInfo.environment["GRANGER_TEST_PDF"], !pdf.isEmpty {
@@ -131,7 +132,8 @@ final class BookShelfTests: XCTestCase {
             let knots = try await core.library.bestResult(query: "a good knot holds when it must")
             let page = try XCTUnwrap(knots?.matches.first { $0.passage.sourceId == pdfId }, "the PDF's page")
             XCTAssertTrue(page.passage.location.hasPrefix("page/"), page.passage.location)
-            XCTAssertEqual(SearchModel.bestRow(page).book?.href, page.passage.location)
+            guard case let .bookAt(_, at) = SearchRows.bestRoute(page) else { return XCTFail("a PDF row opens at its page") }
+            XCTAssertEqual(at.href, page.passage.location)
         }
 
         LibraryGate.shared.languages = ["es"]

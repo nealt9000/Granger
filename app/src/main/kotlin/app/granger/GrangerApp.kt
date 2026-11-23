@@ -932,22 +932,14 @@ class AppContainer(context: Context) {
      * Wikipedia online's titles and full-text hits for a query, in each knowledge language (Plan O1 Task 7). Nothing when
      * the gate is shut or there's no signal.
      */
-    suspend fun searchOnline(query: String): Pair<List<app.granger.core.library.SearchHit>, List<app.granger.core.library.SearchHit>> =
-        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            val langs = knowledgeNow.value.filter { onlineSources.archive(it) != null }
-            if (langs.isEmpty() || !networkGate.open) return@withContext emptyList<app.granger.core.library.SearchHit>() to emptyList()
-            fun hit(lang: String, h: app.granger.core.online.WikimediaClient.Hit, snippet: Boolean) = app.granger.core.library.SearchHit(
-                app.granger.core.online.OnlineWikipediaArchive.packName(lang), if (langs.size > 1) "Wikipedia · ${java.util.Locale(lang).getDisplayLanguage(java.util.Locale(lang)).replaceFirstChar { it.uppercase() }}" else "Wikipedia",
-                h.key, h.title, snippet = if (snippet) h.excerpt else null,
-            )
-            kotlinx.coroutines.coroutineScope {
-                val scope = this
-                val titles = langs.map { l -> scope.async { wikimedia.titles(l, query, ONLINE_HITS).map { hit(l, it, false) } } }
-                val pages = langs.map { l -> scope.async { wikimedia.pages(l, query, ONLINE_HITS).map { hit(l, it, true) } } }
-                // Interleaved, so a second language's hits aren't all behind Show all (Plan O2 Task 9).
-                app.granger.online.interleave(titles.map { it.await() }) to app.granger.online.interleave(pages.map { it.await() })
-            }
+    suspend fun searchOnline(query: String): Pair<List<app.granger.core.library.SearchHit>, List<app.granger.core.library.SearchHit>> {
+        val langs = knowledgeNow.value.filter { onlineSources.archive(it) != null }
+        if (langs.isEmpty() || !networkGate.open) return emptyList<app.granger.core.library.SearchHit>() to emptyList()
+        // Shared with the iPhone since Plan I7 Task 7c.
+        return app.granger.search.OnlineSearchHits.search(wikimedia, langs, query) { lang ->
+            java.util.Locale(lang).getDisplayLanguage(java.util.Locale(lang)).replaceFirstChar { it.uppercase() }
         }
+    }
 
     /** Updates for kept articles (Plan O5 Task 4): checked once a day while online, when Outfitting shows. */
     val keptUpdates by lazy {
@@ -1166,7 +1158,7 @@ class AppContainer(context: Context) {
     }
     val homePrefs: HomePrefs = SharedHomePrefs(context)
     /** The tidy offers Keep both answered (Plan WF Decision 5), shared by Home and Downloads. */
-    val tidyDismissals = app.granger.sources.TidyDismissals.shared(context.getSharedPreferences("home", Context.MODE_PRIVATE))
+    val tidyDismissals = app.granger.sources.tidyDismissals(context.getSharedPreferences("home", Context.MODE_PRIVATE))
     val onboardingPrefs: OnboardingPrefs = SharedOnboardingPrefs(context)
 
     /** Where archive.org metadata sidecars live, whatever volume the download goes to. */
@@ -1740,7 +1732,6 @@ private const val READY_RECENT = 60
 private const val ROOM_KEEP = 60
 
 /** Wikipedia online's hits per group and language in Search (Plan O1 Task 7). */
-private const val ONLINE_HITS = 8
 
 /** A book's language as two letters: `en` from `en`, `eng` or `en-GB`; `es` from `spa`. */
 internal fun twoLetter(language: String): String? {

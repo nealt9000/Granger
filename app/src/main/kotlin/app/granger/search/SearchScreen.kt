@@ -77,16 +77,12 @@ import app.granger.UiText
 import app.granger.audiobooks.AudiobookCover
 import app.granger.core.books.PdfText
 import app.granger.core.library.AlbumSummary
-import app.granger.core.library.Albums
 import app.granger.core.library.ArtistHit
 import app.granger.core.library.Audiobook
 import app.granger.core.library.BookHit
 import app.granger.core.library.SearchHit
-import app.granger.core.library.SearchText
-import app.granger.core.text.Spellings
 import app.granger.core.library.Track
 import app.granger.music.AlbumCover
-import app.granger.music.MusicCatalog
 import app.granger.theme.MediaKind
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -251,14 +247,15 @@ fun SearchScreen(
                     val p = match.passage
                     ListItem(
                         modifier = Modifier.clickable { scope.launch { viewModel.recordSearch() }; onOpenMatch(match) }.testTag(SearchTags.BEST_ROW),
-                        leadingContent = { KindIcon(p.kind) },
+                        leadingContent = { KindIcon(SearchLines.matchKind(p)) },
                         headlineContent = { Text(p.sourceTitle, maxLines = 2, overflow = TextOverflow.Ellipsis) },
                         supportingContent = {
                             Column {
-                                val sentence = match.sentence?.let { p.text.substring(it).trim() } ?: p.text.take(220)
-                                val shown = remember(sentence, state.bestWords) { SearchRows.highlight("“$sentence”", state.bestWords) }
+                                val line = SearchLines.matchLine(match)
+                                val shown = remember(line, state.bestWords) { SearchRows.highlight(line, state.bestWords) }
                                 Text(shown, maxLines = 3, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
-                                Text(p.packTitle.ifBlank { p.meta.collection }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                // A media card's "Your music" / "Your audiobooks" in the phone's words (Plan I7 Task 7c).
+                                Text(SearchLines.matchSource(p).resolve(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         },
                     )
@@ -381,6 +378,9 @@ object SearchTags {
     const val FILTER = "search-filter"
     const val MEDICAL = "search-medical"
     const val DEFINE = "search-define"
+
+    /** A Best match's kind icon: `search-kind-article`, `-book`, `-music`, `-audiobook`. */
+    fun kind(kind: SearchLines.MatchKind) = "search-kind-${kind.name.lowercase()}"
 }
 
 private fun moreKey(group: SearchGroup) = "more:${group.name}"
@@ -410,137 +410,51 @@ private fun <T> LazyListScope.results(
     }
 }
 
-/** The second line of each music and audiobook result (the copy is fixed by plan M3), and the Show all row. */
+/**
+ * The second line of each music and audiobook result (the copy is fixed by plan M3), and the Show all row. Shared with
+ * the iPhone since Plan I7 Task 7c ([SearchLines]); this hands on, and draws the bold words as Compose wants them.
+ */
 internal object SearchRows {
     /** A title as words, to tell the same article in two places (online and on the phone). */
-    fun titleKey(title: String): String = title.lowercase().replace('_', ' ').replace(Regex("\\s+"), " ").trim()
+    fun titleKey(title: String): String = SearchLines.titleKey(title)
 
-    fun artist(a: ArtistHit): UiText = UiText.Plural(R.plurals.search_artist_line, a.albumCount, a.albumCount)
-    fun album(a: AlbumSummary): UiText = UiText.Res(R.string.search_album_line, app.granger.music.shownNameText(a.albumArtist))
-    fun song(t: Track): UiText = UiText.Res(
-        R.string.search_song_line,
-        MusicCatalog.trackArtistsOf(t).joinToString(", ").ifBlank { null }?.let { app.granger.music.shownNameText(it) }
-            ?: UiText.Res(R.string.music_unknown_artist),
-        app.granger.music.shownNameText(Albums.title(t)),
-    )
-    fun audiobook(b: Audiobook): UiText {
-        val author: UiText = b.author.ifBlank { null }?.let { UiText.Raw(it) } ?: UiText.Res(R.string.audiobooks_unknown_author)
-        return if (b.narrator.isBlank()) author else UiText.Res(R.string.search_audiobook_read_by, author, b.narrator)
-    }
+    fun artist(a: ArtistHit): UiText = SearchLines.artist(a)
+    fun album(a: AlbumSummary): UiText = SearchLines.album(a)
+    fun song(t: Track): UiText = SearchLines.song(t)
+    fun audiobook(b: Audiobook): UiText = SearchLines.audiobook(b)
 
     /** A [capped] group may hold more than were fetched, so it doesn't claim to show them all. */
-    fun showAll(group: SearchGroup, count: Int, capped: Boolean): UiText {
-        val id = if (capped) {
-            when (group) {
-                SearchGroup.TITLES -> R.plurals.search_show_first_titles
-                SearchGroup.ARTISTS -> R.plurals.search_show_first_artists
-                SearchGroup.ALBUMS -> R.plurals.search_show_first_albums
-                SearchGroup.SONGS -> R.plurals.search_show_first_songs
-                SearchGroup.AUDIOBOOKS -> R.plurals.search_show_first_audiobooks
-                SearchGroup.FULL_TEXT, SearchGroup.BEST -> R.plurals.search_show_first_articles
-                SearchGroup.BOOKS -> R.plurals.search_show_first_books
-            }
-        } else {
-            when (group) {
-                SearchGroup.TITLES -> R.plurals.search_show_all_titles
-                SearchGroup.ARTISTS -> R.plurals.search_show_all_artists
-                SearchGroup.ALBUMS -> R.plurals.search_show_all_albums
-                SearchGroup.SONGS -> R.plurals.search_show_all_songs
-                SearchGroup.AUDIOBOOKS -> R.plurals.search_show_all_audiobooks
-                SearchGroup.FULL_TEXT, SearchGroup.BEST -> R.plurals.search_show_all_articles
-                SearchGroup.BOOKS -> R.plurals.search_show_all_books
-            }
-        }
-        return UiText.Plural(id, count, count)
-    }
+    fun showAll(group: SearchGroup, count: Int, capped: Boolean): UiText = SearchLines.showAll(group, count, capped)
 
-    fun showFewer(group: SearchGroup): UiText = UiText.Res(
-        when (group) {
-            SearchGroup.TITLES -> R.string.search_show_fewer_titles
-            SearchGroup.ARTISTS -> R.string.search_show_fewer_artists
-            SearchGroup.ALBUMS -> R.string.search_show_fewer_albums
-            SearchGroup.SONGS -> R.string.search_show_fewer_songs
-            SearchGroup.AUDIOBOOKS -> R.string.search_show_fewer_audiobooks
-            SearchGroup.FULL_TEXT, SearchGroup.BEST -> R.string.search_show_fewer_articles
-            SearchGroup.BOOKS -> R.string.search_show_fewer_books
-        },
-    )
+    fun showFewer(group: SearchGroup): UiText = SearchLines.showFewer(group)
+
+    /** A book pack's text hit as a book's ([SearchLines.bookHitOf]). */
+    fun bookHitOf(hit: SearchHit, query: String): BookHit = SearchLines.bookHitOf(hit, query)
+
+    /** A book result's line under its title ([SearchLines.bookLine]). */
+    fun bookLine(hit: BookHit): UiText? = SearchLines.bookLine(hit)
+
+    /** Under the results: the packs searched by title only ([SearchLines.titleOnly]). */
+    fun titleOnly(titles: List<String>): UiText? = SearchLines.titleOnly(titles)
+
+    /** Whether an article's [snippet] shows the match ([SearchLines.snippetMatches]). */
+    fun snippetMatches(snippet: String, query: String): Boolean = SearchLines.snippetMatches(snippet, query)
 
     /**
-     * A book result's line under its title: the author, and "3 matches" when the book matched in more than one place;
-     * null when it has neither.
-     */
-    /**
-     * A book pack's text hit as a book's ([SearchViewModel], Plan KB2 Task 4.5): no place of its own (an empty href opens
-     * the book where the reader left it), and its snippet only when it shows the query.
-     */
-    fun bookHitOf(hit: app.granger.core.library.SearchHit, query: String): BookHit = BookHit(
-        bookId = hit.packId, bookTitle = hit.title, author = hit.author, href = "", progression = 0.0,
-        snippet = hit.snippet?.takeIf { snippetMatches(it, query) }.orEmpty(),
-    )
-
-    fun bookLine(hit: BookHit): UiText? = when {
-        hit.matches > 1 && hit.author.isNotBlank() -> UiText.Plural(R.plurals.search_book_matches_by, hit.matches, hit.matches, hit.author)
-        hit.matches > 1 -> UiText.Plural(R.plurals.search_book_matches, hit.matches, hit.matches)
-        hit.author.isNotBlank() -> UiText.Raw(hit.author)
-        else -> null
-    }
-
-    /**
-     * Under the results: the packs searched by title only (no full-text index), three named and the rest counted; null
-     * when there are none.
-     */
-    fun titleOnly(titles: List<String>): UiText? {
-        if (titles.isEmpty()) return null
-        val named = titles.take(3).joinToString(", ")
-        val rest = titles.size - 3
-        return if (rest > 0) UiText.Plural(R.plurals.search_title_only_more, rest, named, rest)
-        else UiText.Plural(R.plurals.search_title_only, titles.size, named)
-    }
-
-    /**
-     * Whether an article's [snippet] shows the match, so it's worth showing: it holds one of [query]'s words, case and
-     * accents aside, or a libkiwix `<b>` mark (which also marks a stemmed match, "apocalyptic" for "apocalypse"). A
-     * snippet of page chrome (category footers, menus, profile stats) has neither, and the row shows title and pack only
-     * (Plan U3b Decision 10).
-     */
-    fun snippetMatches(snippet: String, query: String): Boolean {
-        if (BOLD.containsMatchIn(snippet)) return true
-        val text = SearchText.fold(plainText(snippet))
-        return SearchText.words(query).any { it in text }
-    }
-
-    /**
-     * [sentence] with the words that match [keywords] in bold (Plan SQ Task 5.1): a word matches when, case and accents
-     * aside, it is a keyword's word or begins with one of three letters or more ("burns" for "burn").
+     * [sentence] with the words that match [keywords] in bold (Plan SQ Task 5.1, [SearchLines.highlights]): a word matches
+     * when, case and accents aside, it is a keyword's word or begins with one of three letters or more ("burns" for "burn").
      */
     fun highlight(sentence: String, keywords: List<String>): AnnotatedString {
-        // Either spelling of a word is bold ("gray" in the text for "grey" searched).
-        val wanted = keywords.flatMap { SearchText.words(it) }.flatMap { Spellings.variants(it) }.toSet()
-        if (wanted.isEmpty()) return AnnotatedString(sentence)
-        // Folded a character at a time, so offsets in the folded text are offsets in the sentence.
-        val folded = String(CharArray(sentence.length) { i -> SearchText.fold(sentence[i].toString()).firstOrNull() ?: sentence[i] })
+        val bold = SearchLines.highlights(sentence, keywords)
+        if (bold.isEmpty()) return AnnotatedString(sentence)
         return buildAnnotatedString {
             append(sentence)
-            WORD.findAll(folded).forEach { m ->
-                val w = m.value
-                if (wanted.any { it == w || (it.length >= 3 && w.startsWith(it)) }) {
-                    addStyle(SpanStyle(fontWeight = FontWeight.SemiBold), m.range.first, m.range.last + 1)
-                }
-            }
+            bold.forEach { r -> addStyle(SpanStyle(fontWeight = FontWeight.SemiBold), r.first, r.last + 1) }
         }
     }
 
     /** The Define card's text from a dictionary entry (shared since Plan I7 Task 7b: [app.granger.search.SearchDefine.text]). */
     fun defineText(entry: String): String = SearchDefine.text(entry)
-
-    private val WORD = Regex("[\\p{L}\\p{N}]+")
-    private val BOLD = Regex("<b>\\s*[^<\\s]", RegexOption.IGNORE_CASE)
-    private val TAG = Regex("<[^>]*>")
-    private val ENTITIES = mapOf("&amp;" to "&", "&lt;" to "<", "&gt;" to ">", "&quot;" to "\"", "&#39;" to "'", "&nbsp;" to " ")
-
-    private fun plainText(html: String): String =
-        ENTITIES.entries.fold(TAG.replace(html, " ")) { text, (entity, char) -> text.replace(entity, char) }
 }
 
 @Composable
@@ -639,14 +553,23 @@ private fun MedicalBanner() {
     )
 }
 
-/** A Best match's kind: an article or a book, read out by TalkBack with the row. */
+/**
+ * A Best match's kind: an article, a book, or (Plan I7 Task 7c) an album or audiobook's media card with Listen's
+ * headphones; read out by TalkBack with the row.
+ */
 @Composable
-private fun KindIcon(kind: app.granger.core.research.SourceKind) {
-    val book = kind == app.granger.core.research.SourceKind.BOOK
+private fun KindIcon(kind: SearchLines.MatchKind) {
     Icon(
-        painterResource(if (book) R.drawable.ic_menu_book else R.drawable.ic_article),
-        contentDescription = stringResource(if (book) R.string.search_kind_book else R.string.search_kind_article),
+        painterResource(
+            when (kind) {
+                SearchLines.MatchKind.BOOK -> R.drawable.ic_menu_book
+                SearchLines.MatchKind.MUSIC, SearchLines.MatchKind.AUDIOBOOK -> R.drawable.ic_headphones
+                SearchLines.MatchKind.ARTICLE -> R.drawable.ic_article
+            },
+        ),
+        contentDescription = SearchLines.kindLabel(kind).resolve(),
         tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.testTag(SearchTags.kind(kind)),
     )
 }
 

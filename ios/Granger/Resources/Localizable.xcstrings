@@ -2445,6 +2445,16 @@
         }
       }
     },
+    "Also in %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "También en %@"
+          }
+        }
+      }
+    },
     "An email from your mail app · %lld crash reports kept on this phone" : {
       "localizations" : {
         "en" : {
@@ -5393,6 +5403,16 @@
         }
       }
     },
+    "Looking through your library…" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscando en tu biblioteca…"
+          }
+        }
+      }
+    },
     "Make all searchable?" : {
       "localizations" : {
         "es" : {
@@ -5611,6 +5631,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Como la app"
+          }
+        }
+      }
+    },
+    "Media" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Multimedia"
           }
         }
       }
@@ -6501,16 +6531,6 @@
         }
       }
     },
-    "Nothing on this phone for that. Online results appear when you're connected." : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No hay nada sobre eso en este teléfono. Los resultados en línea aparecen cuando hay conexión."
-          }
-        }
-      }
-    },
     "Nothing on this phone stands near it yet." : {
       "localizations" : {
         "es" : {
@@ -6771,6 +6791,16 @@
         }
       }
     },
+    "Online results appear when you're connected." : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los resultados en línea aparecen cuando hay conexión."
+          }
+        }
+      }
+    },
     "Open" : {
       "localizations" : {
         "es" : {
@@ -6837,6 +6867,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abrir artículo"
+          }
+        }
+      }
+    },
+    "Open in %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir en %@"
           }
         }
       }
@@ -8446,138 +8486,6 @@
         }
       }
     },
-    "Show all %lld article matches" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Show all %lld article match"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Show all %lld article matches"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Mostrar las %lld coincidencias en artículos"
-                }
-              },
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Mostrar %lld coincidencia en artículos"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Mostrar las %lld coincidencias en artículos"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "Show all %lld best matches" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Show all %lld best match"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Show all %lld best matches"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Ver %lld resultado principal"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Ver los %lld resultados principales"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "Show all %lld titles" : {
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Show all %lld title"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Show all %lld titles"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Mostrar los %lld títulos"
-                }
-              },
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Mostrar %lld título"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Mostrar los %lld títulos"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "Show as grid" : {
       "localizations" : {
         "es" : {
@@ -8594,36 +8502,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ver como lista"
-          }
-        }
-      }
-    },
-    "Show fewer article matches" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar menos coincidencias en artículos"
-          }
-        }
-      }
-    },
-    "Show fewer best matches" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ver menos resultados principales"
-          }
-        }
-      }
-    },
-    "Show fewer titles" : {
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar menos títulos"
           }
         }
       }

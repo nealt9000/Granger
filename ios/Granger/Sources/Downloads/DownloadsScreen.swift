@@ -7,6 +7,8 @@ import SwiftUI
 final class DownloadsHolder {
     private(set) var summary: QueueSummary?
     private(set) var records: [DownloadRecord] = []
+    /// A bigger slice of a set is in: the offers to remove the smaller (Plan WF Decision 5, Plan I7 Task 7c).
+    private(set) var tidy: [TidyOffer] = []
     private var watching: [Task<Void, Never>] = []
 
     @MainActor
@@ -15,9 +17,42 @@ final class DownloadsHolder {
         let library = core.library
         watching.append(Task { @MainActor [weak self] in for await s in library.queueSummary { self?.summary = s } })
         watching.append(Task { @MainActor [weak self] in for await r in library.downloads.records { self?.records = r } })
+        watching.append(Task { @MainActor [weak self] in for await t in library.tidyOffers { self?.tidy = t } })
     }
 
     deinit { watching.forEach { $0.cancel() } }
+}
+
+/// One tidy offer (Android's `TidyOfferCard`, Plan WF Decision 5): "Top 1 million is in. Remove Best 50,000 (2.7 GB)? Your
+/// places and bookmarks move across.", then Keep both and Remove. Nothing is removed without the Remove. On Home and in
+/// Downloads, as on Android.
+struct TidyOfferCard: View {
+    let offer: TidyOffer
+    @Environment(\.core) private var core
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(offer.text.words).font(.subheadline).foregroundStyle(palette.onSurface)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Spacer()
+                Button(offer.keepLabel.words) { core?.library.keepBoth(offer: offer) }
+                    .accessibilityIdentifier("tidy-keep")
+                Button(offer.removeLabel.words) {
+                    guard let library = core?.library else { return }
+                    Task { try? await library.removeSmaller(offer: offer) }
+                }
+                .accessibilityIdentifier("tidy-remove")
+            }
+            .buttonStyle(.borderless)
+            .font(Spectral.medium(17))
+            .foregroundStyle(palette.primary)
+        }
+        .padding(.vertical, 8)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("tidy-offer")
+    }
 }
 
 /// Plain words for the queue's figures, as Android's QueueText: rounded so they don't jump about.
@@ -84,6 +119,9 @@ struct DownloadsScreen: View {
 
     var body: some View {
         List {
+            ForEach(holder.tidy, id: \.key) { offer in
+                TidyOfferCard(offer: offer).listRowBackground(palette.background)
+            }
             if let s = holder.summary, s.isActive || !s.stopped.isEmpty {
                 header(s)
                 if let current = s.current {

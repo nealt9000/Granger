@@ -4,7 +4,9 @@ import android.os.Looper
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import app.granger.FakeReadingSessions
@@ -69,5 +71,35 @@ class SearchBestMatchesTest {
         list.performScrollToNode(hasText("Burn 2"))
         compose.onNodeWithText("Burn 2").performClick()
         assertThat(opened.single().passage.location).isEqualTo("Burn_2")
+    }
+
+    /** Plan I7 Task 7c: an album's and an audiobook's media cards, each with Listen's headphones and its place in words. */
+    private fun showMediaCards() {
+        val album = Passage(SourceKind.MEDIA, "album:holst|the planets", "The Planets", packTitle = "Your music", location = "", text = "Album: The Planets")
+        val book = Passage(SourceKind.MEDIA, "librivox-1", "The Jungle Book", packTitle = "Your audiobooks", location = "", text = "Audiobook: The Jungle Book")
+        val vm = SearchViewModel(
+            NoTitles, FakeReadingSessions(), "planets",
+            best = BestMatchSearch { kotlinx.coroutines.flow.flowOf(BestMatches.Result(listOf(BestMatches.Match(album, null), BestMatches.Match(book, null)), listOf("planets"), byMeaning = false, final = true)) },
+        )
+        compose.setContent {
+            SearchScreen(vm, onOpenTab = {}, onOpenBook = { _, _ -> }, onOpenAlbum = {}, onOpenArtist = {}, onOpenAudiobook = {}, onPlaySong = {}, onBack = {})
+        }
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(SearchViewModel.BEST_PAUSE_MS + 100))
+        compose.waitForIdle()
+    }
+
+    @Test fun mediaCardsHaveTheHeadphonesAndSayWhereTheyAre() {
+        showMediaCards()
+        compose.onNodeWithText("Your music").assertExists()
+        compose.onNodeWithText("Your audiobooks").assertExists()
+        compose.onNodeWithTag(SearchTags.kind(SearchLines.MatchKind.MUSIC), useUnmergedTree = true).assertContentDescriptionEquals("Music")
+        compose.onNodeWithTag(SearchTags.kind(SearchLines.MatchKind.AUDIOBOOK), useUnmergedTree = true).assertContentDescriptionEquals("Audiobook")
+    }
+
+    @Test @Config(qualifiers = "es") fun mediaCardsSayWhereTheyAreInSpanish() {
+        showMediaCards()
+        compose.onNodeWithText("Tu música").assertExists()
+        compose.onNodeWithText("Tus audiolibros").assertExists()
+        compose.onNodeWithText("Your music").assertDoesNotExist()
     }
 }

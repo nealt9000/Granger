@@ -91,7 +91,6 @@
     "Not enough room for %@.": "No hay espacio suficiente para %@.",
     "Not enough room: %@ needs %@.": "No hay espacio suficiente: %1$@ necesita %2$@.",
     "Nothing downloading. Get more adds packs, and they download here one at a time.": "No se está descargando nada. Conseguir más agrega paquetes, que se descargan aquí de uno en uno.",
-    "Nothing on this phone for that. Online results appear when you're connected.": "No hay nada sobre eso en este teléfono. Los resultados en línea aparecen cuando hay conexión.",
     "Open Listen": "Abrir Escuchar",
     "Opening…": "Abriendo…",
     "PDF: %@": "PDF: %@",
@@ -115,11 +114,6 @@
     "Search index · %@": "Índice de búsqueda · %@",
     "Seen": "Visto",
     "Sets": "Conjuntos",
-    "Show all %lld best matches": {
-      "en": {"one": "Show all %lld best match", "other": "Show all %lld best matches"},
-      "es": {"one": "Ver %lld resultado principal", "other": "Ver los %lld resultados principales"}
-    },
-    "Show fewer best matches": "Ver menos resultados principales",
     "Sort": "Ordenar",
     "Stopped: %@": "Detenida: %@",
     "Story": "Historia",

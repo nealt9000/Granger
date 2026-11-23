@@ -181,6 +181,64 @@ final class BookReaderTests: XCTestCase {
         shot(app, "best-match-book-passage")
     }
 
+    /// Plan I7 Task 7c: Search's Books group lists the hits inside books (Android's: one row per book, its author and how
+    /// many places matched, the snippet); tapped, the book opens at the hit.
+    func testBooksGroupOpensTheBookAtItsHit() throws {
+        let epub = try env("GRANGER_TEST_EPUB")
+        let app = launch(epub)
+        XCTAssertTrue(app.staticTexts["book-progress"].waitForExistence(timeout: 30), "the book opens (imported and indexed)")
+        let row = app.buttons.matching(identifier: "search-books-hit").firstMatch
+        searchFromBook(app, "In vain have I struggled", until: row)
+        XCTAssertTrue(row.exists, "a hit inside the book under Books")
+        XCTAssertTrue(app.reveal(row))
+        XCTAssertTrue(app.staticTexts["Books"].exists, "the Books group")
+        XCTAssertTrue(row.label.contains("Pride and Prejudice"), row.label)
+        XCTAssertTrue(row.label.contains("struggled"), "the snippet: \(row.label)")
+        XCTAssertTrue(app.searchFields.firstMatch.value as? String == "In vain have I struggled", "the words as typed")
+        shot(app, "search-books-group")
+        row.tap()
+        XCTAssertTrue(app.staticTexts["book-progress"].waitForExistence(timeout: 30), "the book opens")
+        showBars(app)
+        waitForProgress(app, containing: "Chapter XXXIV", timeout: 20)
+        shot(app, "search-books-opened")
+    }
+
+    /// Plan I7 Task 7c: a typed search whose words find nothing offers the library name it most likely meant (Android's
+    /// typed "Did you mean"); tapped, that name is searched.
+    func testTypedSearchThatFindsNothingOffersDidYouMean() throws {
+        let epub = try env("GRANGER_TEST_EPUB")
+        let app = launch(epub)
+        XCTAssertTrue(app.staticTexts["book-progress"].waitForExistence(timeout: 30), "the book opens (imported and indexed)")
+        let offer = app.buttons["search-did-you-mean"]
+        searchFromBook(app, "Pryde and Prejudise", until: offer)
+        XCTAssertTrue(offer.exists, "Did you mean")
+        XCTAssertEqual(offer.label, "Did you mean Pride and Prejudice?")
+        XCTAssertTrue(app.staticTexts["Nothing in your library for that. Try fewer words."].exists, "the empty state under it")
+        shot(app, "search-did-you-mean")
+        offer.tap()
+        XCTAssertTrue(app.reveal(app.staticTexts["Titles"], timeout: 20), "the name searched finds the book")
+        XCTAssertEqual(app.searchFields.firstMatch.value as? String, "Pride and Prejudice")
+        XCTAssertFalse(offer.exists, "the offer goes")
+        shot(app, "search-did-you-mean-taken")
+    }
+
+    /// From the open book: Search, [query] typed until [element] shows (the words are indexed just after the import).
+    private func searchFromBook(_ app: XCUIApplication, _ query: String, until element: XCUIElement) {
+        let tab = app.tabBars.buttons["Search"]
+        if !tab.isHittable { showBars(app) }
+        if !tab.isHittable { app.navigationBars.buttons.firstMatch.tap() }
+        XCTAssertTrue(tab.waitForExistence(timeout: 5))
+        tab.tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        for attempt in 0..<4 {
+            field.tap()
+            if attempt > 0, let typed = field.value as? String { field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: typed.count)) }
+            field.typeText(query)
+            if element.waitForExistence(timeout: 20) { break }
+        }
+    }
+
     /// From the open book: Search, [query], and the first book row in Best matches (titled with [expecting]) tapped.
     /// The book's words are indexed just after its import, so the search is tried again until they are.
     private func openBestMatch(_ app: XCUIApplication, query: String, expecting title: String) {

@@ -32,6 +32,9 @@ class IosSystem(private val library: IosLibrary, private val voice: IosVoice, pr
         { res: UiText.Res -> text(res.key) },
     )
 
+    /** Plays a song within its album, as Android's Search plays a song result (`SongPlayer`). */
+    suspend fun playSong(track: app.granger.core.library.Track) = SongPlayer(library.media, voice.hub).play(track)
+
     /** The widget's model now: the active player, else the saved one play resumes, else "Nothing playing". */
     fun widgetModel(ui: PlayerUi, saved: SavedModes): WidgetModel = WidgetModel.of(ui, saved)
 

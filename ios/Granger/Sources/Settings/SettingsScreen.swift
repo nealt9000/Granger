@@ -125,7 +125,8 @@ struct SettingsScreen: View {
                 Button("Clear what you've read", role: .destructive) { recent.clear() }
                     .disabled(recent.entries.isEmpty)
                 Button(clearedSearches ? "Recent searches cleared" : "Clear recent searches", role: .destructive) {
-                    SearchModel().clearRecent()
+                    // Recent searches live in the library database, as Android's (Plan I7 Task 7c).
+                    Task { try? await core?.library.clearRecentSearches() }
                     clearedSearches = true
                 }
                 .disabled(clearedSearches)

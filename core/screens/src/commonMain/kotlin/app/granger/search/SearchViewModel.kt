@@ -1,19 +1,15 @@
 package app.granger.search
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.granger.BookTarget
 import app.granger.core.library.BookHit
 import app.granger.core.library.BookIndex
-import app.granger.core.library.LibrarySearch
 import app.granger.core.library.MediaIndex
 import app.granger.core.library.MediaResults
+import app.granger.core.library.PackSearch
 import app.granger.core.library.ReadingSessions
 import app.granger.core.library.SearchHit
-import app.granger.core.library.ZimLibrarySearch
+import app.granger.core.library.TitleSearch
 import app.granger.core.text.SpokenTitleMatcher
 import app.granger.voiceinput.Dictation
 import app.granger.voiceinput.VoiceInput
@@ -61,12 +57,12 @@ fun interface OnlineSearch { suspend fun search(query: String): Pair<List<Search
  */
 enum class SearchGroup(val preview: Int, val fetch: Int) {
     BEST(3, app.granger.core.research.BestMatches.LIMIT),
-    TITLES(8, ZimLibrarySearch.TITLE_LIMIT),
+    TITLES(8, PackSearch.TITLE_LIMIT),
     ARTISTS(3, MEDIA_FETCH),
     ALBUMS(5, MEDIA_FETCH),
     SONGS(5, MEDIA_FETCH),
     AUDIOBOOKS(5, MEDIA_FETCH),
-    FULL_TEXT(8, ZimLibrarySearch.FULL_TEXT_LIMIT),
+    FULL_TEXT(8, PackSearch.FULL_TEXT_LIMIT),
     BOOKS(8, BookIndex.LIMIT),
 }
 
@@ -80,13 +76,26 @@ suspend fun MediaIndex.searchForGroups(query: String): MediaResults = search(
 )
 
 /**
+ * Where the search field's text lives, written synchronously on every keystroke: Android keeps it in Compose state
+ * (`ComposeSearchFieldText`, so the field never reads a value that lags the keyboard), the iPhone and tests a plain value.
+ */
+interface SearchFieldText {
+    var value: String
+}
+
+/** The search field's text as a plain value (the iPhone's field keeps its own and tells the model). */
+class PlainSearchFieldText(override var value: String = "") : SearchFieldText
+
+/**
  * Search over titles (books on the shelf among them), then music and audiobooks, then books, then article text (shown
  * as Titles, Articles, Books, Music, Audiobooks). [initialQuery] (for example text selected in the reader, or a
  * recent search) is searched straight away; opening a hit remembers the query and opens a rail tab.
+ *
+ * Shared with the iPhone since Plan I7 Task 7c (moved from the app; Android's call sites and tests unchanged).
  */
 @OptIn(FlowPreview::class)
 class SearchViewModel(
-    private val search: LibrarySearch,
+    private val search: TitleSearch,
     private val sessions: ReadingSessions,
     initialQuery: String = "",
     private val media: MediaSearch = MediaSearch { MediaResults() },
@@ -104,6 +113,8 @@ class SearchViewModel(
     private val online: OnlineSearch? = null,
     /** Whether Granger can reach the internet (Plan O3's Reach); coming back online searches the query again. */
     private val reachOnline: Flow<Boolean> = emptyFlow(),
+    /** Where the field's text is kept; a plain value when null (Android passes its Compose state). */
+    fieldText: SearchFieldText? = null,
 ) : ViewModel() {
     data class State(
         val query: String = "",
@@ -115,7 +126,7 @@ class SearchViewModel(
         /** Hits inside books, one per book: its first (best) hit, which says how many places [BookHit.matches]. */
         val books: List<BookHit> = emptyList(),
         val searching: Boolean = false,
-        /** Packs whose text isn't searched, only their titles ([LibrarySearch.titleOnly]); said under the results. */
+        /** Packs whose text isn't searched, only their titles ([TitleSearch.titleOnly]); said under the results. */
         val titleOnly: List<String> = emptyList(),
         /** Recent searches, newest first; shown while the field is empty. */
         val recent: List<String> = emptyList(),
@@ -149,17 +160,17 @@ class SearchViewModel(
     ) {
         /** The phone's titles, in words, so an online hit for an article already listed is dropped (the local copy wins). */
         private val localWords: Set<String>
-            get() = (titles.flatMap { listOf(it) + it.also } + fullText).mapTo(HashSet()) { SearchRows.titleKey(it.title) }
+            get() = (titles.flatMap { listOf(it) + it.also } + fullText).mapTo(HashSet()) { SearchLines.titleKey(it.title) }
 
         /** Online titles not already listed. */
         val onlineTitlesShown: List<SearchHit>
-            get() = localWords.let { seen -> onlineTitles.filter { SearchRows.titleKey(it.title) !in seen } }
+            get() = localWords.let { seen -> onlineTitles.filter { SearchLines.titleKey(it.title) !in seen } }
 
         /** Articles: the phone's full-text hits, then Wikipedia online's not already listed above. */
         val articles: List<SearchHit>
             get() {
-                val seen = localWords + onlineTitles.map { SearchRows.titleKey(it.title) }
-                return fullText + onlinePages.filter { SearchRows.titleKey(it.title) !in seen }
+                val seen = localWords + onlineTitles.map { SearchLines.titleKey(it.title) }
+                return fullText + onlinePages.filter { SearchLines.titleKey(it.title) !in seen }
             }
 
         // By kind is shared (core:screens SearchKinds, Plan I5 Task 2).
@@ -211,7 +222,7 @@ class SearchViewModel(
 
     private val query = MutableStateFlow(Request(initialQuery.trim()))
 
-    /** The running search for titles a slip away ([LibrarySearch.nearTitles]); a new query cancels it. */
+    /** The running search for titles a slip away ([TitleSearch.nearTitles]); a new query cancels it. */
     private var nearJob: kotlinx.coroutines.Job? = null
     /** Wikipedia online's search for the current query (Plan O1 Task 7). */
     private var onlineJob: kotlinx.coroutines.Job? = null
@@ -229,8 +240,10 @@ class SearchViewModel(
      * value from a flow: a value that lags a dispatch behind the keyboard is pushed back into the field and scrambles
      * fast typing (seen on the Pixel 6, 2026-10-17).
      */
-    var searchText by mutableStateOf(initialQuery)
-        private set
+    private val textHolder: SearchFieldText = (fieldText ?: PlainSearchFieldText()).also { it.value = initialQuery }
+
+    /** The field's text as typed (not trimmed). */
+    val searchText: String get() = textHolder.value
 
     /**
      * The library's names, read from the first spoken search (or typed search that found nothing) on, so they are ready
@@ -382,8 +395,8 @@ class SearchViewModel(
                 _state.update {
                     it.copy(
                         fullText = articleText
-                            .map { hit -> hit.copy(snippet = hit.snippet?.takeIf { s -> SearchRows.snippetMatches(s, q) }) },
-                        books = (it.books + bookText.map { hit -> SearchRows.bookHitOf(hit, q) }).distinctBy { hit -> hit.bookId },
+                            .map { hit -> hit.copy(snippet = hit.snippet?.takeIf { s -> SearchLines.snippetMatches(s, q) }) },
+                        books = (it.books + bookText.map { hit -> SearchLines.bookHitOf(hit, q) }).distinctBy { hit -> hit.bookId },
                         searching = false,
                         titleOnly = titleOnly,
                         capped = it.capped.cap(SearchGroup.FULL_TEXT, allText.size),
@@ -415,7 +428,7 @@ class SearchViewModel(
     }
 
     private fun setQuery(text: String) {
-        searchText = text
+        textHolder.value = text
         query.update { it.copy(text = text.trim()) }
         _state.update { it.copy(query = text) }
     }
@@ -488,10 +501,13 @@ class SearchViewModel(
         return sessions.openTab(hit.packId, hit.path, hit.title)
     }
 
-    /** Remembers the current query, opens (or reuses) the book's tab, and returns it with the place to open at. */
-    suspend fun openBook(hit: BookHit): Pair<Long, BookTarget> {
+    /**
+     * Remembers the current query, opens (or reuses) the book's tab and returns its id; the place to open at is the hit's
+     * (Android's `openBook` adds it).
+     */
+    suspend fun openBookTab(hit: BookHit): Long {
         sessions.recordSearch(query.value.text)
-        return sessions.openTab(hit.bookId, "", hit.bookTitle) to BookTarget(hit.href, hit.progression, hit.quote)
+        return sessions.openTab(hit.bookId, "", hit.bookTitle)
     }
 
     /** These groups, with [group] added when its [count] reaches its fetch or its search said it had [more]. */

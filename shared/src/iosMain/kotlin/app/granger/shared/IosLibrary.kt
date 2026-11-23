@@ -36,6 +36,9 @@ import app.granger.core.text.sha1
 import kotlinx.io.buffered
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import app.granger.search.searchForGroups
 
 /**
  * The iPhone's library (Plan I3 Task 6), wired as `GrangerApp` wires Android's: the library database, Saved for now,
@@ -224,6 +227,7 @@ class IosLibrary(
     /** Swift tells the queue the network changed (NWPathMonitor). */
     fun networkChanged() {
         unmeteredNow.value = unmetered()
+        reach.value = canFetchOnline()
         scheduler.ensure(false)
     }
 
@@ -486,17 +490,7 @@ class IosLibrary(
         val result = runCatching { bestMatches.find(query) }.getOrNull() ?: return null
         // Each query's meaning step timed, so a slow phone drops to keywords alone (Android's EmbedSpeed).
         if (result.byMeaning && result.embedMs + result.denseMs > 0) meaning.speed.record(result.embedMs + result.denseMs)
-        val allowed = languages().toSet()
-        val packLanguages = packs.associate { it.id to it.language }
-        val bookLanguages = HashMap<String, String?>()
-        suspend fun allowedSource(p: app.granger.core.research.Passage): Boolean = when (p.kind) {
-            app.granger.core.research.SourceKind.ARTICLE ->
-                packLanguages[p.sourceId]?.let { l -> allowed.any { app.granger.core.library.TitleMatch.inLanguage(l, it) } } ?: true
-            app.granger.core.research.SourceKind.BOOK ->
-                bookLanguages.getOrPut(p.sourceId) { bookshelf.book(p.sourceId)?.language?.let(::twoLetterLanguage) }?.let { it in allowed } ?: true
-            else -> true
-        }
-        return result.copy(matches = result.matches.filter { allowedSource(it.passage) })
+        return result.copy(matches = inLibraryLanguages(result.matches, packs))
     }
 
     /** Loads the embedder ahead of the first query (Search opened); nothing without search by meaning. */
@@ -549,6 +543,136 @@ class IosLibrary(
             slices = packSlices, languages = { languages().toSet() }, bookIndex = bookIndex,
         )
     }
+
+    // ---- Search (Plan I7 Task 7c): Android's SearchViewModel, now shared, wired as Android's GrangerNavHost wires it.
+
+    /** The library's names for "Did you mean" (Android's `spokenTitles`, over the same table). */
+    private val spokenTitles by lazy { app.granger.voiceinput.SpokenTitles(database.libraryNameDao().observe(), scope) }
+
+    /** Tests (`-debugBestDelay <ms>`): Best matches wait this long first, so "Looking…" can be seen; 0 in use. */
+    var debugBestDelayMs: Long = 0
+
+    /** Whether Wikipedia online can be reached now (Android's Reach): coming back online searches the query again. */
+    private val reach = MutableStateFlow(true)
+
+    /** Swift says the gate (Local only, the privacy line) or the network moved. */
+    fun reachChanged() {
+        reach.value = canFetchOnline()
+    }
+
+    /**
+     * Search's model, Android's: titles, near titles, music and audiobooks, books, article text, Best matches (in two
+     * steps), the Define card, Wikipedia online in each knowledge language, By kind, "Did you mean" after a typed search
+     * that found nothing, the medical banner, recent searches. No mic yet (I8). [initial] is searched at once.
+     */
+    fun searchModel(initial: String): OwnedViewModel<app.granger.search.SearchViewModel> {
+        reach.value = canFetchOnline()
+        return OwnedViewModel {
+            app.granger.search.SearchViewModel(
+                packSearch, sessions, initial,
+                media = app.granger.search.MediaSearch { q -> mediaIndex.searchForGroups(q) },
+                spokenNames = spokenTitles.names,
+                best = object : app.granger.search.BestMatchSearch {
+                    override fun stream(query: String) = bestStream(query)
+                    override suspend fun warm() = warmBest()
+                },
+                define = app.granger.search.WordEntry { word -> wordEntry(word) },
+                online = app.granger.search.OnlineSearch { q -> searchOnline(q) },
+                reachOnline = reach,
+            )
+        }
+    }
+
+    /** Wikipedia online's titles and pages for [query] in each knowledge language (Android's `searchOnline`); none offline. */
+    suspend fun searchOnline(query: String): Pair<List<app.granger.core.library.SearchHit>, List<app.granger.core.library.SearchHit>> {
+        if (!canFetchOnline()) return emptyList<app.granger.core.library.SearchHit>() to emptyList()
+        return app.granger.search.OnlineSearchHits.search(client, languages(), query) { lang ->
+            val locale = platform.Foundation.NSLocale(localeIdentifier = lang)
+            (locale.displayNameForKey(platform.Foundation.NSLocaleLanguageCode, lang) ?: lang).replaceFirstChar { it.uppercase() }
+        }
+    }
+
+    /**
+     * Best matches in up to two steps, as Android's `bestStream`: the meaning hits first, then the merged ranking, only in
+     * the library's languages, each query's meaning step timed. One empty final result with no pack, book or media.
+     */
+    fun bestStream(query: String): kotlinx.coroutines.flow.Flow<app.granger.core.research.BestMatches.Result> = kotlinx.coroutines.flow.flow {
+        if (debugBestDelayMs > 0) kotlinx.coroutines.delay(debugBestDelayMs)
+        val packs = packLibrary.packs.first()
+        if (packs.none { it.status == app.granger.core.library.PackStatus.OK } &&
+            bookshelf.books.first().none { it.status == app.granger.core.library.PackStatus.OK } &&
+            media.tracks.first().none { it.status == app.granger.core.library.PackStatus.OK } &&
+            media.audiobooks.first().none { it.status == app.granger.core.library.PackStatus.OK }) {
+            emit(app.granger.core.research.BestMatches.Result(emptyList(), emptyList(), byMeaning = false, final = true))
+            return@flow
+        }
+        var timed = false
+        bestMatches.stream(query).collect { result ->
+            if (!timed && result.byMeaning && result.embedMs + result.denseMs > 0) {
+                meaning.speed.record(result.embedMs + result.denseMs)
+                timed = true
+            }
+            emit(result.copy(matches = inLibraryLanguages(result.matches, packs)))
+        }
+    }
+
+    /** Only the library's languages, as Android's (Neal, 2026-11-16): a pack's or book's of another language is left out. */
+    private suspend fun inLibraryLanguages(
+        matches: List<app.granger.core.research.BestMatches.Match>, packs: List<app.granger.core.library.Pack>,
+    ): List<app.granger.core.research.BestMatches.Match> {
+        val allowed = languages().toSet()
+        val packLanguages = packs.associate { it.id to it.language }
+        val bookLanguages = HashMap<String, String?>()
+        suspend fun allowedSource(p: app.granger.core.research.Passage): Boolean = when (p.kind) {
+            app.granger.core.research.SourceKind.ARTICLE ->
+                packLanguages[p.sourceId]?.let { l -> allowed.any { app.granger.core.library.TitleMatch.inLanguage(l, it) } } ?: true
+            app.granger.core.research.SourceKind.BOOK ->
+                bookLanguages.getOrPut(p.sourceId) { bookshelf.book(p.sourceId)?.language?.let(::twoLetterLanguage) }?.let { it in allowed } ?: true
+            else -> true
+        }
+        return matches.filter { allowedSource(it.passage) }
+    }
+
+    /**
+     * A search hit's mark, as Android's `AvailabilityMark`: a Wikipedia online hit's own (on this phone, saved for now,
+     * none), a pack's article a dot (a ring-less dot, shorter for a Wikipedia pack without pictures), a book none.
+     */
+    suspend fun hitMark(packId: String, path: String): Mark {
+        OnlineWikipediaArchive.languageOf(packId)?.let { return mark(it, path) }
+        if (app.granger.core.library.BookIds.isBook(packId)) return Mark.NONE
+        val pack = packLibrary.packs.first().firstOrNull { it.id == packId } ?: return Mark.NONE
+        return if (ArticleCopies.kindOf(pack) == app.granger.online.ArticleCopy.Kind.FULL) Mark.ON_PHONE else Mark.ON_PHONE_SHORTER
+    }
+
+    /** Settings › Clear recent searches: every remembered search forgotten (Android's History clears them too). */
+    suspend fun clearRecentSearches() {
+        sessions.recentSearches(limit = 1000).first().forEach { sessions.forgetSearch(it) }
+    }
+
+    // ---- The tidy-up offer (Plan WF Decision 5, Plan I7 Task 7c): a bigger slice of a set is in, so the smaller may go.
+
+    private val tidyDismissals by lazy {
+        val d = platform.Foundation.NSUserDefaults.standardUserDefaults
+        val key = app.granger.sources.TidyDismissals.KEY
+        app.granger.sources.TidyDismissals(d.stringArrayForKey(key).orEmpty().mapNotNull { it as? String }.toSet()) { keys ->
+            d.setObject(keys.toList(), key)
+        }
+    }
+
+    /** The offers on Home and in Downloads, as Android's: one per smaller slice while a bigger one is in, none answered Keep. */
+    val tidyOffers: kotlinx.coroutines.flow.Flow<List<app.granger.sources.TidyOffer>> by lazy {
+        combine(catalogSource.state, downloads.records, packLibrary.packs, tidyDismissals.keys) { c, records, packs, keys ->
+            app.granger.sources.SetTidy.offers(c.catalog, records, packs, keys)
+        }.flowOn(Dispatchers.Default)
+    }
+
+    /** Remove: the smaller slice gives way to the bigger, places and bookmarks moving across; kept quiet if it couldn't. */
+    suspend fun removeSmaller(offer: app.granger.sources.TidyOffer) {
+        if (!app.granger.sources.SetTidy.remove(offer, packLibrary, downloads)) tidyDismissals.dismiss(offer.key)
+    }
+
+    /** Keep both: the offer doesn't come back. */
+    fun keepBoth(offer: app.granger.sources.TidyOffer) = tidyDismissals.dismiss(offer.key)
 
     // ---- Books (Plan I5 Task 5): the shared shelf over the iPhone's library database, as Android's GrangerApp wires it.
 

@@ -31,8 +31,10 @@ final class Core: PageSource {
         // libarchive and UIGraphicsPDFRenderer for comics (CBZ, CBR) imported as books (Plan I5 Task 6).
         ComicNatives.install()
         #if DEBUG
-        // UI tests and checks: `-debugPack <path on the Mac>` copies that pack in (the Simulator reads the Mac's disk).
-        if let from = UserDefaults.standard.string(forKey: "debugPack"), FileManager.default.fileExists(atPath: from) {
+        // UI tests and checks: `-debugPack <path on the Mac>` copies that pack in (the Simulator reads the Mac's disk);
+        // several packs are `|`-separated.
+        for from in (UserDefaults.standard.string(forKey: "debugPack") ?? "").split(separator: "|").map(String.init)
+        where FileManager.default.fileExists(atPath: from) {
             let to = packsFolder.appendingPathComponent((from as NSString).lastPathComponent)
             if !FileManager.default.fileExists(atPath: to.path) { try? FileManager.default.copyItem(atPath: from, toPath: to.path) }
         }
@@ -62,6 +64,10 @@ final class Core: PageSource {
         )
         // Search by meaning (Plan I7 call 6): EmbeddingGemma 2 on LiteRT-LM, loaded by the core when Best matches need it.
         library.meaning.natives = EmbedderNativesImpl()
+        #if DEBUG
+        // `-debugBestDelay <ms>`: Best matches wait first, so a test sees "Looking through your library…".
+        library.debugBestDelayMs = Int64(UserDefaults.standard.integer(forKey: "debugBestDelay"))
+        #endif
         Core.shared = self
         NetworkPath.shared.changed = { [weak self] in self?.library.networkChanged() }
         library.startDownloads()
