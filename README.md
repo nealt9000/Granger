@@ -11,7 +11,7 @@ An offline library for Android. Granger keeps Wikipedia, 557 typeset classics, f
 
 The packs are [Kiwix](https://kiwix.org)'s open ZIM files, so anything Granger downloads can also be read by Kiwix's apps. No account, and nothing you read or search leaves the device.
 
-Site: [opengranger.org](https://opengranger.org) · Licensed under GPL-3.0 (see `LICENSE`).
+Site: [opengranger.org](https://opengranger.org) · Licensed under GPL-3.0 (see `LICENSE`), with an additional permission for app stores under its section 7 (see `LICENSE-APPSTORE.md`).
 
 ## Build
 

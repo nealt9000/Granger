@@ -3,7 +3,7 @@
   {
    "licence": "GPL-3.0-or-later",
    "name": "Granger",
-   "note": "Copyright © AETHERBOUND LLC.\nAdditional permission under GNU GPL version 3 section 7: [placeholder: the App Store distribution permission comes with the first App Store release (Plan I8)].",
+   "note": "Copyright © AETHERBOUND LLC.\nAdditional permission under GNU GPL version 3 section 7: AETHERBOUND LLC, as copyright holder of Granger, gives you permission to convey this program, or a work based on it, through an app store whose terms add restrictions or usage rules (for example Apple's App Store and TestFlight), provided the Corresponding Source is also available under the GPL's terms. This permission covers only code whose copyright AETHERBOUND LLC holds; other components keep their own licences. (LICENSE-APPSTORE.md in the source.)",
    "texts": [
     "gpl-3.0"
    ],

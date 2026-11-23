@@ -30,6 +30,12 @@ match), and the icon from the brand mark through `tools/ios/make_appicon.py`.
 `tools/ios/release-core.sh` builds, zips and checksums the core and prints what it would publish. `--publish` creates
 the GitHub release `ios-core-<date>` and pins it in `GrangerCore/Package.swift`.
 
+## Licence
+
+GPL-3.0-or-later (`LICENSE`), with AETHERBOUND LLC's additional permission for app stores under its section 7
+(`LICENSE-APPSTORE.md`). The libraries the app bundles keep their own licences (Settings › About › Open-source
+licences).
+
 ## Feedback
 
 Email feedback@opengranger.org or open a GitHub issue.
