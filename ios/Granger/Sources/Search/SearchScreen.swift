@@ -20,10 +20,12 @@ struct SearchScreen: View {
                 recent
             } else if model.searching && model.titles.isEmpty && model.pages.isEmpty {
                 HStack { Spacer(); ProgressView(); Spacer() }
-            } else if model.done && model.titles.isEmpty && model.pages.isEmpty && model.best.isEmpty {
+            } else if model.done && model.titles.isEmpty && model.pages.isEmpty && model.best.isEmpty && model.define == nil {
                 Text(settings.canFetch ? "Nothing in your library for that. Try fewer words." : "Nothing on this phone for that. Online results appear when you're connected.")
                     .foregroundStyle(palette.onSurfaceVariant)
             } else {
+                // A single word's dictionary entry above the results (Android's Define card, Plan SQ Task 5.4).
+                if let entry = model.define { defineCard(entry) }
                 group(L("Best matches"), hits: model.best, all: $model.allBest, showAll: { L("Show all \($0) best matches") },
                       fewer: L("Show fewer best matches"))
                 group(L("Titles"), hits: model.titles, all: $model.allTitles, showAll: { L("Show all \($0) titles") },
@@ -68,14 +70,41 @@ struct SearchScreen: View {
         }
     }
 
+    /// Android's Define card: "Define", the headword, the start of its senses, and the Wiktionary it's from; tapped, the
+    /// entry opens in the reader.
+    private func defineCard(_ entry: Passage) -> some View {
+        Button {
+            model.remember(query)
+            openRoute(.read(packId: entry.sourceId, path: entry.location))
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(core?.library.defineLabel().words ?? "").font(.caption.weight(.medium)).foregroundStyle(palette.primary)
+                Text(entry.sourceTitle).font(Spectral.medium(20)).foregroundStyle(palette.onSurface)
+                    .accessibilityAddTraits(.isHeader)
+                Text(SearchModel.defineLine(entry)).font(.subheadline).foregroundStyle(palette.onSurface).lineLimit(4)
+                Text(core?.library.defineSource(packTitle: entry.packTitle).words ?? "")
+                    .font(.caption).foregroundStyle(palette.onSurfaceVariant).padding(.top, 4)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(palette.surfaceContainerHigh, in: RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .listRowSeparator(.hidden)
+        .listRowBackground(palette.background)
+        .accessibilityIdentifier("search-define")
+    }
+
     private func group(_ title: String, hits: [SearchRow], all: Binding<Bool>, showAll: (Int) -> String, fewer: String) -> some View {
         let shown = all.wrappedValue ? hits : Array(hits.prefix(SearchModel.preview))
         return Section {
             ForEach(shown) { hit in
                 Button {
                     model.remember(query)
-                    // A book's Best match opens the book at its passage (Android's CitationOpener); anything else its page.
+                    // A book's Best match opens the book at its passage, a media card its album or audiobook at the song or
+                    // chapter (Android's CitationOpener); anything else its page.
                     if let book = hit.book { openRoute(.bookAt(id: hit.packId, passage: book)) }
+                    else if let media = hit.media { openRoute(media) }
                     else { openRoute(.article(packId: hit.packId, path: hit.path)) }
                 } label: {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -95,7 +124,7 @@ struct SearchScreen: View {
                     }
                     .padding(.vertical, 2)
                 }
-                .accessibilityIdentifier(hit.book != nil ? "search-book-hit" : "search-hit")
+                .accessibilityIdentifier(hit.book != nil ? "search-book-hit" : hit.media != nil ? "search-media-hit" : "search-hit")
             }
             if hits.count > SearchModel.preview {
                 Button(all.wrappedValue ? fewer : showAll(hits.count)) { all.wrappedValue.toggle() }
@@ -121,6 +150,8 @@ struct SearchRow: Identifiable, Hashable {
     var book: BookPassage? = nil
     /// The kind's icon (Best matches, as Android's): an article or a book; nil for none.
     var icon: String? = nil
+    /// A media card's Best match (Plan I7 Task 7b): its album or audiobook, at the song or chapter it's about.
+    var media: Route? = nil
     var id: String { "\(packId)|\(path)" }
 
     /// A snippet's words without its `<b>` highlights.
@@ -136,6 +167,8 @@ final class SearchModel {
     static let limit = 20
     var best: [SearchRow] = []
     var allBest = false
+    /// A one-word query's Wiktionary entry (Android's Define card); nil for none.
+    var define: Passage?
     var titles: [SearchRow] = []
     var pages: [SearchRow] = []
     var allTitles = false
@@ -160,7 +193,7 @@ final class SearchModel {
         allTitles = false
         allBest = false
         allPages = false
-        guard !q.isEmpty else { best = []; titles = []; pages = []; return }
+        guard !q.isEmpty else { best = []; titles = []; pages = []; define = nil; return }
         // A short pause, so typing doesn't send a request a letter.
         try? await Task.sleep(for: .milliseconds(300))
         if Task.isCancelled { return }
@@ -172,6 +205,7 @@ final class SearchModel {
         async let pp: [SearchRow] = (try? await packs.fullText(query: q))?.map(Self.row) ?? []
         let library = core.library
         async let bm: [SearchRow] = ((try? await library.best(query: q)) ?? []).map(Self.bestRow)
+        async let entry: Passage? = try? await library.wordEntry(query: q)
         async let ot: [SearchRow] = online ? background { client.titles(lang: lang, query: q, limit: Int32(Self.limit)) }
             .map { SearchRow(packId: onlinePack, path: $0.key, title: $0.title, detail: $0.description_, source: "Wikipedia", onlineLang: lang) } : []
         async let op: [SearchRow] = online ? background { client.pages(lang: lang, query: q, limit: Int32(Self.limit)) }
@@ -180,6 +214,8 @@ final class SearchModel {
         if Task.isCancelled { return }
         titles = Self.merged(packTitles, onlineTitles)
         pages = Self.merged(packPages, onlinePages)
+        define = await entry
+        if Task.isCancelled { return }
         searching = false
         done = true
         // Best matches rank passages, slower than titles: they join when ready (Android shows them as they come too).
@@ -188,17 +224,48 @@ final class SearchModel {
         best = bestRows
     }
 
-    /// A Best match: an article, or a book's chapter that opens at its passage (Android's row: the kind's icon, the title,
-    /// the sentence, then the pack or the book's collection).
+    /// A Best match: an article, a book's chapter that opens at its passage, or (Plan I7 Task 7b) an album's or audiobook's
+    /// media card that opens it at the song or chapter it names. Android's row: the kind's icon (a book's, else an
+    /// article's, as Android's `KindIcon`), the title, the matched sentence (else the passage's start), then the pack or
+    /// the book's collection ("Your music" for a media card).
     static func bestRow(_ m: BestMatches.Match) -> SearchRow {
         let p = m.passage
         let book = p.kind == .book
+        let media = p.kind == .media
         return SearchRow(packId: p.sourceId, path: p.location,
-                         title: book ? p.sourceTitle : PageTitles.shared.clean(title: p.sourceTitle, packTitle: p.packTitle, mainPage: false),
-                         detail: m.quote(), source: p.packTitle.isEmpty ? p.meta.collection : p.packTitle, onlineLang: nil,
+                         title: book || media ? p.sourceTitle : PageTitles.shared.clean(title: p.sourceTitle, packTitle: p.packTitle, mainPage: false),
+                         detail: media ? sentence(m) : m.quote(), source: p.packTitle.isEmpty ? p.meta.collection : p.packTitle, onlineLang: nil,
                          book: book ? BookPassage(href: p.location, quote: m.quote() ?? "", before: "", progression: p.progression) : nil,
-                         icon: book ? "book.closed" : "doc.text")
+                         icon: book ? "book.closed" : "doc.text",
+                         media: media ? mediaRoute(p) : nil)
     }
+
+    /// The row's line as Android's: the matched sentence, else the passage's first 220 characters.
+    private static func sentence(_ m: BestMatches.Match) -> String {
+        let text = m.passage.text
+        // Kotlin's range counts UTF-16 units, as NSString does.
+        let ns = text as NSString
+        if let r = m.sentence, r.first >= 0, Int(r.last) < ns.length, r.last >= r.first {
+            return ns.substring(with: NSRange(location: Int(r.first), length: Int(r.last - r.first) + 1)).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return ns.length <= 220 ? text : ns.substring(to: 220)
+    }
+
+    /// Where a media card opens (Android's `PassageAddress.media` and `CitationOpener`): a song's card its album at the
+    /// song, a chapter's its audiobook at the chapter, a whole work's its album or audiobook page.
+    static func mediaRoute(_ p: Passage) -> Route {
+        let location = p.location
+        if location.hasPrefix("chapter:") {
+            return .audiobook(id: p.sourceId, chapter: max(0, Int(location.dropFirst("chapter:".count)) ?? 0))
+        }
+        if p.sourceId.hasPrefix("album:") {
+            return .album(key: String(p.sourceId.dropFirst("album:".count)), track: location.hasPrefix("track:") ? location : nil)
+        }
+        return .audiobook(id: p.sourceId, chapter: nil)
+    }
+
+    /// The Define card's line: the senses, without the etymology when there is more (Android's `SearchRows.defineText`).
+    static func defineLine(_ entry: Passage) -> String { Core.shared?.library.defineText(entry: entry.text) ?? entry.text }
 
     private static func row(_ h: SearchHit) -> SearchRow {
         SearchRow(packId: h.packId, path: h.path, title: h.title, detail: SearchRow.plain(h.snippet), source: h.packTitle, onlineLang: nil)

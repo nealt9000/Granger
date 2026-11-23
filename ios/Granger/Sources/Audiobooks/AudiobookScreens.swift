@@ -198,6 +198,8 @@ struct AudiobookShelfScreen: View {
 /// edit the note; delete). A missing book shows it all but can't play.
 struct AudiobookScreen: View {
     let bookId: String
+    /// A chapter (its ordinal) to scroll to and tint for a moment: a Best match's media card (Android's markedChapter).
+    var markedChapter: Int? = nil
     @Environment(\.voice) private var voice
     @Environment(\.palette) private var palette
     @State private var holder = AudiobooksHolder()
@@ -206,6 +208,7 @@ struct AudiobookScreen: View {
     @State private var deleting: AudioBookmark?
     @State private var removing = false
     @State private var expanded = false
+    @State private var cited = CitedMark()
 
     var body: some View {
         Group {
@@ -234,7 +237,8 @@ struct AudiobookScreen: View {
 
     private func content(_ page: AudiobookPage) -> some View {
         let book = page.book
-        return List {
+        let mark = markedChapter.flatMap { c in page.chapters.contains { Int($0.ordinal) == c } ? "chapter:\(c)" : nil }
+        return ScrollViewReader { reader in List {
             Section {
                 AdaptiveStack(spacing: 16) {
                     AudiobookCover(path: book.coverPath, title: book.title).frame(width: 120).opacity(page.missing ? 0.4 : 1)
@@ -287,6 +291,8 @@ struct AudiobookScreen: View {
                     }
                     .disabled(!page.playable)
                     .accessibilityIdentifier("audiobook-chapter-\(chapter.ordinal + 1)")
+                    .listRowBackground(cited.on("chapter:\(chapter.ordinal)") ? palette.primary.opacity(0.15) : nil)
+                    .id("chapter:\(chapter.ordinal)")
                 }
             }
             Section("Bookmarks") {
@@ -313,6 +319,8 @@ struct AudiobookScreen: View {
             }
         }
         .scrollContentBackground(.hidden)
+        .task(id: mark) { if let mark { cited.show(mark, reader) } }
+        }
     }
 
     private func progressLine(_ page: AudiobookPage) -> String {

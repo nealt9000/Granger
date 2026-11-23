@@ -53,7 +53,8 @@ enum Route: Hashable {
     /// Music (Plan I6 Task 6): a Music collection's tabs (nil: all music), an album by its key, an artist, a genre, a
     /// folder by its stored path, a playlist; the music player; Settings › Music & audiobooks.
     case music(collectionId: String?)
-    case album(key: String)
+    /// An album, with a song marked for a moment (a Best match's media card: Android's AlbumRoute's trackId).
+    case album(key: String, track: String? = nil)
     case artist(name: String)
     case genre(name: String)
     case musicFolder(path: String)
@@ -63,7 +64,8 @@ enum Route: Hashable {
     /// Audiobooks (Plan I6 Task 7): a collection's shelf (nil: every audiobook), a book's page by its id, the audiobook
     /// player; LibriVox; archive.org's spoken word or music (ArchiveKind by name).
     case audiobooks(collectionId: String?)
-    case audiobook(id: String)
+    /// An audiobook's page, a chapter marked for a moment when given (Android's AudiobookRoute's chapter).
+    case audiobook(id: String, chapter: Int? = nil)
     case audiobookPlayer
     case librivox
     case archiveAudio(kind: String)

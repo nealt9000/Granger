@@ -24,6 +24,7 @@ export TEST_RUNNER_GRANGER_TEST_EPUB="$FIX/epub/gc-pride-and-prejudice_2026-11-0
 export TEST_RUNNER_GRANGER_TEST_PDF="$FIX/pdf/field-notes.pdf"
 export TEST_RUNNER_GRANGER_TEST_VOICE="$FIX/voices/vits-piper-en_GB-granger_owl-medium"
 export TEST_RUNNER_GRANGER_TEST_AUDIO="$FIX/audio"
+export TEST_RUNNER_GRANGER_TEST_SEARCH="$FIX/ios-search"
 export TEST_RUNNER_GRANGER_TEST_EMBEDDER="$FIX/embedder/embeddinggemma-2-text-270m.litertlm"
 export TEST_RUNNER_GRANGER_SHOTS="${GRANGER_SHOTS:-}"
 cd "$ROOT/ios/Granger"

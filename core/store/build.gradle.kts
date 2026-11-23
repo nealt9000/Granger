@@ -29,6 +29,8 @@ kotlin {
             api(libs.androidx.room.runtime)
             api(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+            // Plan I7 Task 7b: the Wiktionary entry reader (DictionaryEntry) is shared with the iPhone.
+            implementation(libs.ksoup)
             // Public: Bookshelf.importFrom takes a kotlinx-io Source.
             api(libs.kotlinx.io.core)
         }

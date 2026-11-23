@@ -4,8 +4,8 @@ import app.granger.core.research.HtmlPassage
 import app.granger.core.research.HtmlPassages
 import app.granger.core.research.ResearchLanguage
 import app.granger.core.zim.ZimArchive
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Element
 
 /**
  * A word's entry in a Wiktionary ZIM, as one passage's text: the first language section's etymology and senses,
@@ -15,8 +15,14 @@ import org.jsoup.nodes.Element
  * Both Wiktionaries head each language with an h2 ("English", "Italian"; "Español", "Gallego"), so the entry is the
  * page up to its second h2. English senses carry their quotations and examples as lists nested in the sense; they are
  * dropped, or "betimes" is all quotation and its meaning never fits (l4-words-en-2).
+ *
+ * Shared with the iPhone since Plan I7 Task 7b (moved from Android's `core:library`, jsoup → ksoup): both phones' Define
+ * card and Ask's word entries ([PackPassageFinder.entry]) read it. Kotlin only: hidden from Swift, where the e-book
+ * reader's `app.granger.ebook.DictionaryEntry` keeps its name.
  */
-internal object DictionaryEntry {
+@OptIn(kotlin.experimental.ExperimentalObjCRefinement::class)
+@kotlin.native.HiddenFromObjC
+object DictionaryEntry {
     const val PACK_PREFIX = PackPassageFinder.DICTIONARY_PREFIX
     private const val MAX_CHARS = 1_100
     private const val SEARCHED = 5
@@ -38,6 +44,9 @@ internal object DictionaryEntry {
 
     data class Found(val path: String, val title: String, val text: String)
 
+    /** [find] as [PackPassageFinder]'s `dictionary` reader takes it. */
+    fun hit(archive: ZimArchive, word: String): DictionaryHit? = find(archive, word)?.let { DictionaryHit(it.path, it.title, it.text) }
+
     fun find(archive: ZimArchive, word: String): Found? {
         val exact = readEntry(archive, word) ?: readEntry(archive, word.lowercase())
         if (exact != null) {
@@ -58,13 +67,13 @@ internal object DictionaryEntry {
         val resolved = archive.resolvePath(path) ?: return null
         val item = archive.read(resolved) ?: return null
         if (!item.mimeType.startsWith("text/html") && !item.mimeType.startsWith("application/xhtml")) return null
-        val passages = HtmlPassages.split(firstLanguage(item.bytes.toString(Charsets.UTF_8)))
+        val passages = HtmlPassages.split(firstLanguage(item.bytes.decodeToString()))
         return passages.takeIf { it.isNotEmpty() }?.let { resolved to it }
     }
 
     /** [html] up to its second h2 (the next language), without the quotations and examples nested in senses. */
-    internal fun firstLanguage(html: String): String {
-        val doc = Jsoup.parse(html)
+    fun firstLanguage(html: String): String {
+        val doc = Ksoup.parse(html)
         doc.select("li > ul, li > dl").remove()
         val next = doc.select("h2").getOrNull(1) ?: return doc.outerHtml()
         // The h2 sits in a heading wrapper (div.mw-heading) or straight in the content: it and everything after it
@@ -80,14 +89,14 @@ internal object DictionaryEntry {
     }
 
     /** The lemma an inflected form's entry names, or null when the entry is a lemma's own. */
-    internal fun lemmaOf(passages: List<HtmlPassage>): String? {
+    fun lemmaOf(passages: List<HtmlPassage>): String? {
         val first = passages.first()
         if (!FORM_HEADING.containsMatchIn(first.heading) && !FORM_TEXT.containsMatchIn(first.text)) return null
         return FORM_OF.find(first.text.trim())?.groupValues?.get(2)
     }
 
     /** Same word, another ending: one word, sharing all but its last three letters (at least four), folded. */
-    internal fun sameStem(title: String, word: String): Boolean {
+    fun sameStem(title: String, word: String): Boolean {
         val t = ResearchLanguage.fold(title.replace('_', ' ').trim())
         val w = ResearchLanguage.fold(word.trim())
         if (t.contains(' ') || t.length > w.length + 3) return false
@@ -100,7 +109,7 @@ internal object DictionaryEntry {
      * [MAX_CHARS]. A section split over several passages keeps one heading; the part that doesn't fit is cut at a word,
      * so a long etymology still leaves the senses some room.
      */
-    internal fun text(passages: List<HtmlPassage>): String {
+    fun text(passages: List<HtmlPassage>): String {
         val out = StringBuilder()
         var last: String? = null
         for (p in passages) {

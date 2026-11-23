@@ -114,17 +114,3 @@ fun TidyOfferCard(offer: TidyOffer, onRemove: () -> Unit, onKeep: () -> Unit) {
         }
     }
 }
-
-/** Each installed pack's set and rank (Plan WF Decision 6), from the current catalog by the pack's ZIM name. */
-class CatalogPackSlices(private val catalog: () -> Catalog?) : app.granger.core.library.PackSlices {
-    @Volatile private var cached: Pair<Catalog, Map<String, app.granger.core.library.SliceKey>>? = null
-
-    override fun of(pack: Pack): app.granger.core.library.SliceKey? {
-        val current = catalog() ?: return null
-        val table = cached?.takeIf { it.first === current }?.second
-            ?: current.packs.filter { it.isSlice }
-                .associate { it.zimName to app.granger.core.library.SliceKey(it.setId, it.setRank) }
-                .also { cached = current to it }
-        return table[pack.name]
-    }
-}

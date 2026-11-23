@@ -90,7 +90,8 @@ sh tools/ios/test.sh ~/granger-fixtures "iPhone 17" -only-testing:GrangerUITests
 - Two targets: `GrangerTests` (unit and spike tests in the host app) and `GrangerUITests` (XCUITest).
 - **Fixtures.** The Simulator can't read every disk, so tests read their files from paths in environment variables:
   `GRANGER_TEST_ZIM` (a small pack), `GRANGER_TEST_BOOKPACK` (a book pack), `GRANGER_TEST_EPUB`, `GRANGER_TEST_PDF`,
-  `GRANGER_TEST_VOICE` (the Owl voice, unpacked), `GRANGER_TEST_AUDIO` (testdata/audio) and
+  `GRANGER_TEST_VOICE` (the Owl voice, unpacked), `GRANGER_TEST_AUDIO` (testdata/audio), `GRANGER_TEST_SEARCH`
+  (testdata/ios-search: a test Wiktionary and two slices of a set, made by `tools/test-zim/make_ios_search_zims.py`) and
   `GRANGER_TEST_EMBEDDER`. xcodebuild passes a variable to the tests when it's set as `TEST_RUNNER_<name>`;
   `tools/ios/test.sh` sets them all from the fixtures folder. A test whose fixture isn't set skips itself.
   `GRANGER_SHOTS=<folder>` makes some tests save screenshots there.

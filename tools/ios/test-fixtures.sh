@@ -9,6 +9,7 @@
 #   pdf/field-notes.pdf a six-page PDF with an outline, made here by fixtures/make-test-pdf.swift
 #   voices/…owl-medium  the Owl Piper voice, unpacked (read aloud)
 #   audio/              a copy of testdata/audio (tags, chapters, gapless)
+#   ios-search/         a copy of testdata/ios-search: a test Wiktionary and two slices of a set (Search, Plan I7 Task 7b)
 #   embedder/           EmbeddingGemma 2 (search by meaning), 165 MB
 # About 230 MB in all. Run again to fill in anything missing; what's there and right is kept.
 #
@@ -42,4 +43,6 @@ if [ ! -f "$DIR/pdf/field-notes.pdf" ]; then
 fi
 rm -rf "$DIR/audio"
 cp -R "$ROOT/testdata/audio" "$DIR/audio"
+rm -rf "$DIR/ios-search"
+cp -R "$ROOT/testdata/ios-search" "$DIR/ios-search"
 echo "fixtures in $DIR"

@@ -12,17 +12,14 @@ import app.granger.media.SongPlayer
 import app.granger.widget.Secondary
 import app.granger.widget.WidgetModel
 import app.granger.widget.resumeMode
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 
 /**
  * The system's pieces on the iPhone (Plan I6 Task 8): CarPlay's browse tree and the player widget's model and buttons,
  * all shared rules (Android Auto's [MediaBrowse], the Glance widget's [WidgetModel] and its two actions).
  */
 class IosSystem(private val library: IosLibrary, private val voice: IosVoice, private val music: IosMusic) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val index by lazy { MediaIndex(library.media, scope) }
+    /** The library's media index, shared with Best matches' media cards. */
+    private val index: MediaIndex get() = library.mediaIndex
 
     /**
      * What CarPlay browses (call 6): Recent, Music (Albums, Artists, Playlists) and Audiobooks, Android Auto's tree.

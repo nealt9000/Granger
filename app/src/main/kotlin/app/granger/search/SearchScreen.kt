@@ -531,17 +531,9 @@ internal object SearchRows {
         }
     }
 
-    /**
-     * The Define card's text from a dictionary entry ("Heading: text" lines, DictionaryEntry): the senses, the etymology
-     * left out when there is anything else, on one line.
-     */
-    fun defineText(entry: String): String {
-        val lines = entry.lines().map { it.trim() }.filter { it.isNotEmpty() }
-        val senses = lines.filterNot { ETYMOLOGY.containsMatchIn(SearchText.fold(it.substringBefore(':'))) }
-        return senses.ifEmpty { lines }.joinToString(" ")
-    }
+    /** The Define card's text from a dictionary entry (shared since Plan I7 Task 7b: [app.granger.search.SearchDefine.text]). */
+    fun defineText(entry: String): String = SearchDefine.text(entry)
 
-    private val ETYMOLOGY = Regex("^(etymolog|etimolog)")
     private val WORD = Regex("[\\p{L}\\p{N}]+")
     private val BOLD = Regex("<b>\\s*[^<\\s]", RegexOption.IGNORE_CASE)
     private val TAG = Regex("<[^>]*>")

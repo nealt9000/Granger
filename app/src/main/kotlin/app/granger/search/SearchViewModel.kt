@@ -499,8 +499,8 @@ class SearchViewModel(
         if (more || count >= group.fetch) this + group else this
 
     companion object {
-        /** One word of at least two letters: a query the Define card looks up. */
-        fun isOneWord(q: String): Boolean = q.length >= 2 && q.none { it.isWhitespace() } && q.any { it.isLetter() } && q.all { it.isLetter() || it == '-' || it == '\'' || it == '’' }
+        /** One word of at least two letters: a query the Define card looks up (shared: [SearchDefine.isOneWord]). */
+        fun isOneWord(q: String): Boolean = SearchDefine.isOneWord(q)
 
         /** A medical query, by the same lexicons Ask used (Plan SQ Decision 8). */
         fun looksMedical(q: String): Boolean =

@@ -373,8 +373,19 @@ class IosLibrary(
         kotlinx.coroutines.runBlocking { packLibrary.packs.first() }.filter { it.isBookPack && it.status == app.granger.core.library.PackStatus.OK }.sortedBy { it.title.lowercase() }
 
     /**
+     * Each installed pack's set and rank from the catalog (Plan WF Decision 6, Plan I7 Task 7b): while a smaller slice of
+     * a set and a bigger one are both here, the smaller one's hits for articles the bigger has are left out of Search,
+     * as on Android.
+     */
+    val packSlices: app.granger.core.library.PackSlices = app.granger.sources.CatalogPackSlices { catalog }
+
+    /** The music and audiobooks in memory, for Best matches' media cards and CarPlay's search (Android's `mediaIndex`). */
+    val mediaIndex: app.granger.core.library.MediaIndex by lazy { app.granger.core.library.MediaIndex(media, scope) }
+
+    /**
      * The keyword side of Best matches, as Android's `LibraryPassageFinder` (Plan I7 Task 7a): the packs' full text, and
-     * the books' passages from the book index with the shelf's books and their collections.
+     * the books' passages from the book index with the shelf's books and their collections. Since Plan I7 Task 7b also
+     * the media cards (an album or audiobook, at most two), the Wiktionary reader (the Define card) and the slices.
      */
     private val passageFinder by lazy {
         app.granger.core.library.PackPassageFinder(
@@ -382,8 +393,28 @@ class IosLibrary(
             bookSearch = app.granger.core.library.BookIndexPassageSearch(bookIndex),
             books = { bookshelf.books.first() },
             collections = { shelves.collectionNames() },
+            media = { words, languages -> app.granger.core.library.mediaCardPassages(mediaIndex, MEDIA_CARDS, words, languages) },
+            slices = packSlices,
+            dictionary = app.granger.core.library.DictionaryEntry::hit,
         )
     }
+
+    /**
+     * Search's Define card (Plan SQ Task 5.4, Plan I7 Task 7b): a one-word query's entry in the first installed
+     * Wiktionary, one in the word's language first, as Android's `WordEntry`; null for any other query or none found.
+     */
+    suspend fun wordEntry(query: String): app.granger.core.research.Passage? {
+        val q = query.trim()
+        if (!app.granger.search.SearchDefine.isOneWord(q)) return null
+        return runCatching { passageFinder.entry(q, app.granger.core.research.ResearchLanguage.of(q)) }.getOrNull()
+    }
+
+    /** The Define card's line from an entry's text (Android's `SearchRows.defineText`). */
+    fun defineText(entry: String): String = app.granger.search.SearchDefine.text(entry)
+
+    /** The Define card's label and its foot naming the Wiktionary (Android's search_define, search_define_source). */
+    fun defineLabel(): app.granger.UiText = app.granger.search.SearchDefine.label
+    fun defineSource(packTitle: String): app.granger.UiText = app.granger.search.SearchDefine.source(packTitle)
 
     /** Vectors for the books you add, made here in the background while search by meaning is on (Android's Plan R2 Task 9). */
     val bookVectors by lazy {
@@ -403,6 +434,7 @@ class IosLibrary(
             app.granger.core.library.CombinedVectorSources(meaning.sources, bookVectors.sources),
             unescape = { app.granger.librivox.decodeEntities(it) },
             io = app.granger.screens.ioDispatcher,
+            slices = packSlices,
         )
     }
 
@@ -441,14 +473,16 @@ class IosLibrary(
     suspend fun best(query: String): List<app.granger.core.research.BestMatches.Match> = bestResult(query)?.matches.orEmpty()
 
     /**
-     * Best matches for [query] with how they were found (by meaning, its times); null with no pack or book, or on a
-     * failure. Only the library's languages, as Android's (Neal, 2026-11-16): a pack's or book's of another language is
-     * left out.
+     * Best matches for [query] with how they were found (by meaning, its times); null with no pack, book, album or
+     * audiobook, or on a failure. Only the library's languages, as Android's (Neal, 2026-11-16): a pack's or book's of
+     * another language is left out.
      */
     suspend fun bestResult(query: String): app.granger.core.research.BestMatches.Result? {
         val packs = packLibrary.packs.first()
         if (packs.none { it.status == app.granger.core.library.PackStatus.OK } &&
-            bookshelf.books.first().none { it.status == app.granger.core.library.PackStatus.OK }) return null
+            bookshelf.books.first().none { it.status == app.granger.core.library.PackStatus.OK } &&
+            media.tracks.first().none { it.status == app.granger.core.library.PackStatus.OK } &&
+            media.audiobooks.first().none { it.status == app.granger.core.library.PackStatus.OK }) return null
         val result = runCatching { bestMatches.find(query) }.getOrNull() ?: return null
         // Each query's meaning step timed, so a slow phone drops to keywords alone (Android's EmbedSpeed).
         if (result.byMeaning && result.embedMs + result.denseMs > 0) meaning.speed.record(result.embedMs + result.denseMs)
@@ -498,6 +532,13 @@ class IosLibrary(
     }
 
     /**
+     * Tests (Plan I7 Task 7b): a catalog read from [json] without its signature (the test's own slices of a set); null
+     * when it doesn't parse. Hand it to [catalog], and the previous one back after.
+     */
+    fun debugCatalog(json: String): Catalog? =
+        runCatching { kotlinx.serialization.json.Json { ignoreUnknownKeys = true }.decodeFromString(Catalog.serializer(), json) }.getOrNull()
+
+    /**
      * Search over the packs (titles, near titles, full text) and the shelf's books (titles, authors and their words,
      * Plan I5 Task 5), in the library's languages, as Android's.
      */
@@ -505,7 +546,7 @@ class IosLibrary(
         app.granger.core.library.PackSearch(
             packLibrary, shelf = { bookshelf.books.first() },
             collectionOf = { book, packs -> app.granger.core.library.Filing.defaultName(app.granger.core.library.Filing.defaultKey(book), book, packs) },
-            languages = { languages().toSet() }, bookIndex = bookIndex,
+            slices = packSlices, languages = { languages().toSet() }, bookIndex = bookIndex,
         )
     }
 
@@ -1793,6 +1834,9 @@ private const val EMBEDDER_FOLLOWED = "embedder.followed"
 
 /** A vector file's embedder or source sha256 when there is none to name (a test's file). */
 private val NO_SHA = "0".repeat(64)
+
+/** Best matches' media cards, at most (Android's `LibraryPassageFinder` default). */
+private const val MEDIA_CARDS = 2
 
 /** A book's language as two letters, as Android's `twoLetter`: `en` from `en`, `eng` or `en-GB`; `es` from `spa`. */
 internal fun twoLetterLanguage(language: String): String? {

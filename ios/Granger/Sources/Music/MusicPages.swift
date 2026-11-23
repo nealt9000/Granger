@@ -8,19 +8,27 @@ import SwiftUI
 
 /// One album (Android's AlbumScreen): cover and details, its artists (each opens their page), Play/Shuffle (Stop while
 /// its queue plays, Play resuming it while paused), then its songs in disc and track order under "Disc n" headers when
-/// it has more than one disc. The player's song is marked wherever it was played from.
+/// it has more than one disc. The player's song is marked wherever it was played from. Opened from a Best match's media
+/// card at a song ([marked], a track id), the page scrolls to it and tints it for a moment, as Android's cited row.
 struct AlbumScreen: View {
     let albumKey: String
+    var marked: String? = nil
     @Environment(\.voice) private var voice
     @Environment(\.palette) private var palette
     @Environment(\.openRoute) private var openRoute
     @State private var holder = MusicHolder()
     @State private var page: AlbumPage?
     @State private var dialog: MusicDialog?
+    @State private var cited = CitedMark()
 
     var body: some View {
-        ScrollView {
-            if let page { content(page) }
+        ScrollViewReader { reader in
+            ScrollView {
+                if let page { content(page) }
+            }
+            .onChange(of: page?.tracks.contains { $0.id == marked } == true) { _, has in
+                if has, let marked { cited.show(marked, reader) }
+            }
         }
         .background(palette.background)
         .navigationTitle(page.map { MusicWords.shown($0.album.title) } ?? "")
@@ -76,6 +84,8 @@ struct AlbumScreen: View {
                 SongRow(track: t, holder: holder, dialog: $dialog, onPlay: { play(holder, tracks, i, source) },
                         leading: t.trackNo.map { "\($0.intValue)" } ?? "", showAlbum: false,
                         playing: now?.trackId == t.id ? now?.playing : nil)
+                    .background(cited.on(t.id) ? palette.primary.opacity(0.15) : .clear)
+                    .id(t.id)
             }
         }
         .padding(.bottom, 24)
@@ -286,5 +296,27 @@ struct PlaylistScreen: View {
             }
         }
         .padding(.bottom, 24)
+    }
+}
+
+/// A cited song's or chapter's mark (Android's `citedMark`): the page scrolls to the row once, when it's there, and tints
+/// it for [seconds] (as a Research source card flashes). Opened again, it isn't scrolled back to.
+@Observable
+final class CitedMark {
+    static let seconds = 2.0
+    private var shown = false
+    private(set) var marked: String?
+
+    func on(_ id: String) -> Bool { marked == id }
+
+    @MainActor func show(_ id: String, _ reader: ScrollViewProxy) {
+        guard !shown else { return }
+        shown = true
+        marked = id
+        withAnimation { reader.scrollTo(id, anchor: .center) }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(Self.seconds))
+            marked = nil
+        }
     }
 }
