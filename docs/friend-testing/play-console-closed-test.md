@@ -58,3 +58,12 @@ Store listing (can be minimal for a closed test, but the fields are required): a
 - The counter runs per tester from their opt-in; a tester who opts out and back in starts over. Aim for 15 to 20 opted in so 12 survive.
 - Updates to the track don't reset anyone. Ship fixes freely.
 - Check Testing → Closed testing → Round 1 → Testers for the opted-in count. When 12 have reached 14 days, the "Apply for production" button appears on the dashboard; the application asks about recruitment, feature coverage and what changed, which `release checklist B` (weekly triage) is written to answer.
+
+## 6. Every Play build goes to F-Droid too
+
+Neal, 2026-11-26: the published version of Granger stays the same across app stores. Whenever a bundle goes to Play
+(internal or closed), the same version code goes to Granger's own F-Droid repo (https://opengranger.org/fdroid/repo)
+in the same pass. That means the arm64 APK made from that AAB, `fdroid update`, the `android-<code>` GitHub release,
+then `publish.sh` and a granger-site push. The steps are in the header of `../granger-fdroid/publish.sh`, which lives
+outside this repo. If a Play build is held back or discarded, hold back the F-Droid one too. The test pages tell
+F-Droid users how to install (`/test`, `/prueba`).
